@@ -1,0 +1,24 @@
+
+  var scrollElement = 'html, body';
+  var $scrollElement; 
+ 
+  /* Smooth scrolling of links between panels */
+  $(function() {
+    var $panels = $('.panel');
+
+    $panels.each(function() {
+      var $panel = $(this);
+      var hash = '#' + this.id;
+
+      $('a[href="' + hash + '"]').click(function(event) {
+        $scrollElement.stop().animate({
+          scrollLeft: $panel.offset().left
+        }, 500, 'swing', function() {
+          window.location.hash = hash;
+        });
+
+        event.preventDefault();
+      });
+    });
+  });
+   

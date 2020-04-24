@@ -1,0 +1,102 @@
+<!doctype html><html>
+	<head>
+	<style>
+		body {
+background: #FFF;
+color: #000;
+font-family: "Lato", sans-serif;
+width: 100%;
+height: 100%;
+line-height: 1.5;
+overflow: hidden;
+}
+
+.nav {
+width: 620px;
+padding:0px;
+position: fixed;
+z-index: 3;
+top: 0;
+left: 50%;
+margin:0 0 0 -320px;
+background: #FFF;
+color: #000;
+overflow: hidden;
+box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+-webkit-transition: all 300ms ease-in-out;
+-moz-transition: all 300ms ease-in-out;
+-o-transition: all 300ms ease-in-out;
+-ms-transition: all 300ms ease-in-out;
+transition: all 300ms ease-in-out;
+}.nav ul {
+list-style: none;
+}.nav li {
+float: left;
+padding: 0 5px;
+}.panel {
+position: absolute;
+width: 100%;
+height: 100%;
+top: 0;
+overflow: auto;
+}
+.panel img{margin:auto;}
+#p01{left:100%}
+#p02{left:200%}
+#p03{left:300%}
+#p04{left:400%}
+#p05{left:500%}
+#p06{left:600%}
+#p07{left:700%}
+#p08{left:800%}
+#p09{left:900%}
+#p10{left:1000%}
+#p11{left:1100%}
+#p12{left:1200%}
+#p13{left:1300%}
+#p14{left:1400%}
+#p15{left:1500%}
+</style>
+</head>
+<body>
+<div class="nav">
+      <ul>
+        <li><a class="nav-docs" href="#p01">p01</a></li>
+        <li><a class="nav-docs" href="#p02">p02</a></li>
+        <li><a class="nav-docs" href="#p03">p03</a></li>
+        <li><a class="nav-docs" href="#p04">p04</a></li>
+        <li><a class="nav-docs" href="#p05">p05</a></li>
+        <li><a class="nav-docs" href="#p06">p06</a></li>
+        <li><a class="nav-docs" href="#p07">p07</a></li>
+        <li><a class="nav-docs" href="#p08">p08</a></li>
+        <li><a class="nav-docs" href="#p09">p09</a></li>
+        <li><a class="nav-docs" href="#p10">p10</a></li>
+        <li><a class="nav-docs" href="#p11">p11</a></li>
+        <li><a class="nav-docs" href="#p12">p12</a></li>
+        <li><a class="nav-docs" href="#p13">p13</a></li>
+        <li><a class="nav-docs" href="#p14">p14</a></li>
+        <li><a class="nav-docs" href="#p15">p15</a></li>
+      </ul>
+    </div>
+    
+    
+<div id="p01" class="panel"><img src="01.png"/></div>
+<div id="p02" class="panel"><img src="02.png"/></div>
+<div id="p03" class="panel"><img src="03.png"/></div>
+<div id="p04" class="panel"><img src="04.png"/></div>
+<div id="p05" class="panel"><img src="05.png"/></div>
+<div id="p06" class="panel"><img src="06.png"/></div>
+<div id="p07" class="panel"><img src="07.png"/></div>
+<div id="p08" class="panel"><img src="08.png"/></div>
+<div id="p09" class="panel"><img src="09.png"/></div>
+<div id="p10" class="panel"><img src="10.png"/></div>
+<div id="p11" class="panel"><img src="11.png"/></div>
+<div id="p12" class="panel"><img src="12.png"/></div>
+<div id="p13" class="panel"><img src="13.png"/></div>
+<div id="p14" class="panel"><img src="14.png"/></div>
+<div id="p15" class="panel"><img src="15.png"/></div>
+    <script src="jquery.js"></script>
+    <script src="waypoints.js"></script>
+    <script src="index.js"></script>
+  </body>
+</html>
