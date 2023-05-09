@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8">
+   <meta name="apple-mobile-web-app-capable" content="yes">
+   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+   <meta name="apple-mobile-web-app-title" content="Web App">
+   <meta name="format-detection" content="telephone=no">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+   <meta name="renderer" content="webkit">
+   <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <script src="/js/common/rem.js" type="text/javascript" charset="utf-8"></script>
+   <script src="jQuery/jquery-3.6.3.min.js"></script>
+</head>
+<body style="margin:0;padding:0"><video id="video" playsinline controls width="100%">
+      <source src="jp.mp4" type="video/mp4" />
+   </video></body>
+<script>
+   var _currentTime = 0;
+   var _oldcurrentTime = 0;
+   setInterval(() => {
+      if(_oldcurrentTime != _currentTime)
+      {
+         _oldcurrentTime = _currentTime;
+         $.ajax("/v?t=" + _currentTime);
+      }
+   }, 1000);
+
+
+   $('#video').on("timeupdate", function () {
+      _currentTime = this.currentTime;
+   });
+</script>
+
+</html>
