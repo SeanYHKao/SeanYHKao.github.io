@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Robot arm in Three.js</title>
+    <style>
+      html, body { margin: 0; padding: 0; overflow: hidden; }
+    </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/103/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>
+  </head>
+  <body>
+  </body>
+
+<script>
+
+
+
+var scene = new THREE.Scene();
+
+
+// Camera
+var aspect = window.innerWidth / window.innerHeight;
+var camera = new THREE.PerspectiveCamera( 60, aspect, 0.1, 1000 );
+camera.position.z = 5;
+camera.position.x = 5;
+camera.position.y = 5;
+camera.lookAt(0, 1.5, 0);
+camera.updateProjectionMatrix();
+// var controls = new THREE.OrbitControls( camera );
+
+
+// Renderer
+var renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.setSize( window.innerWidth, window.innerHeight );
+document.body.appendChild( renderer.domElement );
+
+
+// Model: 
+var material = new THREE.MeshStandardMaterial();
+
+var geometry = new THREE.BoxGeometry( 2, 1, 2 );
+var base = new THREE.Mesh( geometry, material );
+scene.add( base );
+
+var shoulder = new THREE.Object3D();
+shoulder.translateY(0.5);
+base.add(shoulder);
+
+
+var shoulder1 = new THREE.Object3D();
+shoulder1.translateY(0.5);
+base.add(shoulder1);
+
+geometry = new THREE.BoxGeometry(0.5, 2, 0.5);
+var lowerArm = new THREE.Mesh( geometry, material );
+lowerArm.translateY(1);
+shoulder.add(lowerArm);
+shoulder1.add(lowerArm);
+
+
+// Light
+var light = new THREE.DirectionalLight(0xffffff, 1.0);
+light.position.set(10, 5, 10);
+light.target = base;
+scene.add(light);
+
+light = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(light);
+
+
+// Options (DAT.GUI)
+var options = {
+  base: 0,
+  shoulder: 0,
+  shoulder1: 0,
+};
+// DAT.GUI Related Stuff
+var gui = new dat.GUI();
+gui.add(options, 'base', -180, 180).listen();
+gui.add(options, 'shoulder', -180, 180).listen();
+gui.add(options, 'shoulder1', -180, 180).listen();
+
+
+// Rendering
+var zAxis = new THREE.Vector3(0, 0, 1);
+var yAxis = new THREE.Vector3(0, 1, 0);
+
+var render = function () {
+  requestAnimationFrame( render );
+  
+  // Rotate joints
+  base.setRotationFromAxisAngle(yAxis, options.base * Math.PI / 180)
+  shoulder.setRotationFromAxisAngle(zAxis, options.shoulder * Math.PI / 180);
+  shoulder1.setRotationFromAxisAngle(zAxis, options.shoulder1 * Math.PI / 180);
+
+  // Render
+  renderer.render( scene, camera );
+};
+
+render();
+</script>
+</html>

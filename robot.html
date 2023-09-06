@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jQuery UI Slider - Default functionality</title>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  <style>
+    #handle1,
+    #handle2,
+    #handle3,
+    #handle4,
+    #handle5,
+    #handle6 {
+      width: 3em;
+      height: 1.6em;
+      top: 50%;
+      margin-top: -.8em;
+      text-align: center;
+      line-height: 1.6em;
+    }
+  </style>
+  <script>
+    $(function () {
+      var changed1 = false;
+      var changed2 = false;
+      var changed3 = false;
+      var changed4 = false;
+      var changed5 = false;
+      var changed6 = false;
+      $("#slider1").slider({
+        min: 500,
+        max: 1500,
+        value: 1500,
+        create: function () {
+          $(this).children("div").text($(this).slider("value"));
+        },
+        slide: function (event, ui) {
+          $(this).children("div").text(ui.value);
+          changed1 = ui.value;
+        }
+      });
+      $("#slider2").slider({
+        min: 500,
+        max: 2500,
+        value: 1500,
+        create: function () {
+          $(this).children("div").text($(this).slider("value"));
+        },
+        slide: function (event, ui) {
+          $(this).children("div").text(ui.value);
+          changed2 = ui.value;
+        }
+      });
+      $("#slider3").slider({
+        min: 500,
+        max: 2500,
+        value: 1500,
+        create: function () {
+          $(this).children("div").text($(this).slider("value"));
+        },
+        slide: function (event, ui) {
+          $(this).children("div").text(ui.value);
+          changed3 = ui.value;
+        }
+      });
+      $("#slider4").slider({
+        min: 500,
+        max: 2500,
+        value: 1500,
+        create: function () {
+          $(this).children("div").text($(this).slider("value"));
+        },
+        slide: function (event, ui) {
+          $(this).children("div").text(ui.value);
+          changed4 = ui.value;
+        }
+      });
+      $("#slider5").slider({
+        min: 500,
+        max: 2500,
+        value: 1500,
+        create: function () {
+          $(this).children("div").text($(this).slider("value"));
+        },
+        slide: function (event, ui) {
+          $(this).children("div").text(ui.value);
+          changed5 = ui.value;
+        }
+      });
+      $("#slider6").slider({
+        min: 500,
+        max: 2500,
+        value: 1500,
+        create: function () {
+          $(this).children("div").text($(this).slider("value"));
+        },
+        slide: function (event, ui) {
+          $(this).children("div").text(ui.value);
+          changed6 = ui.value;
+        }
+      });
+
+      $("button").on("click", function () {
+        $.ajax("http://" + $("#ip").val() + "/reset/");
+        changed1 = 1500;
+        changed2 = 1500;
+        changed3 = 1500;
+        changed4 = 1500;
+        changed5 = 1500;
+        changed6 = 1500;
+        $("#slider1").slider("value", 1500).children("div").text(1500);
+        $("#slider2").slider("value", 1500).children("div").text(1500);
+        $("#slider3").slider("value", 1500).children("div").text(1500);
+        $("#slider4").slider("value", 1500).children("div").text(1500);
+        $("#slider5").slider("value", 1500).children("div").text(1500);
+        $("#slider6").slider("value", 1500).children("div").text(1500);
+      });
+
+      setInterval(() => {
+
+        if (changed1) $.ajax("http://" + $("#ip").val() + "/robot/1/" + changed1 + "/10000/");
+        if (changed2) $.ajax("http://" + $("#ip").val() + "/robot/2/" + changed2 + "/10/");
+        if (changed3) $.ajax("http://" + $("#ip").val() + "/robot/3/" + changed3 + "/10/");
+        if (changed4) $.ajax("http://" + $("#ip").val() + "/robot/4/" + changed4 + "/10/");
+        if (changed5) $.ajax("http://" + $("#ip").val() + "/robot/5/" + changed5 + "/1000/");
+        if (changed6) $.ajax("http://" + $("#ip").val() + "/robot/6/" + changed6 + "/10/");
+        changed1 = false;
+        changed2 = false;
+        changed3 = false;
+        changed4 = false;
+        changed5 = false;
+        changed6 = false;
+      }, 500);
+    });
+  </script>
+</head>
+
+<body>
+
+  <div style="margin:50px; width:50%">
+    ip <input id="ip" value="192.168.137.158" /><br /><br />
+    鉗子 <br /> <br />
+    <div id="slider1">
+      <div id="handle1" class="ui-slider-handle"></div>
+    </div>
+    <br />旋轉<br /><br />
+    <div id="slider2">
+      <div id="handle2" class="ui-slider-handle"></div>
+    </div><br /><br /><br />
+    <div id="slider3">
+      <div id="handle3" class="ui-slider-handle"></div>
+    </div><br /><br /><br />
+    <div id="slider4">
+      <div id="handle4" class="ui-slider-handle"></div>
+    </div><br /><br /><br />
+    <div id="slider5">
+      <div id="handle5" class="ui-slider-handle"></div>
+    </div> <br /><br /><br />
+    <div id="slider6">
+      <div id="handle6" class="ui-slider-handle"></div>
+    </div><br />
+    <button>reset</button>
+  </div>
+</body>
+
+</html>
