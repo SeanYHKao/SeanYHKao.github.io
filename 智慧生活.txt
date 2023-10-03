@@ -1,0 +1,39 @@
+In the autonomous driving system, trajectory prediction plays a vital
+role in ensuring safety and facilitating smooth navigation. However, we
+observe a substantial discrepancy between the accuracy of predictors on
+fixed datasets and their driving performance when used in downstream
+tasks. This discrepancy arises from two overlooked factors in the current
+evaluation protocols of trajectory prediction: 1) the dynamics gap
+between the dataset and real driving scenario; and 2) the computational
+efficiency of predictors. In real-world scenarios, prediction algorithms
+influence the behavior of autonomous vehicles, which, in turn, alter the
+behaviors of other agents on the road. This interaction results in
+predictor-specific dynamics that directly impact prediction results. As
+other agents' responses are predetermined on datasets, a significant
+dynamics gap arises between evaluations conducted on fixed datasets
+and actual driving scenarios. Furthermore, focusing solely on accuracy
+fails to address the demand for computational efficiency, which is
+critical for the real-time response required by the autonomous driving sy
+stem. Therefore, in this paper, we demonstrate that an interactive, task-
+driven evaluation approach for trajectory prediction is crucial to reflect
+its efficacy for autonomous driving.
+
+在自動駕駛系統中，軌跡預測起着至關重要的作用。
+在確保安全及方便航行方面擔當重要角色。 不過,我們
+觀測到預測變量在數據上的精確度之間的顯著差異。
+用於下游的固定數據集及其驅動性能
+任務。 這種差異源於目前被忽視的兩個因素。
+彈道預測評價協議: 1）動力學差距
+在數據集和實際駕駛場景之間;以及2）計算結果。
+預測器的效率。 在實際場景中，預測算法
+影響自動駕駛車輛的行爲,而自動駕駛車輛反過來又改變了車輛的行爲。
+其他代理人在路上的行爲。 這種互動的結果是
+直接影響到預測結果的預測者特定的動力學。 如
+其他代理的響應是預先確定的數據集, 一個重要的
+在固定數據集上進行的評估之間產生動態差異
+和實際駕駛場景。 此外，只注重準確度
+未能滿足對計算效率的需求,即:
+對自動駕駛系統所需的實時響應至關重要
+樹幹 因此，在這篇論文中，我們展示了一個交互式的，任務-
+彈道預測的驅動評估方法是反映彈道預測的關鍵。
+自動駕駛的功效。
