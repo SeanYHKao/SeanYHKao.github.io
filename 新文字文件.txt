@@ -1,4 +1,16 @@
 112054011
 322983	智慧生活科技專論  陳文輝 三教406(e)
 322992	嵌入式工業機器視覺陳金聖 共同312(e) 　計中電腦教室　　
-　　
+
+
+112054011	高玉鑫	5	5	11月27日	 	 	 	 	 	 	 	 	 	 	 
+職自動化碩一	112618506	連彥鈞	5	5	 	 	 	 	 	 	 	 	 	 	 	 
+職自動化碩一	112618508	張佳明	5	5	 	 
+
+論文代碼	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+1. Je-Sok Ham et al., "CIPF: Crossing Intention Prediction Network based on Feature Fusion Modules for Improving Pedestrian Safety," CVPR 2023.	 	 	 	 	 
+2. Mengmeng Liu et al., "LAformer: Trajectory Prediction for Autonomous Driving with Lane-Aware Scene Constraints," 2023, arXiv preprint arXiv:2302.13933x	 	 	 
+3. Daehee Park et al., "Leveraging Future Relationship Reasoning For Vehicle Trajectory Prediction," ICLR 2023.	 	 	 	 	 	 	 	 
+4. Zikang Zhou et al., "Query-Centric Trajectory Prediction," CVPR 2023.	 	 	 	 	 	 	 	 	 	 	 
+5. Abduallah Mohamed et al., "Social-implicit: Rethinking Trajectory Prediction Evaluation and The Effectiveness of Implicit Maximum Likelihood Estimation", ECCV2022, https://shorturl.at/aIJKN
+6. Siyu Teng et al., "Motion Planning for Autonomous Driving: The State of the Art and Future Perspectives," IEEE Transactions on Intelligent Vehicles, vol. 8, no. 6, June 2023, pp3692-3711
