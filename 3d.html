@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive WebGL Cube</title>
+    <style>body,html,canvas{margin:0;padding:0;width:100%;height:100%;background-color: black;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/gl-matrix@2.8.1/dist/gl-matrix-min.js"></script>
+</head>
+<body>
+<canvas id="glCanvas"></canvas>
+<script>
+var canvas = document.getElementById('glCanvas');
+var gl = canvas.getContext('webgl');
+if (!gl) { alert('WebGL not supported'); throw 'WebGL not supported'; }
+gl.clearColor(0, 0, 0, 1); // Set clear color to black, fully opaque
+
+var vs = 'attribute vec4 aPosition;attribute vec4 aColor;uniform mat4 uModelViewMatrix;uniform mat4 uProjectionMatrix;varying lowp vec4 vColor;void main(){gl_Position=uProjectionMatrix*uModelViewMatrix*aPosition;vColor=aColor;}';
+var fs = 'varying lowp vec4 vColor;void main(){gl_FragColor=vColor;}';
+var program = gl.createProgram();
+var vShader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vShader, vs);
+gl.compileShader(vShader);
+var fShader = gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fShader, fs);
+gl.compileShader(fShader);
+gl.attachShader(program, vShader);
+gl.attachShader(program, fShader);
+gl.linkProgram(program);
+gl.useProgram(program);
+
+var vertices = new Float32Array([
+    // Positions        // Colors
+    -1.0,-1.0,-1.0,     1.0,0.0,0.0,1.0, // Red
+     1.0,-1.0,-1.0,     0.0,1.0,0.0,1.0, // Green
+     1.0, 1.0,-1.0,     0.0,0.0,1.0,1.0, // Blue
+    -1.0, 1.0,-1.0,     1.0,1.0,1.0,1.0, // White
+    -1.0,-1.0, 1.0,     1.0,0.0,1.0,1.0, // Magenta
+     1.0,-1.0, 1.0,     1.0,1.0,0.0,1.0, // Yellow
+     1.0, 1.0, 1.0,     0.0,1.0,1.0,1.0, // Cyan
+    -1.0, 1.0, 1.0,     0.0,0.0,0.0,1.0  // Black
+]);
+var indices = new Uint16Array([
+    0, 1, 2,     0, 2, 3,    // front
+    4, 5, 6,     4, 6, 7,    // back
+    0, 3, 7,     0, 7, 4,    // left
+    1, 2, 6,     1, 6, 5,    // right
+    0, 1, 5,     0, 5, 4,    // bottom
+    3, 2, 6,     3, 6, 7     // top
+]);
+var positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+var indexBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+var position = gl.getAttribLocation(program, 'aPosition');
+gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 7 * 4, 0);
+gl.enableVertexAttribArray(position);
+var color = gl.getAttribLocation(program, 'aColor');
+gl.vertexAttribPointer(color, 4, gl.FLOAT, false, 7 * 4, 3 * 4);
+gl.enableVertexAttribArray(color);
+
+var pMatrix = mat4.create();
+mat4.perspective(pMatrix, 45 * Math.PI / 180, gl.canvas.width / gl.canvas.height, 0.1, 100.0);
+var mvMatrix = mat4.create();
+mat4.translate(mvMatrix, mvMatrix, [0, 0, -6]);
+var uProjectionMatrix = gl.getUniformLocation(program, 'uProjectionMatrix');
+var uModelViewMatrix = gl.getUniformLocation(program, 'uModelViewMatrix');
+gl.uniformMatrix4fv(uProjectionMatrix, false, pMatrix);
+gl.uniformMatrix4fv(uModelViewMatrix, false, mvMatrix);
+
+var lastX, lastY, dragging = false;
+canvas.addEventListener('mousedown', function(e) { dragging = true; lastX = e.pageX; lastY = e.pageY; });
+canvas.addEventListener('mouseup', function() { dragging = false; });
+canvas.addEventListener('mousemove', function(e) {
+    if (dragging) {
+        var deltaX = e.pageX - lastX, deltaY = e.pageY - lastY;
+        var rotateX = mat4.create(), rotateY = mat4.create();
+        mat4.rotate(rotateY, mvMatrix, deltaX * Math.PI / 180, [0, 1, 0]);
+        mat4.rotate(rotateX, rotateY, deltaY * Math.PI / 180, [1, 0, 0]);
+        mvMatrix = rotateX;
+        lastX = e.pageX; lastY = e.pageY;
+    }
+});
+canvas.addEventListener('touchstart', function(e) {
+    var touch = e.touches[0];
+    dragging = true; lastX = touch.pageX; lastY = touch.pageY;
+}, {passive: true});
+canvas.addEventListener('touchmove', function(e) {
+    if (dragging) {
+        var touch = e.touches[0];
+        var deltaX = touch.pageX - lastX, deltaY = touch.pageY - lastY;
+        var rotateX = mat4.create(), rotateY = mat4.create();
+        mat4.rotate(rotateY, mvMatrix, deltaX * Math.PI / 180, [0, 1, 0]);
+        mat4.rotate(rotateX, rotateY, deltaY * Math.PI / 180, [1, 0, 0]);
+        mvMatrix = rotateX;
+        lastX = touch.pageX; lastY = touch.pageY;
+    }
+}, {passive: true});
+canvas.addEventListener('touchend', function() { dragging = false; }, {passive: true});
+
+function draw(now) {
+    gl.uniformMatrix4fv(uModelViewMatrix, false, mvMatrix);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+    requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>
