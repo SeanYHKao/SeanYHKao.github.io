@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive WebGL Cube</title>
+    <style>body,html,canvas{margin:0;padding:0;width:100%;height:100%;background-color: black;}</style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<canvas id="glCanvas"></canvas>
+<script>
+        // Scene, camera, renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        camera.position.z = 50;
+    // Main body (fuselage)
+    const fuselageGeometry = new THREE.CylinderGeometry(2, 2, 20, 32);
+    const fuselageMaterial = new THREE.MeshBasicMaterial({color: 0xffffff});
+    const fuselage = new THREE.Mesh(fuselageGeometry, fuselageMaterial);
+    fuselage.rotation.z = Math.PI / 2;
+    scene.add(fuselage);
+
+    // Wings
+    const wingGeometry = new THREE.BoxGeometry(20, 1, 5);
+    const wingMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
+    const wing = new THREE.Mesh(wingGeometry, wingMaterial);
+    wing.position.y = -2;
+    scene.add(wing);
+
+    // Engines
+    const engineGeometry = new THREE.BoxGeometry(2, 1, 1);
+    const engineMaterial = new THREE.MeshBasicMaterial({color: 0x333333});
+    const engine1 = new THREE.Mesh(engineGeometry, engineMaterial);
+    engine1.position.set(-7, -3, 2);
+    const engine2 = engine1.clone();
+    engine2.position.set(-7, -3, -2);
+    scene.add(engine1);
+    scene.add(engine2);
+
+    // Tail
+    const tailGeometry = new THREE.ConeGeometry(1.5, 5, 4);
+    const tailMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+    const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+    tail.position.set(0, 2, 10);
+    tail.rotation.z = Math.PI / 2;
+    scene.add(tail);
+    
+    // Render the scene
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+    animate();
+</script>
+</body>
+</html>

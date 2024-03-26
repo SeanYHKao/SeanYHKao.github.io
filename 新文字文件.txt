@@ -15,3 +15,8 @@
 4. Zikang Zhou et al., "Query-Centric Trajectory Prediction," CVPR 2023.	 	 	 	 	 	 	 	 	 	 	 
 5. Abduallah Mohamed et al., "Social-implicit: Rethinking Trajectory Prediction Evaluation and The Effectiveness of Implicit Maximum Likelihood Estimation", ECCV2022, https://shorturl.at/aIJKN
 6. Siyu Teng et al., "Motion Planning for Autonomous Driving: The State of the Art and Future Perspectives," IEEE Transactions on Intelligent Vehicles, vol. 8, no. 6, June 2023, pp3692-3711
+
+
+
+112054529
+@cc.ntut.edu.tw
