@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+	body {
+	  font-family: Monospace;
+	  background-color: #000;
+	  color: #fff;
+	  margin: 0px;
+	  overflow: hidden;
+	}
+
+	#info {
+	  color: #fff;
+	  position: absolute;
+	  top: 10px;
+	  width: 100%;
+	  text-align: center;
+	  z-index: 100;
+	  display: block;
+	}
+
+	#info a,
+	.button {
+	  color: #f00;
+	  font-weight: bold;
+	  text-decoration: underline;
+	  cursor: pointer
+	}
+
+
+</style>
+</head>
+
+<body>  
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	
+<script type="module">
+// from Three.JS Installation note:
+// https://threejs.org/docs/#manual/en/introduction/Installation
+// also, Q&A from discourse.threejs.org
+// https://discourse.threejs.org/t/failed-installation-from-cdn/35227
+
+import * as THREE from 'https://cdn.skypack.dev/three@0.136';
+import { OrbitControls } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
+
+import { OBJLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/OBJLoader.js';
+
+var camera, scene, renderer;
+var theObject;
+
+var mouseX = 0,
+  mouseY = 0;
+
+var windowHalfX = window.innerWidth / 2;
+var windowHalfY = window.innerHeight / 2;
+var controls;
+var bs;
+var modelName;
+var theModel;
+
+
+
+init();
+animate();
+
+
+function init() {
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild (renderer.domElement);
+  
+  renderer.setClearColor (0xffffff);
+
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
+  camera.position.z = 100;
+  controls = new OrbitControls(camera, renderer.domElement);
+
+  // scene
+
+  scene = new THREE.Scene();
+        // 添加天空背景
+        scene.background = new THREE.Color('skyblue');
+
+        // 添加地面
+        var planeGeometry = new THREE.PlaneGeometry(100, 100);
+        var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa });
+        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -Math.PI / 2; // 将平面旋转为水平
+        plane.position.y = -1; // 调整地面位置
+        scene.add(plane);
+
+  var ambient = new THREE.AmbientLight(0x444444);
+  scene.add(ambient);
+	
+  var gridxz = new THREE.GridHelper (200, 20,'red','black');
+  scene.add (gridxz);
+
+  let axis = new THREE.AxesHelper (20);
+ // scene.add (axis);
+  	
+  var directionalLight = new THREE.DirectionalLight(0xffffff);
+  directionalLight.position.set(0, 0, 1).normalize();
+  scene.add(directionalLight);
+
+  var pointLight = new THREE.PointLight (0xffffff);
+  pointLight.position.set (100,200,-100);
+  scene.add (pointLight);
+	
+  window.addEventListener('resize', onWindowResize, false);
+ 
+  ///////////////////////////////////////////////////////////////////	
+	function onWindowResize() {
+
+	  windowHalfX = window.innerWidth / 2;
+	  windowHalfY = window.innerHeight / 2;
+
+	  camera.aspect = window.innerWidth / window.innerHeight;
+	  camera.updateProjectionMatrix();
+
+	  renderer.setSize(window.innerWidth, window.innerHeight);
+
+	}
+  
+}
+
+function readModel (modelName, targetSize=40) {
+
+  var onProgress = function(xhr) {
+    if (xhr.lengthComputable) {
+      var percentComplete = xhr.loaded / xhr.total * 100;
+      console.log(Math.round(percentComplete, 2) + '% downloaded');
+    }
+  };
+
+  var onError = function(xhr) {};
+
+ 
+
+    var objLoader = new OBJLoader();
+    objLoader.load('airport.obj', function(object) {
+		
+		let theObject =  unitize (object, targetSize);
+		//theObject.add ( new THREE.BoxHelper (theObject) )
+		theObject.name = 'OBJ'
+
+
+    // 计算模型的边界盒子
+    const bbox = new THREE.Box3().setFromObject(theObject);
+
+    // 计算模型的高度
+    const height = bbox.max.y - bbox.min.y;
+
+    theObject.position.y = -bbox.min.y;
+
+		scene.add (theObject);
+
+    }, onProgress, onError);
+
+
+}
+
+
+////////////////////////////////////////
+// wrap an Object3D around the given object
+// so that it is centered at +Y axis
+// 
+function unitize (object, targetSize) {  
+	
+	// find bounding box of 'object'
+	var box3 = new THREE.Box3();
+	box3.setFromObject (object);
+	var size = new THREE.Vector3();
+	size.subVectors (box3.max, box3.min);
+	var center = new THREE.Vector3();
+	center.addVectors(box3.max, box3.min).multiplyScalar (0.5);
+	
+	console.log ('center: ' + center.x + ', '+center.y + ', '+center.z );
+	console.log ('size: ' + size.x + ', ' +  size.y + ', '+size.z );
+	
+	// uniform scaling according to objSize
+	var objSize = Math.max (size.x, size.y, size.z);
+	var scaleSet = targetSize/objSize;
+				
+	var theObject =  new THREE.Object3D();
+	theObject.add (object);
+	object.scale.set (scaleSet, scaleSet, scaleSet);
+	object.position.set (-center.x*scaleSet, -center.y*scaleSet, -center.z*scaleSet);
+	
+	return theObject;
+			
+}
+
+
+function animate() {
+
+  requestAnimationFrame(animate);
+  render();
+
+}
+
+function render() {
+		
+  renderer.render(scene, camera);
+
+}
+
+readModel();
+</script>
+</body>
+
+</html>
