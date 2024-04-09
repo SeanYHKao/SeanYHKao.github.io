@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Control STL Model</title>
+</head>
+
+<body>
+    <textarea id="json">
+
+    </textarea><button id="setjson">setjson</button>
+    <script src="https://threejs.org/build/three.js"></script>
+    <script src="https://threejs.org/examples/js/loaders/STLLoader.js"></script>
+    <script type="module">
+
+        import * as THREE from 'https://cdn.skypack.dev/three@0.136';
+        import { OrbitControls } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
+
+        import { OBJLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/OBJLoader.js';
+        import { STLLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/STLLoader.js';
+
+
+        let camera, scene, renderer, controls;
+        let stlModels = [];
+        let stlName = [];
+
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            // 添加天空背景
+            scene.background = new THREE.Color('skyblue');
+
+            // 添加地面
+            var planeGeometry = new THREE.PlaneGeometry(100, 100);
+            var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa });
+            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.rotation.x = -Math.PI / 2; // 将平面旋转为水平
+            plane.position.y = -1; // 调整地面位置
+            scene.add(plane);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 100;
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Lighting
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(1, 1, 1).normalize();
+            scene.add(light);
+
+            // 实例化OrbitControls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; // 可选，为了更平滑的交互效果
+            controls.dampingFactor = 0.25;
+            controls.screenSpacePanning = false;
+            // Handle STL upload
+            document.getElementById('setjson').addEventListener('click', function (event) {
+                var tmp = JSON.parse(document.getElementById('json').value);
+                for (var i = 0; i < tmp.length; i++) {
+                    (function (i) {
+                        const loader = new STLLoader();
+                        loader.load(tmp[i].name, function (geometry) {
+                            var material = new THREE.MeshPhongMaterial({ color: 0x555555, specular: 0x111111, shininess: 200 });
+                            var stlModel = new THREE.Mesh(geometry, material);
+                            scene.add(stlModel);
+
+                            // 在这个闭包内，i和tmp[i]是被正确捕获的
+                            stlModel.position.set(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z);
+                            stlModel.scale.set(tmp[i].scale.x, tmp[i].scale.y, tmp[i].scale.z);
+                            stlModel.rotation.set(
+                                tmp[i].rotation._x,
+                                tmp[i].rotation._y,
+                                tmp[i].rotation._z
+                            );
+                        });
+                    })(i);
+                }
+            });
+
+
+            animate();
+        }
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // 只有当 enableDamping 或 autoRotate 被设置时才需要
+            renderer.render(scene, camera);
+        }
+
+        init();
+
+    </script> <!-- Your JavaScript code will go here -->
+</body>
+
+</html>

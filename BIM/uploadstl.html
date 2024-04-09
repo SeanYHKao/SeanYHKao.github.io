@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload and Display STL File</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <input type="file" id="file-input" accept=".stl" />
+    <script  type="module">
+
+import * as THREE from 'https://cdn.skypack.dev/three@0.136';
+import { OrbitControls } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
+
+import { OBJLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/OBJLoader.js';
+import { STLLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/STLLoader.js';
+
+
+document.getElementById('file-input').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        // 实例化一个文件阅读器
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            // 创建场景、相机和渲染器
+            const scene = new THREE.Scene();
+        // 添加天空背景
+        scene.background = new THREE.Color('skyblue');
+
+        // 添加地面
+        var planeGeometry = new THREE.PlaneGeometry(100, 100);
+        var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa });
+        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -Math.PI / 2; // 将平面旋转为水平
+        plane.position.y = -1; // 调整地面位置
+        scene.add(plane);
+        
+  var ambient = new THREE.AmbientLight(0x444444);
+  scene.add(ambient);
+	
+  var gridxz = new THREE.GridHelper (200, 20,'red','black');
+  scene.add (gridxz);
+
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // 添加一些基础光源
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(0, 1, 0);
+            scene.add(directionalLight);
+
+            // 使用STLLoader加载STL文件内容
+            const loader = new STLLoader();
+            const geometry = loader.parse(event.target.result);
+            const material = new THREE.MeshPhongMaterial({ color: 0x00ff00, specular: 0x111111, shininess: 200 });
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+
+            // 调整相机位置
+            camera.position.z = 5;
+            if (geometry.boundingSphere) {
+                camera.position.z = geometry.boundingSphere.radius * 2;
+            }
+
+            // 实例化OrbitControls
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; // 可选，为了更平滑的交互效果
+            controls.dampingFactor = 0.25;
+            controls.screenSpacePanning = false;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update(); // 只有当 enableDamping 或 autoRotate 被设置时才需要
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+        };
+        reader.readAsArrayBuffer(file);
+    }
+});
+
+    </script>
+</body>
+</html>
