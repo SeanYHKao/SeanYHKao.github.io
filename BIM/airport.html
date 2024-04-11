@@ -166,6 +166,32 @@
                 }
 
 
+// Raycaster和鼠标位置
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+function onMouseClick(event) {
+    // 计算鼠标在场景中的位置
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // 更新raycaster的射线方向
+    raycaster.setFromCamera(mouse, camera);
+
+    // 计算物体和射线的交点
+    const intersects = raycaster.intersectObjects(scene.children);
+
+    if (intersects.length > 0) {
+        // 如果有物体被选中，则改变最近的物体的颜色
+        console.log(intersects[0]);
+        intersects[0].object.material.color.setHex(Math.random() * 0xffffff);
+    }
+}
+
+// 监听鼠标点击事件
+window.addEventListener('mousedown', onMouseClick, false);
+
+
             animate();
         }
 
