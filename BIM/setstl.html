@@ -203,33 +203,33 @@
         function updateModelTransform() {
 
             const sIndex = parseInt(document.getElementById('stlIndex').value);
-if(sIndex){
-            const posX = parseFloat(document.getElementById('positionX').value);
-            const posY = parseFloat(document.getElementById('positionY').value);
-            const posZ = parseFloat(document.getElementById('positionZ').value);
-            stlModels[sIndex].position.set(posX, posY, posZ);
+            if (sIndex >= 0){
+                const posX = parseFloat(document.getElementById('positionX').value);
+                const posY = parseFloat(document.getElementById('positionY').value);
+                const posZ = parseFloat(document.getElementById('positionZ').value);
+                stlModels[sIndex].position.set(posX, posY, posZ);
 
-            const scaleX = parseFloat(document.getElementById('scaleX').value);
-            const scaleY = parseFloat(document.getElementById('scaleY').value);
-            const scaleZ = parseFloat(document.getElementById('scaleZ').value);
-            stlModels[sIndex].scale.set(scaleX, scaleY, scaleZ);
+                const scaleX = parseFloat(document.getElementById('scaleX').value);
+                const scaleY = parseFloat(document.getElementById('scaleY').value);
+                const scaleZ = parseFloat(document.getElementById('scaleZ').value);
+                stlModels[sIndex].scale.set(scaleX, scaleY, scaleZ);
 
-            const rotX = parseFloat(document.getElementById('rotationX').value) * Math.PI / 180;
-            const rotY = parseFloat(document.getElementById('rotationY').value) * Math.PI / 180;
-            const rotZ = parseFloat(document.getElementById('rotationZ').value) * Math.PI / 180;
-            stlModels[sIndex].rotation.set(rotX, rotY, rotZ);
+                const rotX = parseFloat(document.getElementById('rotationX').value) * Math.PI / 180;
+                const rotY = parseFloat(document.getElementById('rotationY').value) * Math.PI / 180;
+                const rotZ = parseFloat(document.getElementById('rotationZ').value) * Math.PI / 180;
+                stlModels[sIndex].rotation.set(rotX, rotY, rotZ);
 
-            stlModels[sIndex].material.color.set(document.getElementById('color').value); // 将颜色改为红色
-}
+                stlModels[sIndex].material.color.set(document.getElementById('color').value); // 将颜色改为红色
+            }
             for (var i = 0; i < stlModels.length; i++) {
-               
-            var AllposX = parseFloat(document.getElementById('AllpositionX').value);
-            var AllposY = parseFloat(document.getElementById('AllpositionY').value);
-            var AllposZ = parseFloat(document.getElementById('AllpositionZ').value);
-            AllposX  += stlModels[i].position.x;
-            AllposY  += stlModels[i].position.y;
-            AllposZ  += stlModels[i].position.z;
-                stlModels[i].position.set(AllposX  ,AllposY  , AllposZ);
+
+                var AllposX = parseFloat(document.getElementById('AllpositionX').value);
+                var AllposY = parseFloat(document.getElementById('AllpositionY').value);
+                var AllposZ = parseFloat(document.getElementById('AllpositionZ').value);
+                AllposX += stlModels[i].position.x;
+                AllposY += stlModels[i].position.y;
+                AllposZ += stlModels[i].position.z;
+                stlModels[i].position.set(AllposX, AllposY, AllposZ);
             }
 
             var tmp = [];
