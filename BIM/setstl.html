@@ -28,6 +28,14 @@
     <div>
         <label>color: <input id="color"></label>
     </div>
+
+
+    <div>
+        <label>Position X: <input type="number" id="AllpositionX" value="0"></label>
+        <label>Position Y: <input type="number" id="AllpositionY" value="0"></label>
+        <label>Position Z: <input type="number" id="AllpositionZ" value="0"></label>
+    </div>
+
     <textarea id="json">
 
     </textarea><button id="setjson">setjson</button>
@@ -56,7 +64,7 @@
             scene.background = new THREE.Color('skyblue');
 
             // 添加地面
-            var planeGeometry = new THREE.PlaneGeometry(100, 100);
+            var planeGeometry = new THREE.PlaneGeometry(10000, 10000);
             var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa });
             var plane = new THREE.Mesh(planeGeometry, planeMaterial);
             plane.rotation.x = -Math.PI / 2; // 将平面旋转为水平
@@ -164,6 +172,9 @@
             document.getElementById('positionX').addEventListener('input', updateModelTransform);
             document.getElementById('positionY').addEventListener('input', updateModelTransform);
             document.getElementById('positionZ').addEventListener('input', updateModelTransform);
+            document.getElementById('AllpositionX').addEventListener('input', updateModelTransform);
+            document.getElementById('AllpositionY').addEventListener('input', updateModelTransform);
+            document.getElementById('AllpositionZ').addEventListener('input', updateModelTransform);
             document.getElementById('scaleX').addEventListener('input', updateModelTransform);
             document.getElementById('scaleY').addEventListener('input', updateModelTransform);
             document.getElementById('scaleZ').addEventListener('input', updateModelTransform);
@@ -192,7 +203,7 @@
         function updateModelTransform() {
 
             const sIndex = parseInt(document.getElementById('stlIndex').value);
-
+if(sIndex){
             const posX = parseFloat(document.getElementById('positionX').value);
             const posY = parseFloat(document.getElementById('positionY').value);
             const posZ = parseFloat(document.getElementById('positionZ').value);
@@ -209,6 +220,17 @@
             stlModels[sIndex].rotation.set(rotX, rotY, rotZ);
 
             stlModels[sIndex].material.color.set(document.getElementById('color').value); // 将颜色改为红色
+}
+            for (var i = 0; i < stlModels.length; i++) {
+               
+            var AllposX = parseFloat(document.getElementById('AllpositionX').value);
+            var AllposY = parseFloat(document.getElementById('AllpositionY').value);
+            var AllposZ = parseFloat(document.getElementById('AllpositionZ').value);
+            AllposX  += stlModels[i].position.x;
+            AllposY  += stlModels[i].position.y;
+            AllposZ  += stlModels[i].position.z;
+                stlModels[i].position.set(AllposX  ,AllposY  , AllposZ);
+            }
 
             var tmp = [];
             for (var i = 0; i < stlModels.length; i++) {
