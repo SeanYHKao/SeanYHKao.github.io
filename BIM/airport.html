@@ -3,20 +3,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Control STL Model</title>
+    <title>bimModel</title>
 </head>
 
 <body>
-
-    <script src="https://threejs.org/build/three.js"></script>
-    <script src="https://threejs.org/examples/js/loaders/STLLoader.js"></script>
+    <div id="bimModel" style="width: 800px; height: 600px;"></div>
     <script type="module">
 
-        import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-        import { OrbitControls } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
+        import * as THREE from './three.js';
+        import { OrbitControls } from './OrbitControls.js';
 
-        import { OBJLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/OBJLoader.js';
-        import { STLLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/STLLoader.js';
+        import { OBJLoader } from './OBJLoader.js';
+        import { STLLoader } from './STLLoader.js';
 
 
         let camera, scene, renderer, controls;
@@ -30,6 +28,8 @@
             // 添加天空背景
             scene.background = new THREE.Color('skyblue');
 
+            var C = { "position": { "x": 374.8067090994549, "y": 478.2729721296472, "z": -225.8706315955719 }, "rotation": { "_x": -1.5707973268237754, "_y": -1.5911414252139933e-8, "_z": -3.125683041282191, "_order": "XYZ" }, "quaternion": { "_x": 0.0056248352387859865, "_y": 0.7070847624174741, "_z": 0.7070840552231467, "_w": -0.005624840864498439 }, "fov": 75, "aspect": 1.3333333333333333, "near": 0.1, "far": 5000, "zoom": 1, "target": { "x": 374.8067167094543, "y": -2.498248191686033e-15, "z": -225.8701533087879 }, "object_zoom": 1 };
+
             // 添加地面
             var planeGeometry = new THREE.PlaneGeometry(10000, 10000);
             var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa });
@@ -38,12 +38,16 @@
             plane.position.y = -1; // 调整地面位置
             scene.add(plane);
 
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 100;
-            renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+            camera = new THREE.PerspectiveCamera(C.fov, C.aspect, C.near, C.far);
+            camera.position.set(C.position.x, C.position.y, C.position.z);
+            camera.rotation.set(C.rotation._x, C.rotation._y, C.rotation._z);
+            camera.quaternion.set(C.quaternion._x, C.quaternion._y, C.quaternion._z, C.quaternion._w);
+            camera.zoom = C.zoom;
+            camera.updateProjectionMatrix();
 
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(800, 600);
+            document.getElementById('bimModel').appendChild(renderer.domElement);
             // Lighting
             const light = new THREE.DirectionalLight(0xffffff, 1);
             light.position.set(1, 1, 1).normalize();
@@ -54,7 +58,23 @@
             controls.enableDamping = true; // 可选，为了更平滑的交互效果
             controls.dampingFactor = 0.25;
             controls.screenSpacePanning = false;
+            controls.target.set(C.target.x, C.target.y, C.target.z);
+            controls.update(); // 更新控制器状态
 
+            controls.addEventListener('change', () => {
+                console.log(JSON.stringify({
+                    position: camera.position,
+                    rotation: camera.rotation,
+                    quaternion: camera.quaternion,
+                    fov: camera.fov,
+                    aspect: camera.aspect,
+                    near: camera.near,
+                    far: camera.far,
+                    zoom: camera.zoom,
+                    target: controls.target,
+                    object_zoom: controls.object.zoom
+                }))
+            });
             // 设置最小极角为0，防止低于地平面
             // Math.PI / 2 是90度，意味着视线平行于地面，不允许更低
             controls.minPolarAngle = 0; // 不允许移动到地面以下
@@ -66,134 +86,153 @@
             for (var c = 0; c < 5; c++)
                 bridge3.push([]);
             // Handle STL upload
-                var tmp = [{"index":0,"name":"T.stl","position":{"x":0,"y":3,"z":-4},"scale":{"x":0.3,"y":0.2,"z":0.35},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#ee0000"},{"index":1,"name":"Group_29.stl","position":{"x":3.5,"y":2.5,"z":43},"scale":{"x":10,"y":1.5,"z":1},"rotation":{"_x":0,"_y":2.2689280275926285,"_z":0,"_order":"XYZ"},"color":"#555555"},{"index":2,"name":"JetBridge.stl","position":{"x":9,"y":-1,"z":11},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#eeeeee"},{"index":3,"name":"JetBridge.stl","position":{"x":0,"y":-1,"z":13},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#eeeeee"},{"index":4,"name":"a380.stl","position":{"x":30,"y":-1,"z":40},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#005500"},{"index":5,"name":"BuildingwithStair1.stl","position":{"x":0,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#00eeee"},{"index":6,"name":"BuildingwithStair1.stl","position":{"x":70,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#00eeee"},{"index":7,"name":"BuildingwithStair1.stl","position":{"x":35,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#00eeee"}];
-                for (var c = 0; c < 8; c++) {
-                    for (var i = 0; i < tmp.length; i++) {
-                        (function (i, c) {
-                            const loader = new STLLoader();
-                            loader.load(tmp[i].name, function (geometry) {
-                                var material = new THREE.MeshPhongMaterial({ color: tmp[i].color });
-                                var stlModel = new THREE.Mesh(geometry, material);
-                                scene.add(stlModel);
-
-
-                                // 在这个闭包内，i和tmp[i]是被正确捕获的
-                                stlModel.position.set(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z);
-                                stlModel.scale.set(tmp[i].scale.x, tmp[i].scale.y, tmp[i].scale.z);
-                                stlModel.rotation.set(
-                                    tmp[i].rotation._x,
-                                    tmp[i].rotation._y,
-                                    tmp[i].rotation._z
-                                );
-                                stlModel.position.x = stlModel.position.x + c * 98
-                                bridge1[c].push(stlModel);
-                            });
-                        })(i, c);
-                    }
-                }
-                var tmp3 = [{"index":0,"name":"T.stl","position":{"x":75,"y":2,"z":-25},"scale":{"x":0.5,"y":0.3,"z":0.6},"rotation":{"_x":0,"_y":3.141592653589793,"_z":0,"_order":"XYZ"},"color":"#ee0000"},{"index":1,"name":"Group_29.stl","position":{"x":66.5,"y":4.5,"z":-68},"scale":{"x":10,"y":1.5,"z":1},"rotation":{"_x":0,"_y":2.2689280275926285,"_z":3.141592653589793,"_order":"XYZ"},"color":"#555555"},{"index":2,"name":"JetBridge.stl","position":{"x":72,"y":-2,"z":-50},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#eeeeee"},{"index":3,"name":"JetBridge.stl","position":{"x":60,"y":-2,"z":-50},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#eeeeee"},{"index":4,"name":"a380.stl","position":{"x":50,"y":0,"z":-80},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#005500"},{"index":5,"name":"BuildingwithStair1.stl","position":{"x":0,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#00eeee"},{"index":6,"name":"BuildingwithStair1.stl","position":{"x":70,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#00eeee"},{"index":7,"name":"BuildingwithStair1.stl","position":{"x":35,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#00eeee"}];
-                for (var c = 0; c < 8; c++) {
-                    for (var i = 0; i < tmp3.length; i++) {
-                        (function (i, c) {
-                            const loader = new STLLoader();
-                            loader.load(tmp3[i].name, function (geometry) {
-                                var material = new THREE.MeshPhongMaterial({ color: tmp3[i].color });
-                                var stlModel = new THREE.Mesh(geometry, material);
-                                scene.add(stlModel);
-
-
-                                // 在这个闭包内，i和tmp[i]是被正确捕获的
-                                stlModel.position.set(tmp3[i].position.x, tmp3[i].position.y, tmp3[i].position.z);
-                                stlModel.scale.set(tmp3[i].scale.x, tmp3[i].scale.y, tmp3[i].scale.z);
-                                stlModel.rotation.set(
-                                    tmp3[i].rotation._x,
-                                    tmp3[i].rotation._y,
-                                    tmp3[i].rotation._z
-                                );
-                                stlModel.position.x = stlModel.position.x + c * 98
-                                stlModel.position.z = stlModel.position.z - 405
-                                bridge2[c].push(stlModel);
-
-                            });
-                        })(i, c);
-                    }
-                }
-
-                
-                var tmp4 = [{"index":0,"name":"JetBridge.stl","position":{"x":0,"y":-2,"z":0},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":1.5707963267948966,"_order":"XYZ"},"color":"#eeeeee"},{"index":1,"name":"JetBridge.stl","position":{"x":15,"y":-2,"z":0},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":1.5707963267948966,"_order":"XYZ"},"color":"#eeeeee"},{"index":2,"name":"a380.stl","position":{"x":-25,"y":0,"z":5},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":1.5707963267948966,"_order":"XYZ"},"color":"#005500"}];
-                for (var c = 0; c < 5; c++) {
-                    for (var i = 0; i < tmp4.length; i++) {
-                        (function (i, c) {
-                            const loader = new STLLoader();
-                            loader.load(tmp4[i].name, function (geometry) {
-                                var material = new THREE.MeshPhongMaterial({ color: tmp4[i].color });
-                                var stlModel = new THREE.Mesh(geometry, material);
-                                scene.add(stlModel);
-
-
-                                // 在这个闭包内，i和tmp[i]是被正确捕获的
-                                stlModel.position.set(tmp4[i].position.x, tmp4[i].position.y, tmp4[i].position.z);
-                                stlModel.scale.set(tmp4[i].scale.x, tmp4[i].scale.y, tmp4[i].scale.z);
-                                stlModel.rotation.set(
-                                    tmp4[i].rotation._x,
-                                    tmp4[i].rotation._y,
-                                    tmp4[i].rotation._z
-                                );
-                                stlModel.position.x = stlModel.position.x + 50
-                                stlModel.position.z = stlModel.position.z - c * 70 - 80
-                                bridge3[c].push(stlModel);
-
-                            });
-                        })(i, c);
-                    }
-                }
-                var tmp2 = [{"index":0,"name":"Concept.stl","position":{"x":70,"y":0,"z":-70},"scale":{"x":50,"y":200,"z":65},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#555555"},{"index":1,"name":"Concept.stl","position":{"x":170,"y":0,"z":-70},"scale":{"x":50,"y":200,"z":65},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#555555"},{"index":2,"name":"Concept.stl","position":{"x":270,"y":0,"z":-70},"scale":{"x":50,"y":200,"z":65},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#555555"},{"index":3,"name":"Concept.stl","position":{"x":370,"y":0,"z":-70},"scale":{"x":50,"y":200,"z":65},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#555555"}];
-                for (var i = 0; i < tmp2.length; i++) {
-                    (function (i) {
+            var tmp = [{ "index": 0, "name": "T.stl", "position": { "x": 0, "y": 3, "z": -4 }, "scale": { "x": 0.3, "y": 0.2, "z": 0.35 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ee0000" }, { "index": 1, "name": "Group_29.stl", "position": { "x": 3.5, "y": 2.5, "z": 43 }, "scale": { "x": 10, "y": 1.5, "z": 1 }, "rotation": { "_x": 0, "_y": 2.2689280275926285, "_z": 0, "_order": "XYZ" }, "color": "#555555" }, { "index": 2, "name": "JetBridge.stl", "position": { "x": 9, "y": -1, "z": 11 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee" }, { "index": 3, "name": "JetBridge.stl", "position": { "x": 0, "y": -1, "z": 13 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee" }, { "index": 4, "name": "a380.stl", "position": { "x": 30, "y": -1, "z": 40 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#005500" }, { "index": 5, "name": "BuildingwithStair1.stl", "position": { "x": 0, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee" }, { "index": 6, "name": "BuildingwithStair1.stl", "position": { "x": 70, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee" }, { "index": 7, "name": "BuildingwithStair1.stl", "position": { "x": 35, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee" }];
+            for (var c = 0; c < 8; c++) {
+                for (var i = 0; i < tmp.length; i++) {
+                    (function (i, c) {
                         const loader = new STLLoader();
-                        loader.load(tmp2[i].name, function (geometry) {
-                            var material = new THREE.MeshPhongMaterial({ color: tmp2[i].color });
+                        loader.load(tmp[i].name, function (geometry) {
+                            var material = new THREE.MeshPhongMaterial({ color: tmp[i].color });
                             var stlModel = new THREE.Mesh(geometry, material);
                             scene.add(stlModel);
 
 
                             // 在这个闭包内，i和tmp[i]是被正确捕获的
-                            stlModel.position.set(tmp2[i].position.x, tmp2[i].position.y, tmp2[i].position.z);
-                            stlModel.scale.set(tmp2[i].scale.x, tmp2[i].scale.y, tmp2[i].scale.z);
+                            stlModel.position.set(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z);
+                            stlModel.scale.set(tmp[i].scale.x, tmp[i].scale.y, tmp[i].scale.z);
                             stlModel.rotation.set(
-                                tmp2[i].rotation._x,
-                                tmp2[i].rotation._y,
-                                tmp2[i].rotation._z
+                                tmp[i].rotation._x,
+                                tmp[i].rotation._y,
+                                tmp[i].rotation._z
                             );
+                            stlModel.position.x = stlModel.position.x + c * 98
+                            bridge1[c].push(stlModel);
                         });
-                    })(i);
+                    })(i, c);
                 }
+            }
+            var tmp3 = [{ "index": 0, "name": "T.stl", "position": { "x": 75, "y": 2, "z": -25 }, "scale": { "x": 0.5, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 3.141592653589793, "_z": 0, "_order": "XYZ" }, "color": "#ee0000" }, { "index": 1, "name": "Group_29.stl", "position": { "x": 66.5, "y": 4.5, "z": -68 }, "scale": { "x": 10, "y": 1.5, "z": 1 }, "rotation": { "_x": 0, "_y": 2.2689280275926285, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#555555" }, { "index": 2, "name": "JetBridge.stl", "position": { "x": 72, "y": -2, "z": -50 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#eeeeee" }, { "index": 3, "name": "JetBridge.stl", "position": { "x": 60, "y": -2, "z": -50 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#eeeeee" }, { "index": 4, "name": "a380.stl", "position": { "x": 50, "y": 0, "z": -80 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#005500" }, { "index": 5, "name": "BuildingwithStair1.stl", "position": { "x": 0, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#00eeee" }, { "index": 6, "name": "BuildingwithStair1.stl", "position": { "x": 70, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#00eeee" }, { "index": 7, "name": "BuildingwithStair1.stl", "position": { "x": 35, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#00eeee" }];
+            for (var c = 0; c < 8; c++) {
+                for (var i = 0; i < tmp3.length; i++) {
+                    (function (i, c) {
+                        const loader = new STLLoader();
+                        loader.load(tmp3[i].name, function (geometry) {
+                            var material = new THREE.MeshPhongMaterial({ color: tmp3[i].color });
+                            var stlModel = new THREE.Mesh(geometry, material);
+                            scene.add(stlModel);
 
 
-// Raycaster和鼠标位置
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+                            // 在这个闭包内，i和tmp[i]是被正确捕获的
+                            stlModel.position.set(tmp3[i].position.x, tmp3[i].position.y, tmp3[i].position.z);
+                            stlModel.scale.set(tmp3[i].scale.x, tmp3[i].scale.y, tmp3[i].scale.z);
+                            stlModel.rotation.set(
+                                tmp3[i].rotation._x,
+                                tmp3[i].rotation._y,
+                                tmp3[i].rotation._z
+                            );
+                            stlModel.position.x = stlModel.position.x + c * 98
+                            stlModel.position.z = stlModel.position.z - 405
+                            bridge2[c].push(stlModel);
 
-function onMouseClick(event) {
-    // 计算鼠标在场景中的位置
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                        });
+                    })(i, c);
+                }
+            }
 
-    // 更新raycaster的射线方向
-    raycaster.setFromCamera(mouse, camera);
 
-    // 计算物体和射线的交点
-    const intersects = raycaster.intersectObjects(scene.children);
+            var tmp4 = [{ "index": 0, "name": "JetBridge.stl", "position": { "x": 0, "y": -2, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 1.5707963267948966, "_order": "XYZ" }, "color": "#eeeeee" }, { "index": 1, "name": "JetBridge.stl", "position": { "x": 15, "y": -2, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 1.5707963267948966, "_order": "XYZ" }, "color": "#eeeeee" }, { "index": 2, "name": "a380.stl", "position": { "x": -25, "y": 0, "z": 5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 1.5707963267948966, "_order": "XYZ" }, "color": "#005500" }];
+            for (var c = 0; c < 5; c++) {
+                for (var i = 0; i < tmp4.length; i++) {
+                    (function (i, c) {
+                        const loader = new STLLoader();
+                        loader.load(tmp4[i].name, function (geometry) {
+                            var material = new THREE.MeshPhongMaterial({ color: tmp4[i].color });
+                            var stlModel = new THREE.Mesh(geometry, material);
+                            scene.add(stlModel);
 
-    if (intersects.length > 0) {
-        // 如果有物体被选中，则改变最近的物体的颜色
-        console.log(intersects[0]);
-        intersects[0].object.material.color.setHex(Math.random() * 0xffffff);
-    }
-}
 
-// 监听鼠标点击事件
-window.addEventListener('mousedown', onMouseClick, false);
+                            // 在这个闭包内，i和tmp[i]是被正确捕获的
+                            stlModel.position.set(tmp4[i].position.x, tmp4[i].position.y, tmp4[i].position.z);
+                            stlModel.scale.set(tmp4[i].scale.x, tmp4[i].scale.y, tmp4[i].scale.z);
+                            stlModel.rotation.set(
+                                tmp4[i].rotation._x,
+                                tmp4[i].rotation._y,
+                                tmp4[i].rotation._z
+                            );
+                            stlModel.position.x = stlModel.position.x + 50
+                            stlModel.position.z = stlModel.position.z - c * 70 - 80
+                            bridge3[c].push(stlModel);
+
+                        });
+                    })(i, c);
+                }
+            }
+            var tmp2 = [{ "index": 0, "name": "Concept.stl", "position": { "x": 70, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }, { "index": 1, "name": "Concept.stl", "position": { "x": 170, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }, { "index": 2, "name": "Concept.stl", "position": { "x": 270, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }, { "index": 3, "name": "Concept.stl", "position": { "x": 370, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }];
+            for (var i = 0; i < tmp2.length; i++) {
+                (function (i) {
+                    const loader = new STLLoader();
+                    loader.load(tmp2[i].name, function (geometry) {
+                        var material = new THREE.MeshPhongMaterial({ color: tmp2[i].color });
+                        var stlModel = new THREE.Mesh(geometry, material);
+                        scene.add(stlModel);
+
+
+                        // 在这个闭包内，i和tmp[i]是被正确捕获的
+                        stlModel.position.set(tmp2[i].position.x, tmp2[i].position.y, tmp2[i].position.z);
+                        stlModel.scale.set(tmp2[i].scale.x, tmp2[i].scale.y, tmp2[i].scale.z);
+                        stlModel.rotation.set(
+                            tmp2[i].rotation._x,
+                            tmp2[i].rotation._y,
+                            tmp2[i].rotation._z
+                        );
+                    });
+                })(i);
+            }
+            let sumX = 0, sumY = 0, sumZ = 0;
+            let count = 0;
+
+            // 计算所有对象的坐标平均值
+            scene.traverse(function (object) {
+                if (object.isMesh) {
+                    sumX += object.position.x;
+                    sumY += object.position.y;
+                    sumZ += object.position.z;
+                    count++;
+                }
+            });
+
+            const centerX = sumX / count;
+            const centerY = sumY / count;
+            const centerZ = sumZ / count;
+
+            // 设置摄像机看向新的中心点
+            camera.lookAt(centerX, centerY, centerZ);
+            camera.updateProjectionMatrix();
+
+            // Raycaster和鼠标位置
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            function onMouseClick(event) {
+                // 计算鼠标在场景中的位置
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                // 更新raycaster的射线方向
+                raycaster.setFromCamera(mouse, camera);
+
+                // 计算物体和射线的交点
+                const intersects = raycaster.intersectObjects(scene.children);
+
+                if (intersects.length > 0) {
+                    // 如果有物体被选中，则改变最近的物体的颜色
+                    console.log(intersects[0]);
+                    //intersects[0].object.material.color.setHex(Math.random() * 0xffffff);
+                }
+            }
+
+            // 监听鼠标点击事件
+            window.addEventListener('mousedown', onMouseClick, false);
 
 
             animate();
