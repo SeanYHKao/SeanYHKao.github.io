@@ -48,16 +48,19 @@
  <textarea id="camera">
 
     </textarea><button id="setcamera">setcamera</button>
- <script type="module">
 
-  import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-  import { OrbitControls } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
+    <div id="bimModel" style="width: 800px; height: 600px; position: relative;"></div>
+    <script type="module">
+    var container = document.getElementById('bimModel');
+     import * as THREE from './three.js';
+     import { OrbitControls } from './OrbitControls.js';
+   
+     import { OBJLoader } from './OBJLoader.js';
+     import { STLLoader } from './STLLoader.js';
+  import { CSS2DRenderer, CSS2DObject } from './CSS2DRenderer.js';
 
-  import { OBJLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/OBJLoader.js';
-  import { STLLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/STLLoader.js';
 
-
-  let camera, scene, renderer, controls;
+  let camera, scene, renderer, labelRenderer, controls;
   let stlModels = [];
   let stlName = [];
   let stlCenter = [];
@@ -100,7 +103,6 @@
    };
   }
 
-
   function init() {
    // Scene setup
    scene = new THREE.Scene();
@@ -115,19 +117,24 @@
    plane.position.y = -1; // 调整地面位置
    scene.add(plane);
 
-   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+   camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
    camera.position.z = 100;
    renderer = new THREE.WebGLRenderer();
-   renderer.setSize(window.innerWidth, window.innerHeight);
-   document.body.appendChild(renderer.domElement);
+   renderer.setSize(container.offsetWidth, container.offsetHeight);
+   container.appendChild(renderer.domElement);
 
+   labelRenderer = new CSS2DRenderer();
+  labelRenderer.setSize(container.offsetWidth, container.offsetHeight);
+  labelRenderer.domElement.style.position = "absolute";
+  labelRenderer.domElement.style.top = "0px";
+    container.appendChild(labelRenderer.domElement);
    // Lighting
    const light = new THREE.DirectionalLight(0xffffff, 1);
    light.position.set(1, 1, 1).normalize();
    scene.add(light);
 
    // 实例化OrbitControls
-   controls = new OrbitControls(camera, renderer.domElement);
+   controls = new OrbitControls(camera, labelRenderer.domElement);
    controls.enableDamping = true; // 可选，为了更平滑的交互效果
    controls.dampingFactor = 0.25;
    controls.screenSpacePanning = false;
@@ -244,6 +251,20 @@
         stlCenter.push(null);
        }
 
+      }
+      else if (tmp[i].name.indexOf('label') > -1) {
+       // 添加一個 3D 物體
+       const geometry = new THREE.BoxGeometry();
+       const material = new THREE.MeshBasicMaterial({ color: 0x003300 });
+       const cube = new THREE.Mesh(geometry, material);
+       scene.add(cube);
+       const earthDiv = document.createElement("div");
+       earthDiv.className = "label";
+       earthDiv.textContent = "Earth";
+       earthDiv.style.marginTop = "-1em";
+       const earthLabel = new CSS2DObject(earthDiv);
+       earthLabel.position.set(0, 1, 0);
+       cube.add(earthLabel);
       }
 
      })(i);
@@ -452,6 +473,7 @@
    requestAnimationFrame(animate);
    controls.update(); // 只有当 enableDamping 或 autoRotate 被设置时才需要
    renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
   }
 
   init();
