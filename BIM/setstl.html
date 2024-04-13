@@ -2,258 +2,461 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Control STL Model</title>
+ <meta charset="UTF-8">
+ <title>Control STL Model</title>
 </head>
 
 <body>
-    <input type="file" id="stlUploader" accept=".stl">
-    <input type="number" id="stlIndex">
-    <div>
-        <label>Position X: <input type="number" id="positionX" value="0"></label>
-        <label>Position Y: <input type="number" id="positionY" value="0"></label>
-        <label>Position Z: <input type="number" id="positionZ" value="0"></label>
-    </div>
-    <div>
-        <label>Scale X: <input type="number" id="scaleX" value="1" step="0.1"></label>
-        <label>Scale Y: <input type="number" id="scaleY" value="1" step="0.1"></label>
-        <label>Scale Z: <input type="number" id="scaleZ" value="1" step="0.1"></label>
-    </div>
-    <div>
-        <label>Rotation X (degrees): <input type="number" id="rotationX" value="0"></label>
-        <label>Rotation Y (degrees): <input type="number" id="rotationY" value="0"></label>
-        <label>Rotation Z (degrees): <input type="number" id="rotationZ" value="0"></label>
-    </div>
+ <input type="file" id="stlUploader" accept=".stl,.obj">
+ <input type="number" id="stlIndex">
+ <input id="stlName">
+ <div>
+  <label>Position X: <input type="number" id="positionX" value="0"></label>
+  <label>Position Y: <input type="number" id="positionY" value="0"></label>
+  <label>Position Z: <input type="number" id="positionZ" value="0"></label>
+ </div>
+ <div>
+  <label>Center X: <input type="number" id="CenterX" value="0"></label>
+  <label>Center Y: <input type="number" id="CenterY" value="0"></label>
+  <label>Center Z: <input type="number" id="CenterZ" value="0"></label>
+ </div>
+ <div>
+  <label>Scale X: <input type="number" id="scaleX" value="1" step="0.1"></label>
+  <label>Scale Y: <input type="number" id="scaleY" value="1" step="0.1"></label>
+  <label>Scale Z: <input type="number" id="scaleZ" value="1" step="0.1"></label>
+ </div>
+ <div>
+  <label>Rotation X (degrees): <input type="number" id="rotationX" value="0"></label>
+  <label>Rotation Y (degrees): <input type="number" id="rotationY" value="0"></label>
+  <label>Rotation Z (degrees): <input type="number" id="rotationZ" value="0"></label>
+ </div>
 
-    <div>
-        <label>color: <input id="color"></label>
-    </div>
+ <div>
+  <label>color: <input id="color"></label>
+ </div>
 
 
-    <div>
-        <label>Position X: <input type="number" id="AllpositionX" value="0"></label>
-        <label>Position Y: <input type="number" id="AllpositionY" value="0"></label>
-        <label>Position Z: <input type="number" id="AllpositionZ" value="0"></label>
-    </div>
+ <div>
+  <label>Position X: <input type="number" id="AllpositionX" value="0"></label>
+  <label>Position Y: <input type="number" id="AllpositionY" value="0"></label>
+  <label>Position Z: <input type="number" id="AllpositionZ" value="0"></label>
+ </div>
 
-    <textarea id="json">
+ <textarea id="json">
 
     </textarea><button id="setjson">setjson</button>
-    <textarea id="camera">
+ <textarea id="camera">
 
     </textarea><button id="setcamera">setcamera</button>
-    <script src="https://threejs.org/build/three.js"></script>
-    <script src="https://threejs.org/examples/js/loaders/STLLoader.js"></script>
-    <script type="module">
+ <script type="module">
 
-        import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-        import { OrbitControls } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
+  import * as THREE from 'https://cdn.skypack.dev/three@0.136';
+  import { OrbitControls } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
 
-        import { OBJLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/OBJLoader.js';
-        import { STLLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/STLLoader.js';
+  import { OBJLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/OBJLoader.js';
+  import { STLLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/STLLoader.js';
 
 
-        let camera, scene, renderer, controls;
-        let stlModels = [];
-        let stlName = [];
+  let camera, scene, renderer, controls;
+  let stlModels = [];
+  let stlName = [];
+  let stlCenter = [];
+  let stlPosition = [];
 
-        function init() {
-            // Scene setup
-            scene = new THREE.Scene();
-            // 添加天空背景
-            scene.background = new THREE.Color('skyblue');
+  function rotatePoint(px, py, pz, cx, cy, cz, rx, ry, rz) {
+   // 将角度转换为弧度
+   rx = rx * Math.PI / 180;
+   ry = ry * Math.PI / 180;
+   rz = rz * Math.PI / 180;
 
-            // 添加地面
-            var planeGeometry = new THREE.PlaneGeometry(10000, 10000);
-            var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa });
-            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-            plane.rotation.x = -Math.PI / 2; // 将平面旋转为水平
-            plane.position.y = -1; // 调整地面位置
-            scene.add(plane);
+   // 将点平移到旋转中心
+   let x = px - cx;
+   let y = py - cy;
+   let z = pz - cz;
 
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 100;
-            renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+   // 绕 Z 轴旋转
+   let newX = x * Math.cos(rz) - y * Math.sin(rz);
+   let newY = x * Math.sin(rz) + y * Math.cos(rz);
+   x = newX;
+   y = newY;
 
-            // Lighting
-            const light = new THREE.DirectionalLight(0xffffff, 1);
-            light.position.set(1, 1, 1).normalize();
-            scene.add(light);
+   // 绕 Y 轴旋转
+   newX = x * Math.cos(ry) + z * Math.sin(ry);
+   let newZ = z * Math.cos(ry) - x * Math.sin(ry);
+   x = newX;
+   z = newZ;
 
-            // 实例化OrbitControls
-            controls = new OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true; // 可选，为了更平滑的交互效果
-            controls.dampingFactor = 0.25;
-            controls.screenSpacePanning = false;
-            controls.addEventListener('change', () => {
-                document.getElementById('camera').value = JSON.stringify({
-                    position: camera.position,
-                    rotation: camera.rotation,
-                    zoom: camera.zoom,
-                    quaternion: camera.quaternion,
-                    fov: camera.fov,
-                    aspect: camera.aspect,
-                    near: camera.near,
-                    far: camera.far,
+   // 绕 X 轴旋转
+   newY = y * Math.cos(rx) - z * Math.sin(rx);
+   newZ = y * Math.sin(rx) + z * Math.cos(rx);
+   y = newY;
+   z = newZ;
 
-                })
-            });
-
-            document.getElementById('setcamera').addEventListener('click', function (event) {
-                var cameraSettings = JSON.parse(document.getElementById('camera').value);
-
-                // 假设camera是你已经创建并想要更新的Three.js PerspectiveCamera实例
-                // 更新相机位置
-                camera.position.set(cameraSettings.position.x, cameraSettings.position.y, cameraSettings.position.z);
-
-                // 更新相机旋转
-                camera.rotation.set(cameraSettings.rotation._x, cameraSettings.rotation._y, cameraSettings.rotation._z);
-
-                // 更新相机其他属性
-                camera.fov = cameraSettings.fov;
-                camera.aspect = cameraSettings.aspect;
-                camera.near = cameraSettings.near;
-                camera.far = cameraSettings.far;
-
-                // 在更新相机属性后，调用updateProjectionMatrix()以确保变更生效
-                camera.updateProjectionMatrix();
-            });
-            // Handle STL upload
-            document.getElementById('setjson').addEventListener('click', function (event) {
-                var tmp = JSON.parse(document.getElementById('json').value);
-                for (var i = 0; i < tmp.length; i++) {
-                    (function (i) {
-                        const loader = new STLLoader();
-                        loader.load(tmp[i].name, function (geometry) {
-                            var material = new THREE.MeshPhongMaterial({ color: tmp[i].color });
-                            var stlModel = new THREE.Mesh(geometry, material);
-                            scene.add(stlModel);
-
-                            stlModels.push(stlModel);
-                            stlName.push(tmp[i].name);
-
-                            // 在这个闭包内，i和tmp[i]是被正确捕获的
-                            stlModel.position.set(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z);
-                            stlModel.scale.set(tmp[i].scale.x, tmp[i].scale.y, tmp[i].scale.z);
-                            stlModel.rotation.set(
-                                tmp[i].rotation._x,
-                                tmp[i].rotation._y,
-                                tmp[i].rotation._z
-                            );
-                        });
-                    })(i);
-                }
-            });
-
-            // Handle STL upload
-            document.getElementById('stlUploader').addEventListener('change', function (event) {
-                const file = event.target.files[0];
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const loader = new STLLoader();
-                    const geometry = loader.parse(e.target.result);
+   // 平移回原始中心
+   return {
+    x: x + cx,
+    y: y + cy,
+    z: z + cz
+   };
+  }
 
 
-                    const material = new THREE.MeshPhongMaterial({ color: 0x555555, specular: 0x111111, shininess: 200 });
-                    const stlModel = new THREE.Mesh(geometry, material);
-                    scene.add(stlModel);
-                    stlModels.push(stlModel);
-                    stlName.push(document.getElementById('stlUploader').value);
-                    document.getElementById('stlUploader').value = null;
+  function init() {
+   // Scene setup
+   scene = new THREE.Scene();
+   // 添加天空背景
+   scene.background = new THREE.Color('skyblue');
 
-                };
-                reader.readAsArrayBuffer(file);
-            });
+   // 添加地面
+   var planeGeometry = new THREE.PlaneGeometry(10000, 10000);
+   var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa });
+   var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+   plane.rotation.x = -Math.PI / 2; // 将平面旋转为水平
+   plane.position.y = -1; // 调整地面位置
+   scene.add(plane);
 
-            // Input listeners for transformations
-            document.getElementById('stlIndex').addEventListener('input', queryModelTransform);
-            document.getElementById('positionX').addEventListener('input', updateModelTransform);
-            document.getElementById('positionY').addEventListener('input', updateModelTransform);
-            document.getElementById('positionZ').addEventListener('input', updateModelTransform);
-            document.getElementById('AllpositionX').addEventListener('input', updateModelTransform);
-            document.getElementById('AllpositionY').addEventListener('input', updateModelTransform);
-            document.getElementById('AllpositionZ').addEventListener('input', updateModelTransform);
-            document.getElementById('scaleX').addEventListener('input', updateModelTransform);
-            document.getElementById('scaleY').addEventListener('input', updateModelTransform);
-            document.getElementById('scaleZ').addEventListener('input', updateModelTransform);
-            document.getElementById('rotationX').addEventListener('input', updateModelTransform);
-            document.getElementById('rotationY').addEventListener('input', updateModelTransform);
-            document.getElementById('rotationZ').addEventListener('input', updateModelTransform);
-            document.getElementById('color').addEventListener('input', updateModelTransform);
+   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+   camera.position.z = 100;
+   renderer = new THREE.WebGLRenderer();
+   renderer.setSize(window.innerWidth, window.innerHeight);
+   document.body.appendChild(renderer.domElement);
 
-            animate();
+   // Lighting
+   const light = new THREE.DirectionalLight(0xffffff, 1);
+   light.position.set(1, 1, 1).normalize();
+   scene.add(light);
+
+   // 实例化OrbitControls
+   controls = new OrbitControls(camera, renderer.domElement);
+   controls.enableDamping = true; // 可选，为了更平滑的交互效果
+   controls.dampingFactor = 0.25;
+   controls.screenSpacePanning = false;
+   controls.addEventListener('change', () => {
+    document.getElementById('camera').value = JSON.stringify({
+     position: camera.position,
+     rotation: camera.rotation,
+     zoom: camera.zoom,
+     quaternion: camera.quaternion,
+     fov: camera.fov,
+     aspect: camera.aspect,
+     near: camera.near,
+     far: camera.far,
+
+    })
+   });
+
+   document.getElementById('setcamera').addEventListener('click', function (event) {
+    var cameraSettings = JSON.parse(document.getElementById('camera').value);
+
+    // 假设camera是你已经创建并想要更新的Three.js PerspectiveCamera实例
+    // 更新相机位置
+    camera.position.set(cameraSettings.position.x, cameraSettings.position.y, cameraSettings.position.z);
+
+    // 更新相机旋转
+    camera.rotation.set(cameraSettings.rotation._x, cameraSettings.rotation._y, cameraSettings.rotation._z);
+
+    // 更新相机其他属性
+    camera.fov = cameraSettings.fov;
+    camera.aspect = cameraSettings.aspect;
+    camera.near = cameraSettings.near;
+    camera.far = cameraSettings.far;
+
+    // 在更新相机属性后，调用updateProjectionMatrix()以确保变更生效
+    camera.updateProjectionMatrix();
+   });
+   // Handle STL upload
+   document.getElementById('setjson').addEventListener('click', function (event) {
+    var tmp = JSON.parse(document.getElementById('json').value);
+    for (var i = 0; i < tmp.length; i++) {
+     (function (i) {
+      if (tmp[i].name.indexOf('.stl') > -1) {
+       const loader = new STLLoader();
+       loader.load(tmp[i].name, function (geometry) {
+        var material = new THREE.MeshPhongMaterial({ color: tmp[i].color });
+        var stlModel = new THREE.Mesh(geometry, material);
+        scene.add(stlModel);
+
+        stlModels.push(stlModel);
+        stlName.push(tmp[i].name);
+        stlPosition.push(tmp[i].position);
+        if (tmp[i].center) {
+         stlCenter.push(tmp[i].center);
+         stlModel.rotation.set(
+          tmp[i].rotation._x,
+          tmp[i].rotation._y,
+          tmp[i].rotation._z
+         );
+         var newPos = rotatePoint(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z, tmp[i].center.x, tmp[i].center.y, tmp[i].center.z, tmp[i].rotation._x, tmp[i].rotation._y, tmp[i].rotation._z)
+
+         // 在这个闭包内，i和tmp[i]是被正确捕获的
+         stlModel.position.set(newPos.x, newPos.y, newPos.z);
+        }
+        else {
+
+         stlCenter.push(null);
+         stlModel.rotation.set(
+          tmp[i].rotation._x,
+          tmp[i].rotation._y,
+          tmp[i].rotation._z
+         );
+         // 在这个闭包内，i和tmp[i]是被正确捕获的
+         stlModel.position.set(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z);
         }
 
-        function queryModelTransform() {
-            const sIndex = parseInt(document.getElementById('stlIndex').value);
-            document.getElementById('positionX').value = stlModels[sIndex].position.x;
-            document.getElementById('positionY').value = stlModels[sIndex].position.y;
-            document.getElementById('positionZ').value = stlModels[sIndex].position.z;
-            document.getElementById('scaleX').value = stlModels[sIndex].scale.x;
-            document.getElementById('scaleY').value = stlModels[sIndex].scale.y;
-            document.getElementById('scaleZ').value = stlModels[sIndex].scale.z;
-            document.getElementById('rotationX').value = stlModels[sIndex].rotation._x * 180 / Math.PI;
-            document.getElementById('rotationY').value = stlModels[sIndex].rotation._y * 180 / Math.PI;
-            document.getElementById('rotationZ').value = stlModels[sIndex].rotation._z * 180 / Math.PI;
-            document.getElementById('color').value = '#' + stlModels[sIndex].material.color.getHexString();
-        }
+        stlModel.scale.set(tmp[i].scale.x, tmp[i].scale.y, tmp[i].scale.z);
 
-        function updateModelTransform() {
+       });
+      }
+      else if (tmp[i].name.indexOf('light') > -1) {
+       const pointLight = new THREE.PointLight(tmp[i].color, 1, 50); // 紅色光源
+       pointLight.position.set(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z); // 設定光源位置
+       scene.add(pointLight);
+       stlModels.push(pointLight);
+       stlName.push(tmp[i].name);
+        stlPosition.push(tmp[i].position);
 
-            const sIndex = parseInt(document.getElementById('stlIndex').value);
-            if (sIndex >= 0){
-                const posX = parseFloat(document.getElementById('positionX').value);
-                const posY = parseFloat(document.getElementById('positionY').value);
-                const posZ = parseFloat(document.getElementById('positionZ').value);
-                stlModels[sIndex].position.set(posX, posY, posZ);
+       if (tmp[i].center) {
 
-                const scaleX = parseFloat(document.getElementById('scaleX').value);
-                const scaleY = parseFloat(document.getElementById('scaleY').value);
-                const scaleZ = parseFloat(document.getElementById('scaleZ').value);
-                stlModels[sIndex].scale.set(scaleX, scaleY, scaleZ);
+        stlCenter.push(tmp[i].center);
+       }
+       else {
 
-                const rotX = parseFloat(document.getElementById('rotationX').value) * Math.PI / 180;
-                const rotY = parseFloat(document.getElementById('rotationY').value) * Math.PI / 180;
-                const rotZ = parseFloat(document.getElementById('rotationZ').value) * Math.PI / 180;
-                stlModels[sIndex].rotation.set(rotX, rotY, rotZ);
+        stlCenter.push(null);
+       }
 
-                stlModels[sIndex].material.color.set(document.getElementById('color').value); // 将颜色改为红色
-            }
-            for (var i = 0; i < stlModels.length; i++) {
+      }
+      else if (tmp[i].name.indexOf('sphere') > -1) {
+       const sphereSize = 0.5;
+       const bulbGeometry = new THREE.SphereGeometry(sphereSize, 16, 8);
+       const bulbMaterial = new THREE.MeshBasicMaterial({ color: tmp[i].color }); // 與光源顏色相同
+       const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
+       bulb.position.set(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z);  // 設置與光源相同的位置
+       scene.add(bulb);
+       stlModels.push(bulb);
+       stlName.push(tmp[i].name);
+        stlPosition.push(tmp[i].position);
+       if (tmp[i].center) {
 
-                var AllposX = parseFloat(document.getElementById('AllpositionX').value);
-                var AllposY = parseFloat(document.getElementById('AllpositionY').value);
-                var AllposZ = parseFloat(document.getElementById('AllpositionZ').value);
-                AllposX += stlModels[i].position.x;
-                AllposY += stlModels[i].position.y;
-                AllposZ += stlModels[i].position.z;
-                stlModels[i].position.set(AllposX, AllposY, AllposZ);
-            }
+        stlCenter.push(tmp[i].center);
+       }
+       else {
 
-            var tmp = [];
-            for (var i = 0; i < stlModels.length; i++) {
-                tmp.push({
-                    index: i,
-                    name: stlName[i], position: stlModels[i].position,
-                    scale: stlModels[i].scale,
-                    rotation: stlModels[i].rotation,
-                    color: '#' + stlModels[i].material.color.getHexString()
-                })
-            }
-            document.getElementById('json').value = JSON.stringify(tmp);
-        }
+        stlCenter.push(null);
+       }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update(); // 只有当 enableDamping 或 autoRotate 被设置时才需要
-            renderer.render(scene, camera);
-        }
+      }
 
-        init();
+     })(i);
+    }
+   });
 
-    </script> <!-- Your JavaScript code will go here -->
+   // Handle STL upload
+   document.getElementById('stlUploader').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (!file) return; // 如果没有文件被选中，则退出函数
+
+    // 获取文件扩展名
+    const extension = file.name.split('.').pop().toLowerCase();
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+     let loader;
+
+     // 根据文件扩展名选择加载器
+     if (extension === 'stl') {
+      loader = new STLLoader();
+     } else if (extension === 'obj') {
+      loader = new OBJLoader();
+     } else {
+      // 如果不是支持的文件类型，则退出
+      console.error('Unsupported file type.');
+      return;
+     }
+
+     // 解析文件内容并创建模型
+     const geometry = loader.parse(e.target.result);
+     let material = new THREE.MeshPhongMaterial({ color: 0x555555, specular: 0x111111, shininess: 200 });
+     let mesh;
+
+     if (extension === 'stl') {
+      mesh = new THREE.Mesh(geometry, material);
+     } else if (extension === 'obj') {
+      // OBJLoader返回一个Group对象，而不是Geometry
+      // 因此，我们对返回的group应用材质
+      material = new THREE.MeshPhongMaterial({ color: 0x555555, specular: 0x111111, shininess: 200 });
+      geometry.traverse(function (child) {
+       if (child instanceof THREE.Mesh) {
+        child.material = material;
+       }
+      });
+      mesh = geometry;
+     }
+
+     // 添加到场景和数组中
+     scene.add(mesh);
+     stlModels.push(mesh); // 假设你有一个数组来存储加载的模型
+     stlName.push(file.name); // 存储文件名
+     document.getElementById('stlUploader').value = ''; // 重置文件输入
+    };
+
+    // 根据文件类型以正确的格式读取文件
+    if (extension === 'stl') {
+     reader.readAsArrayBuffer(file);
+    } else if (extension === 'obj') {
+     reader.readAsText(file);
+    }
+   });
+
+   // Input listeners for transformations
+   document.getElementById('stlIndex').addEventListener('input', queryModelTransform);
+   document.getElementById('positionX').addEventListener('input', updateModelTransform);
+   document.getElementById('positionY').addEventListener('input', updateModelTransform);
+   document.getElementById('positionZ').addEventListener('input', updateModelTransform);
+   document.getElementById('CenterX').addEventListener('input', updateModelTransform);
+   document.getElementById('CenterY').addEventListener('input', updateModelTransform);
+   document.getElementById('CenterZ').addEventListener('input', updateModelTransform);
+   document.getElementById('AllpositionX').addEventListener('input', updateModelTransform);
+   document.getElementById('AllpositionY').addEventListener('input', updateModelTransform);
+   document.getElementById('AllpositionZ').addEventListener('input', updateModelTransform);
+   document.getElementById('scaleX').addEventListener('input', updateModelTransform);
+   document.getElementById('scaleY').addEventListener('input', updateModelTransform);
+   document.getElementById('scaleZ').addEventListener('input', updateModelTransform);
+   document.getElementById('rotationX').addEventListener('input', updateModelTransform);
+   document.getElementById('rotationY').addEventListener('input', updateModelTransform);
+   document.getElementById('rotationZ').addEventListener('input', updateModelTransform);
+   document.getElementById('color').addEventListener('input', updateModelTransform);
+
+   animate();
+  }
+
+  function queryModelTransform() {
+   const sIndex = parseInt(document.getElementById('stlIndex').value);
+   document.getElementById('stlName').value = stlName[sIndex];
+   document.getElementById('positionX').value = stlPosition[sIndex].x;
+   document.getElementById('positionY').value = stlPosition[sIndex].y;
+   document.getElementById('positionZ').value = stlPosition[sIndex].z;
+   document.getElementById('scaleX').value = stlModels[sIndex].scale.x;
+   document.getElementById('scaleY').value = stlModels[sIndex].scale.y;
+   document.getElementById('scaleZ').value = stlModels[sIndex].scale.z;
+   document.getElementById('rotationX').value = stlModels[sIndex].rotation._x * 180 / Math.PI;
+   document.getElementById('rotationY').value = stlModels[sIndex].rotation._y * 180 / Math.PI;
+   document.getElementById('rotationZ').value = stlModels[sIndex].rotation._z * 180 / Math.PI;
+   if (stlModels[sIndex].type == "PointLight")
+    document.getElementById('color').value = '#' + stlModels[sIndex].color.getHexString();
+   else
+    document.getElementById('color').value = '#' + stlModels[sIndex].material.color.getHexString();
+   if (stlCenter[sIndex]) {
+
+    document.getElementById('CenterX').value = stlCenter[sIndex].x;
+    document.getElementById('CenterY').value = stlCenter[sIndex].y;
+    document.getElementById('CenterZ').value = stlCenter[sIndex].z;
+   }
+   else {
+    document.getElementById('CenterX').value = "";
+    document.getElementById('CenterY').value = "";
+    document.getElementById('CenterZ').value = "";
+
+   }
+
+   var tmp = [];
+   for (var i = 0; i < stlModels.length; i++) {
+
+    tmp.push({
+     index: i,
+     name: stlName[i], 
+     position: stlPosition[i],
+     scale: stlModels[i].scale,
+     rotation: stlModels[i].rotation,
+     color: (stlModels[i].type == "PointLight") ? '#' + stlModels[i].color.getHexString() : '#' + stlModels[i].material.color.getHexString(),
+     center: stlCenter[i]
+    })
+   }
+   document.getElementById('json').value = JSON.stringify(tmp);
+  }
+
+  function updateModelTransform() {
+
+   const sIndex = parseInt(document.getElementById('stlIndex').value);
+   if (sIndex >= 0) {
+    const posX = parseFloat(document.getElementById('positionX').value);
+    const posY = parseFloat(document.getElementById('positionY').value);
+    const posZ = parseFloat(document.getElementById('positionZ').value);
+    stlPosition[sIndex] = { x: posX, y: posY, z: posZ };
+
+    const scaleX = parseFloat(document.getElementById('scaleX').value);
+    const scaleY = parseFloat(document.getElementById('scaleY').value);
+    const scaleZ = parseFloat(document.getElementById('scaleZ').value);
+    stlModels[sIndex].scale.set(scaleX, scaleY, scaleZ);
+
+    const rotX = parseFloat(document.getElementById('rotationX').value) * Math.PI / 180;
+    const rotY = parseFloat(document.getElementById('rotationY').value) * Math.PI / 180;
+    const rotZ = parseFloat(document.getElementById('rotationZ').value) * Math.PI / 180;
+
+
+    if (document.getElementById('CenterX').value != '' && document.getElementById('CenterY').value != '' && document.getElementById('CenterZ').value != '') {
+
+     const centerX = parseFloat(document.getElementById('CenterX').value);
+     const centerY = parseFloat(document.getElementById('CenterY').value);
+     const centerZ = parseFloat(document.getElementById('CenterZ').value);
+     stlCenter[sIndex] = { x: centerX, y: centerY, z: centerZ };
+
+     stlModels[sIndex].rotation.set(rotX, rotY, rotZ);
+    const rotX1 = parseFloat(document.getElementById('rotationX').value);
+    const rotY1 = parseFloat(document.getElementById('rotationY').value);
+    const rotZ1 = parseFloat(document.getElementById('rotationZ').value);
+
+     var newPos = rotatePoint(posX, posY, posZ, centerX, centerY, centerZ, rotX1, rotY1, rotZ1)
+
+     // 在这个闭包内，i和tmp[i]是被正确捕获的
+     stlModels[sIndex].position.set(newPos.x, newPos.y, newPos.z);
+    }
+    else {
+
+     stlModels[sIndex].rotation.set(rotX, rotY, rotZ);
+     stlModels[sIndex].position.set(posX, posY, posZ);
+    }
+
+
+    if (stlModels[sIndex].type == "PointLight")
+     stlModels[sIndex].color.set(document.getElementById('color').value); // 将颜色改为红色
+    else
+     stlModels[sIndex].material.color.set(document.getElementById('color').value); // 将颜色改为红色
+   }
+   for (var i = 0; i < stlModels.length; i++) {
+
+    var AllposX = parseFloat(document.getElementById('AllpositionX').value);
+    var AllposY = parseFloat(document.getElementById('AllpositionY').value);
+    var AllposZ = parseFloat(document.getElementById('AllpositionZ').value);
+    AllposX += stlModels[i].position.x;
+    AllposY += stlModels[i].position.y;
+    AllposZ += stlModels[i].position.z;
+    stlModels[i].position.set(AllposX, AllposY, AllposZ);
+   }
+
+   var tmp = [];
+   for (var i = 0; i < stlModels.length; i++) {
+
+    tmp.push({
+     index: i,
+     name: stlName[i], position: stlPosition[i],
+     scale: stlModels[i].scale,
+     rotation: stlModels[i].rotation,
+     color: (stlModels[i].type == "PointLight") ? '#' + stlModels[i].color.getHexString() : '#' + stlModels[i].material.color.getHexString(),
+     center: stlCenter[i]
+    })
+   }
+   document.getElementById('json').value = JSON.stringify(tmp);
+  }
+
+  function animate() {
+   requestAnimationFrame(animate);
+   controls.update(); // 只有当 enableDamping 或 autoRotate 被设置时才需要
+   renderer.render(scene, camera);
+  }
+
+  init();
+
+ </script> <!-- Your JavaScript code will go here -->
 </body>
 
 </html>
