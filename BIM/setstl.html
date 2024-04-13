@@ -213,7 +213,7 @@
        scene.add(pointLight);
        stlModels.push(pointLight);
        stlName.push(tmp[i].name);
-        stlPosition.push(tmp[i].position);
+       stlPosition.push(tmp[i].position);
 
        if (tmp[i].center) {
 
@@ -234,7 +234,7 @@
        scene.add(bulb);
        stlModels.push(bulb);
        stlName.push(tmp[i].name);
-        stlPosition.push(tmp[i].position);
+       stlPosition.push(tmp[i].position);
        if (tmp[i].center) {
 
         stlCenter.push(tmp[i].center);
@@ -363,7 +363,7 @@
 
     tmp.push({
      index: i,
-     name: stlName[i], 
+     name: stlName[i],
      position: stlPosition[i],
      scale: stlModels[i].scale,
      rotation: stlModels[i].rotation,
@@ -401,9 +401,9 @@
      stlCenter[sIndex] = { x: centerX, y: centerY, z: centerZ };
 
      stlModels[sIndex].rotation.set(rotX, rotY, rotZ);
-    const rotX1 = parseFloat(document.getElementById('rotationX').value);
-    const rotY1 = parseFloat(document.getElementById('rotationY').value);
-    const rotZ1 = parseFloat(document.getElementById('rotationZ').value);
+     const rotX1 = parseFloat(document.getElementById('rotationX').value);
+     const rotY1 = parseFloat(document.getElementById('rotationY').value);
+     const rotZ1 = parseFloat(document.getElementById('rotationZ').value);
 
      var newPos = rotatePoint(posX, posY, posZ, centerX, centerY, centerZ, rotX1, rotY1, rotZ1)
 
