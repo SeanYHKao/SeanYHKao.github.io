@@ -27,12 +27,12 @@
   import { STLLoader } from './STLLoader.js';
   import { CSS2DRenderer, CSS2DObject } from './CSS2DRenderer.js';
   var planeModels = {
-   model: 'A380' 
+   model: ''
   };
 
   var allModels = [
-   'A380', 'A350-900', 'A330-300', 'A321neo', 
-   '787-10', '777-300ER', '747-400F', '737-800' 
+   'A380', 'A350-900', 'A330-300', 'A321neo',
+   '787-10', '777-300ER', '747-400F', '737-800'
   ];
 
   let camera, scene, renderer, labelRenderer, controls;
@@ -127,6 +127,28 @@
    controlTargetZ.setValue(controls.target.z);
   }
 
+  function clearAllplane() {
+   bridge1.forEach(function (subArray, index) {
+    bridge1[index] = subArray.filter(function (item) {
+     if(item.obj_name == 'a380.stl') scene.remove(item);
+     return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
+    });
+   });
+   bridge2.forEach(function (subArray, index) {
+    bridge1[index] = subArray.filter(function (item) {
+     if(item.obj_name == 'a380.stl') scene.remove(item);
+     return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
+    });
+   });
+   bridge3.forEach(function (subArray, index) {
+    bridge1[index] = subArray.filter(function (item) {
+     if(item.obj_name == 'a380.stl') scene.remove(item);
+     return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
+    });
+   });
+
+  }
+
 
   function init() {
    // Scene setup
@@ -195,6 +217,8 @@
        loader.load(item.name, function (geometry) {
         var material = new THREE.MeshPhongMaterial({ color: item.color });
         var stlModel = new THREE.Mesh(geometry, material);
+        stlModel.obj_name = item.name;
+        if (labelData) stlModel.label = labelData[c];
         scene.add(stlModel);
 
         // 設置模型位置、縮放和旋轉
@@ -231,6 +255,8 @@
       else if (item.name.indexOf('light') > -1) {
        const pointLight = new THREE.PointLight(item.color, 1, 50); // 紅色光源
        pointLight.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement); // 設定光源位置
+       pointLight.obj_name = item.name;
+       if (labelData) pointLight.label = labelData[c];
        scene.add(pointLight);
        _objCollect[c].push(pointLight);
 
@@ -241,6 +267,8 @@
        const bulbMaterial = new THREE.MeshBasicMaterial({ color: item.color }); // 與光源顏色相同
        const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
        bulb.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);  // 設置與光源相同的位置
+       bulb.obj_name = item.name;
+       if (labelData) bulb.label = labelData[c];
        scene.add(bulb);
        _objCollect[c].push(bulb);
       }
@@ -249,6 +277,8 @@
        const geometry = new THREE.BoxGeometry();
        const material = new THREE.MeshBasicMaterial({ color: 0x003300 });
        const cube = new THREE.Mesh(geometry, material);
+       cube.obj_name = item.name;
+       if (labelData) cube.label = labelData[c];
        scene.add(cube);
        const _Div = document.createElement("div");
        _Div.style.padding = '5px 10px';
@@ -363,6 +393,7 @@
    modelController.onChange(function (value) {
     console.log("Selected Model: " + value);
    });
+   gui.add({ clearAllplane }, 'clearAllplane').name('Clear All Plane');
 
    // 监听控制器的改变事件
    controls.addEventListener('change', () => {
@@ -394,7 +425,43 @@
 
   init();
 
- </script> <!-- Your JavaScript code will go here -->
+
+  function bim_launchView(elementId) {
+
+  }
+
+  function ap_didLaunchView() {
+
+  }
+
+  function bim_setOverallData(overallData) {
+
+  }
+
+  function ap_showBridgeInfo(bridgeId) {
+
+  }
+
+  function ap_showBridgeDetailInfo(bridgeId, detailIndex) {
+
+  }
+
+  function ap_didEnterBridgeScene(bridgeId) {
+
+  }
+
+  function bim_setBridgeData(bridgeData) {
+
+  }
+
+  function ap_showBridgePositionInfo(bridgeId, position) {
+
+  }
+
+  function ap_didLeaveBridgeScene(bridgeId) {
+
+  }
+ </script>
 </body>
 
 </html>
