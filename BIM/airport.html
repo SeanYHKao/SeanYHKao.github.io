@@ -27,7 +27,7 @@
   import { STLLoader } from './STLLoader.js';
   import { CSS2DRenderer, CSS2DObject } from './CSS2DRenderer.js';
   var planeModels = {
-   model: ''
+   selectedModel: ''
   };
 
   var allModels = [
@@ -36,6 +36,9 @@
   ];
 
   let camera, scene, renderer, labelRenderer, controls;
+  
+  var camPosX, camPosY, camPosZ, camRotX, camRotY ,camRotZ, controlTargetX , controlTargetY , controlTargetZ ;
+
   var bridge1 = [];
   var bridge2 = [];
   var bridge3 = [];
@@ -66,6 +69,10 @@
 
   //主建築
   var mainBuilding = [{ "index": 0, "name": "Concept.stl", "position": { "x": 70, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }, { "index": 1, "name": "Concept.stl", "position": { "x": 170, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }, { "index": 2, "name": "Concept.stl", "position": { "x": 270, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }, { "index": 3, "name": "Concept.stl", "position": { "x": 370, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }];
+
+
+  var plane = [{ "index": 0, "name": "a380.stl", "position": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 1, "name": "A350-900.stl", "position": { "x": 65, "y": 0, "z": 0 }, "scale": { "x": 0.35, "y": 0.35, "z": 0.35 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "A330-300.stl", "position": { "x": -24, "y": 42, "z": 0 }, "scale": { "x": 2, "y": 2, "z": 2 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 1.5707963267948966, "_order": "XYZ" }, "color": "#555555", "center": { "x": 0, "y": 0, "z": 0 } }];
+
 
   function rotatePoint(px, py, pz, cx, cy, cz, rx, ry, rz) {
    // 将角度转换为弧度
@@ -113,6 +120,26 @@
 
    // 更新控制器和相机
    controls.update();
+   
+   let sumX = 0, sumY = 0, sumZ = 0;
+   let count = 0;
+
+   // 计算所有对象的坐标平均值
+   scene.traverse(function (object) {
+    if (object.isMesh) {
+     sumX += object.position.x;
+     sumY += object.position.y;
+     sumZ += object.position.z;
+     count++;
+    }
+   });
+
+   const centerX = sumX / count;
+   const centerY = sumY / count;
+   const centerZ = sumZ / count;
+
+   // 设置摄像机看向新的中心点
+   camera.lookAt(centerX, centerY, centerZ);
    camera.updateProjectionMatrix();
 
    // 同步更新 GUI 显示
@@ -129,24 +156,191 @@
 
   function clearAllplane() {
    bridge1.forEach(function (subArray, index) {
+    bridge_planeModel1[index] = '';
     bridge1[index] = subArray.filter(function (item) {
-     if(item.obj_name == 'a380.stl') scene.remove(item);
+     if (item.obj_name == 'a380.stl') scene.remove(item);
+     if (item.obj_type == 'plane') scene.remove(item);
      return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
     });
    });
    bridge2.forEach(function (subArray, index) {
+    bridge_planeModel2[index] = '';
     bridge1[index] = subArray.filter(function (item) {
-     if(item.obj_name == 'a380.stl') scene.remove(item);
+     if (item.obj_name == 'a380.stl') scene.remove(item);
+     if (item.obj_type == 'plane') scene.remove(item);
      return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
     });
    });
    bridge3.forEach(function (subArray, index) {
+    bridge_planeModel3[index] = '';
     bridge1[index] = subArray.filter(function (item) {
-     if(item.obj_name == 'a380.stl') scene.remove(item);
+     if (item.obj_name == 'a380.stl') scene.remove(item);
+     if (item.obj_type == 'plane') scene.remove(item);
      return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
     });
    });
+  }
 
+  function setPlane(no, m) {
+   var i1 = bridge_code1.findIndex(x => x == no);
+   var i2 = bridge_code2.findIndex(x => x == no);
+   var i3 = bridge_code3.findIndex(x => x == no);
+   var i = plane.findIndex(x => x.name.indexOf(m) > -1);
+   if (i > -1) {
+    if (i1 > -1) {
+     addModel(bridge1, bridge_code1, plane[i], i1, 0, 98);
+     bridge_planeModel1[i1] = m;
+    }
+    if (i2 > -1) {
+     addModel(bridge2, bridge_code2, plane[i], i2, 0, 98, 405);
+     bridge_planeModel2[i2] = m;
+    }
+    if (i3 > -1) {
+     addModel(bridge3, bridge_code3, plane[i], i3, 50, 0, 80, 70);
+     bridge_planeModel2[i2] = m;
+    }
+   }
+  }
+
+
+
+  function addModel(_objCollect, labelData, item, c, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0) {
+   const loader = new STLLoader();
+   loader.load(item.name, function (geometry) {
+    var material = new THREE.MeshPhongMaterial({ color: item.color });
+    var stlModel = new THREE.Mesh(geometry, material);
+    stlModel.obj_name = item.name;
+    stlModel.obj_type = 'plane';
+    if (labelData) stlModel.label = labelData[c];
+    scene.add(stlModel);
+    if (item.center) {
+     stlModel.rotation.set(
+      item.rotation._x,
+      item.rotation._y,
+      item.rotation._z
+     );
+     var newPos = rotatePoint(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement,
+      item.center.x, item.center.y, item.center.z,
+      item.rotation._x, item.rotation._y, item.rotation._z)
+
+     stlModel.position.set(newPos.x, newPos.y, newPos.z);
+    }
+    else {
+     stlModel.rotation.set(
+      item.rotation._x,
+      item.rotation._y,
+      item.rotation._z
+     );
+     stlModel.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);
+    }
+
+    stlModel.scale.set(item.scale.x, item.scale.y, item.scale.z);
+
+    _objCollect[c].push(stlModel);
+   });
+  }
+
+  // 加載和顯示模型的通用函數
+  function loadModels(_objCollect, labelData, tmpData, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0) {
+   for (let c = 0; c < _objCollect.length; c++) {
+    tmpData.forEach((item, i) => {
+     if (item.name.indexOf('.stl') > -1) {
+      const loader = new STLLoader();
+      loader.load(item.name, function (geometry) {
+       var material = new THREE.MeshPhongMaterial({ color: item.color });
+       var stlModel = new THREE.Mesh(geometry, material);
+       stlModel.obj_name = item.name;
+       if (labelData) stlModel.label = labelData[c];
+       scene.add(stlModel);
+
+       // 設置模型位置、縮放和旋轉
+
+       if (item.center) {
+        stlModel.rotation.set(
+         item.rotation._x,
+         item.rotation._y,
+         item.rotation._z
+        );
+        var newPos = rotatePoint(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement,
+         item.center.x, item.center.y, item.center.z,
+         item.rotation._x, item.rotation._y, item.rotation._z)
+
+        // 在这个闭包内，i和item是被正确捕获的
+        stlModel.position.set(newPos.x, newPos.y, newPos.z);
+       }
+       else {
+
+        stlModel.rotation.set(
+         item.rotation._x,
+         item.rotation._y,
+         item.rotation._z
+        );
+        // 在这个闭包内，i和item是被正确捕获的
+        stlModel.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);
+       }
+
+       stlModel.scale.set(item.scale.x, item.scale.y, item.scale.z);
+
+       _objCollect[c].push(stlModel);
+      });
+     }
+     else if (item.name.indexOf('light') > -1) {
+      const pointLight = new THREE.PointLight(item.color, 1, 50); // 紅色光源
+      pointLight.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement); // 設定光源位置
+      pointLight.obj_name = item.name;
+      if (labelData) pointLight.label = labelData[c];
+      scene.add(pointLight);
+      _objCollect[c].push(pointLight);
+
+     }
+     else if (item.name.indexOf('sphere') > -1) {
+      const sphereSize = 0.5;
+      const bulbGeometry = new THREE.SphereGeometry(sphereSize, 16, 8);
+      const bulbMaterial = new THREE.MeshBasicMaterial({ color: item.color }); // 與光源顏色相同
+      const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
+      bulb.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);  // 設置與光源相同的位置
+      bulb.obj_name = item.name;
+      if (labelData) bulb.label = labelData[c];
+      scene.add(bulb);
+      _objCollect[c].push(bulb);
+     }
+     else if (item.name.indexOf('label') > -1 && labelData) {
+      // 添加一個 3D 物體
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({ color: 0x003300 });
+      const cube = new THREE.Mesh(geometry, material);
+      cube.obj_name = item.name;
+      if (labelData) cube.label = labelData[c];
+      scene.add(cube);
+      const _Div = document.createElement("div");
+      _Div.style.padding = '5px 10px';
+      _Div.style.color = '#fff';
+      _Div.style.fontSize = '16px';
+      _Div.style.position = 'absolute';
+      _Div.style.backgroundColor = 'rgba(25,25,25,0.5)';
+      _Div.style.borderRadius = '5px';
+      _Div.className = "label";
+      _Div.textContent = labelData[c];
+      _Div.style.marginTop = "-1em";
+      _Div.addEventListener('click', function () {
+       labelInfo.selectedLabel = labelData[c]; // 更新 GUI 显示的标签信息
+       gui.updateDisplay(); // 更新 GUI 显示
+      });
+      // 添加鼠标悬停事件
+      _Div.addEventListener('mouseover', function () {
+       _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
+       labelInfo.selectedLabel = labelData[c]; // 更新 GUI 显示的标签信息
+       gui.updateDisplay(); // 更新 GUI 显示
+      });
+      _Div.addEventListener('mouseout', function () {
+       _Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
+      });
+      const _Label = new CSS2DObject(_Div);
+      _Label.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);
+      cube.add(_Label);
+     }
+    });
+   }
   }
 
 
@@ -206,111 +400,6 @@
     bridge3.push([]);
    // Handle STL upload 
 
-
-
-   // 加載和顯示模型的通用函數
-   function loadModels(_objCollect, labelData, tmpData, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0) {
-    for (let c = 0; c < _objCollect.length; c++) {
-     tmpData.forEach((item, i) => {
-      if (item.name.indexOf('.stl') > -1) {
-       const loader = new STLLoader();
-       loader.load(item.name, function (geometry) {
-        var material = new THREE.MeshPhongMaterial({ color: item.color });
-        var stlModel = new THREE.Mesh(geometry, material);
-        stlModel.obj_name = item.name;
-        if (labelData) stlModel.label = labelData[c];
-        scene.add(stlModel);
-
-        // 設置模型位置、縮放和旋轉
-
-        if (item.center) {
-         stlModel.rotation.set(
-          item.rotation._x,
-          item.rotation._y,
-          item.rotation._z
-         );
-         var newPos = rotatePoint(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement,
-          item.center.x, item.center.y, item.center.z,
-          item.rotation._x, item.rotation._y, item.rotation._z)
-
-         // 在这个闭包内，i和item是被正确捕获的
-         stlModel.position.set(newPos.x, newPos.y, newPos.z);
-        }
-        else {
-
-         stlModel.rotation.set(
-          item.rotation._x,
-          item.rotation._y,
-          item.rotation._z
-         );
-         // 在这个闭包内，i和item是被正确捕获的
-         stlModel.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);
-        }
-
-        stlModel.scale.set(item.scale.x, item.scale.y, item.scale.z);
-
-        _objCollect[c].push(stlModel);
-       });
-      }
-      else if (item.name.indexOf('light') > -1) {
-       const pointLight = new THREE.PointLight(item.color, 1, 50); // 紅色光源
-       pointLight.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement); // 設定光源位置
-       pointLight.obj_name = item.name;
-       if (labelData) pointLight.label = labelData[c];
-       scene.add(pointLight);
-       _objCollect[c].push(pointLight);
-
-      }
-      else if (item.name.indexOf('sphere') > -1) {
-       const sphereSize = 0.5;
-       const bulbGeometry = new THREE.SphereGeometry(sphereSize, 16, 8);
-       const bulbMaterial = new THREE.MeshBasicMaterial({ color: item.color }); // 與光源顏色相同
-       const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
-       bulb.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);  // 設置與光源相同的位置
-       bulb.obj_name = item.name;
-       if (labelData) bulb.label = labelData[c];
-       scene.add(bulb);
-       _objCollect[c].push(bulb);
-      }
-      else if (item.name.indexOf('label') > -1 && labelData) {
-       // 添加一個 3D 物體
-       const geometry = new THREE.BoxGeometry();
-       const material = new THREE.MeshBasicMaterial({ color: 0x003300 });
-       const cube = new THREE.Mesh(geometry, material);
-       cube.obj_name = item.name;
-       if (labelData) cube.label = labelData[c];
-       scene.add(cube);
-       const _Div = document.createElement("div");
-       _Div.style.padding = '5px 10px';
-       _Div.style.color = '#fff';
-       _Div.style.fontSize = '16px';
-       _Div.style.position = 'absolute';
-       _Div.style.backgroundColor = 'rgba(25,25,25,0.5)';
-       _Div.style.borderRadius = '5px';
-       _Div.className = "label";
-       _Div.textContent = labelData[c];
-       _Div.style.marginTop = "-1em";
-       _Div.addEventListener('click', function () {
-        labelInfo.selectedLabel = labelData[c]; // 更新 GUI 显示的标签信息
-        gui.updateDisplay(); // 更新 GUI 显示
-       });
-       // 添加鼠标悬停事件
-       _Div.addEventListener('mouseover', function () {
-        _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
-        labelInfo.selectedLabel = labelData[c]; // 更新 GUI 显示的标签信息
-        gui.updateDisplay(); // 更新 GUI 显示
-       });
-       _Div.addEventListener('mouseout', function () {
-        _Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
-       });
-       const _Label = new CSS2DObject(_Div);
-       _Label.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);
-       cube.add(_Label);
-      }
-     });
-    }
-   }
-
    // 呼叫 loadModels 函數來加載和顯示所有模型
    loadModels(bridge1, bridge_code1, bridgeData1, 0, 98);
    loadModels(bridge2, bridge_code2, bridgeData2, 0, 98, 405);
@@ -355,7 +444,7 @@
     const intersects = raycaster.intersectObjects(scene.children);
 
     if (intersects.length > 0) {
-     // 如果有物体被选中，则改变最近的物体的颜色
+     // 如果有物体被选中 
      console.log(intersects[0]);
      //intersects[0].object.material.color.setHex(Math.random() * 0xffffff);
     }
@@ -369,13 +458,13 @@
    var camRotation = cameraFolder.addFolder('Rotation');
 
    // 添加位置和旋转的控制
-   var camPosX = camPosition.add(camera.position, 'x', -500, 500);
-   var camPosY = camPosition.add(camera.position, 'y', -500, 500);
-   var camPosZ = camPosition.add(camera.position, 'z', -500, 500);
+    camPosX = camPosition.add(camera.position, 'x', -500, 500);
+    camPosY = camPosition.add(camera.position, 'y', -500, 500);
+    camPosZ = camPosition.add(camera.position, 'z', -500, 500);
 
-   var camRotX = camRotation.add(camera.rotation, 'x', -Math.PI, Math.PI);
-   var camRotY = camRotation.add(camera.rotation, 'y', -Math.PI, Math.PI);
-   var camRotZ = camRotation.add(camera.rotation, 'z', -Math.PI, Math.PI);
+    camRotX = camRotation.add(camera.rotation, 'x', -Math.PI, Math.PI);
+    camRotY = camRotation.add(camera.rotation, 'y', -Math.PI, Math.PI);
+    camRotZ = camRotation.add(camera.rotation, 'z', -Math.PI, Math.PI);
 
    cameraFolder.open();
    camPosition.open();
@@ -383,15 +472,16 @@
 
    // 添加OrbitControls的目标点控制
    var controlsFolder = gui.addFolder('OrbitControls Target');
-   var controlTargetX = controlsFolder.add(controls.target, 'x', -1000, 1000);
-   var controlTargetY = controlsFolder.add(controls.target, 'y', -1000, 1000);
-   var controlTargetZ = controlsFolder.add(controls.target, 'z', -1000, 1000);
+    controlTargetX = controlsFolder.add(controls.target, 'x', -1000, 1000);
+    controlTargetY = controlsFolder.add(controls.target, 'y', -1000, 1000);
+    controlTargetZ = controlsFolder.add(controls.target, 'z', -1000, 1000);
    controlsFolder.open();
    gui.add({ resetCameraAndControls }, 'resetCameraAndControls').name('Reset Camera');
    gui.add(labelInfo, 'selectedLabel').name('Selected Label');
-   var modelController = gui.add(planeModels, 'model', allModels).name('Aircraft Models');
+   var modelController = gui.add(planeModels, 'selectedModel', allModels).name('Aircraft Models');
    modelController.onChange(function (value) {
     console.log("Selected Model: " + value);
+    setPlane(labelInfo.selectedLabel, planeModels.selectedModel);
    });
    gui.add({ clearAllplane }, 'clearAllplane').name('Clear All Plane');
 
