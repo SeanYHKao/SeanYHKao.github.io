@@ -10,6 +10,7 @@
  <input type="file" id="stlUploader" accept=".stl,.obj">
  <input type="number" id="stlIndex">
  <input id="stlName">
+ <input id="stlObjType">
  <div>
   <label>Position X: <input type="number" id="positionX" value="0"></label>
   <label>Position Y: <input type="number" id="positionY" value="0"></label>
@@ -42,6 +43,27 @@
   <label>Position Z: <input type="number" id="AllpositionZ" value="0"></label>
  </div>
 
+
+ <div>
+  <label>P1x : <input type="number" id="P1x" value="0"></label>
+  <label>P1y : <input type="number" id="P1y" value="0"></label>
+  <label>P1z : <input type="number" id="P1z" value="0"></label>
+ </div>
+
+
+ <div>
+  <label>A1 : <input type="number" id="A1" value="0"></label>
+  <label>A2 : <input type="number" id="A2" value="0"></label>
+  <label>A3 : <input type="number" id="A3" value="0"></label>
+ </div>
+
+
+ <div>
+  <label>B1 : <input type="number" id="B1" value="0"></label>
+  <label>B2 : <input type="number" id="B2" value="0"></label>
+  <label>B3 : <input type="number" id="B3" value="0"></label>
+ </div>
+
  <textarea id="json">
 
     </textarea><button id="setjson">setjson</button>
@@ -49,59 +71,62 @@
 
     </textarea><button id="setcamera">setcamera</button>
 
-    <div id="bimModel" style="width: 800px; height: 600px; position: relative;"></div>
-    <script type="module">
-    var container = document.getElementById('bimModel');
-     import * as THREE from './three.js';
-     import { OrbitControls } from './OrbitControls.js';
-   
-     import { OBJLoader } from './OBJLoader.js';
-     import { STLLoader } from './STLLoader.js';
+ <div id="bimModel" style="width: 800px; height: 600px; position: relative;"></div>
+ <script type="module">
+  var container = document.getElementById('bimModel');
+  import * as THREE from './three.js';
+  import { OrbitControls } from './OrbitControls.js';
+
+  import { OBJLoader } from './OBJLoader.js';
+  import { STLLoader } from './STLLoader.js';
   import { CSS2DRenderer, CSS2DObject } from './CSS2DRenderer.js';
 
 
-  let camera, scene, renderer, labelRenderer, controls;
+  let camera, scene, renderer, labelRenderer, controls, axesHelper, plane;
   let stlModels = [];
   let stlName = [];
   let stlCenter = [];
   let stlPosition = [];
+  let stlObjType = [];
 
   function rotatePoint(px, py, pz, cx, cy, cz, rx, ry, rz) {
-   // 将角度转换为弧度
-   rx = rx * Math.PI / 180;
-   ry = ry * Math.PI / 180;
-   rz = rz * Math.PI / 180;
+    // 将角度从度转换为弧度
+    rx = rx * Math.PI / 180;
+    ry = ry * Math.PI / 180;
+    rz = rz * Math.PI / 180;
 
-   // 将点平移到旋转中心
-   let x = px - cx;
-   let y = py - cy;
-   let z = pz - cz;
+    // 创建点的三维向量
+    let pointVector = new THREE.Vector3(px, py, pz);
 
-   // 绕 Z 轴旋转
-   let newX = x * Math.cos(rz) - y * Math.sin(rz);
-   let newY = x * Math.sin(rz) + y * Math.cos(rz);
-   x = newX;
-   y = newY;
+    // 创建中心点的三维向量
+    let centerVector = new THREE.Vector3(cx, cy, cz);
 
-   // 绕 Y 轴旋转
-   newX = x * Math.cos(ry) + z * Math.sin(ry);
-   let newZ = z * Math.cos(ry) - x * Math.sin(ry);
-   x = newX;
-   z = newZ;
+    // 计算相对于中心点的向量
+    pointVector.sub(centerVector);
 
-   // 绕 X 轴旋转
-   newY = y * Math.cos(rx) - z * Math.sin(rx);
-   newZ = y * Math.sin(rx) + z * Math.cos(rx);
-   y = newY;
-   z = newZ;
+    // 创建一个空的四元数用于旋转
+    let quaternion = new THREE.Quaternion();
 
-   // 平移回原始中心
-   return {
-    x: x + cx,
-    y: y + cy,
-    z: z + cz
-   };
-  }
+    // 绕 Z 轴旋转
+    quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), rz);
+    pointVector.applyQuaternion(quaternion);
+
+    // 绕 Y 轴旋转
+    quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), ry);
+    pointVector.applyQuaternion(quaternion);
+
+    // 绕 X 轴旋转
+    quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), rx);
+    pointVector.applyQuaternion(quaternion);
+
+    // 将旋转后的点向量加回中心点向量，恢复其世界坐标
+    pointVector.add(centerVector);
+
+    // 返回旋转后的点坐标
+    return pointVector;
+}
+
+
 
   function init() {
    // Scene setup
@@ -112,10 +137,13 @@
    // 添加地面
    var planeGeometry = new THREE.PlaneGeometry(10000, 10000);
    var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa });
-   var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane = new THREE.Mesh(planeGeometry, planeMaterial);
    plane.rotation.x = -Math.PI / 2; // 将平面旋转为水平
    plane.position.y = -1; // 调整地面位置
    scene.add(plane);
+
+     axesHelper = new THREE.AxesHelper(5);
+   scene.add(axesHelper);
 
    camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
    camera.position.z = 100;
@@ -124,10 +152,10 @@
    container.appendChild(renderer.domElement);
 
    labelRenderer = new CSS2DRenderer();
-  labelRenderer.setSize(container.offsetWidth, container.offsetHeight);
-  labelRenderer.domElement.style.position = "absolute";
-  labelRenderer.domElement.style.top = "0px";
-    container.appendChild(labelRenderer.domElement);
+   labelRenderer.setSize(container.offsetWidth, container.offsetHeight);
+   labelRenderer.domElement.style.position = "absolute";
+   labelRenderer.domElement.style.top = "0px";
+   container.appendChild(labelRenderer.domElement);
    // Lighting
    const light = new THREE.DirectionalLight(0xffffff, 1);
    light.position.set(1, 1, 1).normalize();
@@ -186,6 +214,7 @@
         stlModels.push(stlModel);
         stlName.push(tmp[i].name);
         stlPosition.push(tmp[i].position);
+        stlObjType.push(tmp[i].obj_type);
         if (tmp[i].center) {
          stlCenter.push(tmp[i].center);
          stlModel.rotation.set(
@@ -221,6 +250,7 @@
        stlModels.push(pointLight);
        stlName.push(tmp[i].name);
        stlPosition.push(tmp[i].position);
+       stlObjType.push(tmp[i].obj_type);
 
        if (tmp[i].center) {
 
@@ -242,6 +272,7 @@
        stlModels.push(bulb);
        stlName.push(tmp[i].name);
        stlPosition.push(tmp[i].position);
+       stlObjType.push(tmp[i].obj_type);
        if (tmp[i].center) {
 
         stlCenter.push(tmp[i].center);
@@ -330,6 +361,7 @@
 
    // Input listeners for transformations
    document.getElementById('stlIndex').addEventListener('input', queryModelTransform);
+   document.getElementById('stlObjType').addEventListener('input', updateModelTransform);
    document.getElementById('positionX').addEventListener('input', updateModelTransform);
    document.getElementById('positionY').addEventListener('input', updateModelTransform);
    document.getElementById('positionZ').addEventListener('input', updateModelTransform);
@@ -347,12 +379,155 @@
    document.getElementById('rotationZ').addEventListener('input', updateModelTransform);
    document.getElementById('color').addEventListener('input', updateModelTransform);
 
+
+   document.getElementById('A1').addEventListener('input', rotateBridge);
+   document.getElementById('A2').addEventListener('input', rotateBridge);
+   document.getElementById('A3').addEventListener('input', rotateBridge);
+   document.getElementById('B1').addEventListener('input', rotateBridge);
+   document.getElementById('B2').addEventListener('input', rotateBridge);
+   document.getElementById('B3').addEventListener('input', rotateBridge);
+
    animate();
   }
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  function onMouseMove(event) {
+   // 计算鼠标在屏幕上的位置
+   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+   // 通过 Raycaster 确定鼠标在三维空间中的位置
+   raycaster.setFromCamera(mouse, camera);
+   
+    // 计算射线与平面的交点
+    const intersects = raycaster.intersectObject(plane);
+
+    if (intersects.length > 0) {
+        const intersect = intersects[0];
+        console.log("交点位置：", intersect.point);
+        // 如果需要，可以在交点位置放置一个标记
+        axesHelper.position.copy(intersect.point);
+    }
+  }
+
+  window.addEventListener('mousemove', onMouseMove, false);
+
+  function rotateBridge() {
+
+   var tmp = JSON.parse(document.getElementById('json').value);
+   const A1 = parseFloat(document.getElementById('A1').value);
+   const A2 = parseFloat(document.getElementById('A2').value);
+   const A3 = parseFloat(document.getElementById('A3').value);
+
+   const B1 = parseFloat(document.getElementById('B1').value);
+   const B2 = parseFloat(document.getElementById('B2').value);
+   const B3 = parseFloat(document.getElementById('B3').value);
+
+   var idxA1 = tmp.findIndex(x => x.obj_type == 'A1');
+   var idxA2 = tmp.findIndex(x => x.obj_type == 'A2');
+   var idxA3 = tmp.findIndex(x => x.obj_type == 'A3');
+
+   var idxB1 = tmp.findIndex(x => x.obj_type == 'B1');
+   var idxB2 = tmp.findIndex(x => x.obj_type == 'B2');
+   var idxB3 = tmp.findIndex(x => x.obj_type == 'B3');
+
+
+
+   var centerA1 =  tmp[idxA1].center;
+   var centerA2 =  tmp[idxA2].center;
+   var centerA3 = tmp[idxA3].center;
+   var rotateA1 = tmp[idxA1].rotation;
+   var rotateA2 = tmp[idxA2].rotation;
+   var rotateA3 = tmp[idxA3].rotation;
+   var posA1 = tmp[idxA1].position;
+   var posA2 = tmp[idxA2].position;
+   var posA3 = tmp[idxA3].position;
+
+   // A1角度 pos依據center旋轉 設rotate後要重算positioin
+   stlModels[idxA1].rotation.set(rotateA1._x, A1 / 180 * Math.PI, rotateA1._z);
+   var newPosA1 = rotatePoint(posA1.x, posA1.y, posA1.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI);
+   stlModels[idxA1].position.set(newPosA1.x, newPosA1.y, newPosA1.z);
+   
+
+   var newPosA2 =  rotatePoint(posA2.x, posA2.y, posA2.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI);
+   var newCenterA2 =  rotatePoint(centerA2.x, centerA2.y, centerA2.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI);
+   
+   var newPosA3 =  rotatePoint(posA3.x, posA3.y, posA3.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI);
+   var newCenterA3 =  rotatePoint(centerA3.x, centerA3.y, centerA3.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI);
+   
+
+   stlModels[idxA2].position.set(newPosA2.x, newPosA2.y, newPosA2.z);
+   stlModels[idxA2].rotation.set(rotateA2._x, (A1 + A2) / 180 * Math.PI, rotateA2._z);
+   newPosA2 =  rotatePoint(newPosA2.x, newPosA2.y, newPosA2.z, newCenterA2.x, newCenterA2.y, newCenterA2.z, rotateA1._x * 180 / Math.PI, A2, rotateA1._z * 180 / Math.PI);
+  
+   stlModels[idxA2].position.set(newPosA2.x, newPosA2.y, newPosA2.z);
+
+   
+   stlModels[idxA3].position.set(newPosA3.x, newPosA3.y, newPosA3.z);
+   stlModels[idxA3].rotation.set(rotateA3._x, (A1 + A2) / 180 * Math.PI, rotateA3._z);
+   newPosA3 =  rotatePoint(newPosA3.x, newPosA3.y, newPosA3.z, newCenterA2.x, newCenterA2.y, newCenterA2.z, rotateA2._x * 180 / Math.PI, A2, rotateA2._z * 180 / Math.PI);
+   newCenterA3 =  rotatePoint(newCenterA3.x, newCenterA3.y, newCenterA3.z, newCenterA2.x, newCenterA2.y, newCenterA2.z, rotateA2._x * 180 / Math.PI, A2, rotateA2._z * 180 / Math.PI);
+   
+   newPosA3 =  rotatePoint(newPosA3.x, newPosA3.y, newPosA3.z, newCenterA3.x, newCenterA3.y, newCenterA3.z, rotateA3._x * 180 / Math.PI, A3, rotateA3._z * 180 / Math.PI);
+  
+   stlModels[idxA3].position.set(newPosA3.x, newPosA3.y, newPosA3.z);
+   stlModels[idxA3].rotation.set(rotateA3._x, (A1 + A2 + A3) / 180 * Math.PI, rotateA3._z);
+
+
+
+   
+
+   var centerB1 =  tmp[idxB1].center;
+   var centerB2 =  tmp[idxB2].center;
+   var centerB3 = tmp[idxB3].center;
+   var rotateB1 = tmp[idxB1].rotation;
+   var rotateB2 = tmp[idxB2].rotation;
+   var rotateB3 = tmp[idxB3].rotation;
+   var posB1 = tmp[idxB1].position;
+   var posB2 = tmp[idxB2].position;
+   var posB3 = tmp[idxB3].position;
+
+   // B1角度 pos依據center旋轉 設rotate後要重算positioin
+   stlModels[idxB1].rotation.set(rotateB1._x, B1 / 180 * Math.PI, rotateB1._z);
+   var newPosB1 = rotatePoint(posB1.x, posB1.y, posB1.z, centerB1.x, centerB1.y, centerB1.z, rotateB1._x * 180 / Math.PI, B1, rotateB1._z * 180 / Math.PI);
+   stlModels[idxB1].position.set(newPosB1.x, newPosB1.y, newPosB1.z);
+   
+
+   var newPosB2 =  rotatePoint(posB2.x, posB2.y, posB2.z, centerB1.x, centerB1.y, centerB1.z, rotateB1._x * 180 / Math.PI, B1, rotateB1._z * 180 / Math.PI);
+   var newCenterB2 =  rotatePoint(centerB2.x, centerB2.y, centerB2.z, centerB1.x, centerB1.y, centerB1.z, rotateB1._x * 180 / Math.PI, B1, rotateB1._z * 180 / Math.PI);
+   
+   var newPosB3 =  rotatePoint(posB3.x, posB3.y, posB3.z, centerB1.x, centerB1.y, centerB1.z, rotateB1._x * 180 / Math.PI, B1, rotateB1._z * 180 / Math.PI);
+   var newCenterB3 =  rotatePoint(centerB3.x, centerB3.y, centerB3.z, centerB1.x, centerB1.y, centerB1.z, rotateB1._x * 180 / Math.PI, B1, rotateB1._z * 180 / Math.PI);
+   
+
+   stlModels[idxB2].position.set(newPosB2.x, newPosB2.y, newPosB2.z);
+   stlModels[idxB2].rotation.set(rotateB2._x, (B1 + B2) / 180 * Math.PI, rotateB2._z);
+   newPosB2 =  rotatePoint(newPosB2.x, newPosB2.y, newPosB2.z, newCenterB2.x, newCenterB2.y, newCenterB2.z, rotateB1._x * 180 / Math.PI, B2, rotateB1._z * 180 / Math.PI);
+  
+   stlModels[idxB2].position.set(newPosB2.x, newPosB2.y, newPosB2.z);
+
+   
+   stlModels[idxB3].position.set(newPosB3.x, newPosB3.y, newPosB3.z);
+   stlModels[idxB3].rotation.set(rotateB3._x, (B1 + B2) / 180 * Math.PI, rotateB3._z);
+   newPosB3 =  rotatePoint(newPosB3.x, newPosB3.y, newPosB3.z, newCenterB2.x, newCenterB2.y, newCenterB2.z, rotateB2._x * 180 / Math.PI, B2, rotateB2._z * 180 / Math.PI);
+   newCenterB3 =  rotatePoint(newCenterB3.x, newCenterB3.y, newCenterB3.z, newCenterB2.x, newCenterB2.y, newCenterB2.z, rotateB2._x * 180 / Math.PI, B2, rotateB2._z * 180 / Math.PI);
+   
+   newPosB3 =  rotatePoint(newPosB3.x, newPosB3.y, newPosB3.z, newCenterB3.x, newCenterB3.y, newCenterB3.z, rotateB3._x * 180 / Math.PI, B3, rotateB3._z * 180 / Math.PI);
+  
+   stlModels[idxB3].position.set(newPosB3.x, newPosB3.y, newPosB3.z);
+   stlModels[idxB3].rotation.set(rotateB3._x, (B1 + B2 + B3) / 180 * Math.PI, rotateB3._z);
+
+
+
+    }
+
+
 
   function queryModelTransform() {
    const sIndex = parseInt(document.getElementById('stlIndex').value);
    document.getElementById('stlName').value = stlName[sIndex];
+   document.getElementById('stlObjType').value = stlObjType[sIndex];
    document.getElementById('positionX').value = stlPosition[sIndex].x;
    document.getElementById('positionY').value = stlPosition[sIndex].y;
    document.getElementById('positionZ').value = stlPosition[sIndex].z;
@@ -385,6 +560,7 @@
     tmp.push({
      index: i,
      name: stlName[i],
+     obj_type: stlObjType[i],
      position: stlPosition[i],
      scale: stlModels[i].scale,
      rotation: stlModels[i].rotation,
@@ -437,6 +613,7 @@
      stlModels[sIndex].position.set(posX, posY, posZ);
     }
 
+    stlObjType[sIndex] = document.getElementById('stlObjType').value
 
     if (stlModels[sIndex].type == "PointLight")
      stlModels[sIndex].color.set(document.getElementById('color').value); // 将颜色改为红色
@@ -459,7 +636,9 @@
 
     tmp.push({
      index: i,
-     name: stlName[i], position: stlPosition[i],
+     name: stlName[i],
+     obj_type: stlObjType[i],
+     position: stlPosition[i],
      scale: stlModels[i].scale,
      rotation: stlModels[i].rotation,
      color: (stlModels[i].type == "PointLight") ? '#' + stlModels[i].color.getHexString() : '#' + stlModels[i].material.color.getHexString(),
@@ -473,7 +652,7 @@
    requestAnimationFrame(animate);
    controls.update(); // 只有当 enableDamping 或 autoRotate 被设置时才需要
    renderer.render(scene, camera);
-  labelRenderer.render(scene, camera);
+   labelRenderer.render(scene, camera);
   }
 
   init();
