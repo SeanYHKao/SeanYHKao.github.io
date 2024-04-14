@@ -193,7 +193,7 @@
           tmp[i].rotation._y,
           tmp[i].rotation._z
          );
-         var newPos = rotatePoint(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z, tmp[i].center.x, tmp[i].center.y, tmp[i].center.z, tmp[i].rotation._x, tmp[i].rotation._y, tmp[i].rotation._z)
+         var newPos = rotatePoint(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z, tmp[i].center.x, tmp[i].center.y, tmp[i].center.z, tmp[i].rotation._x * 180 / Math.PI, tmp[i].rotation._y * 180 / Math.PI, tmp[i].rotation._z * 180 / Math.PI)
 
          // 在这个闭包内，i和tmp[i]是被正确捕获的
          stlModel.position.set(newPos.x, newPos.y, newPos.z);

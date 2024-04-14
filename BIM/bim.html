@@ -36,8 +36,8 @@
   ];
 
   let camera, scene, renderer, labelRenderer, controls;
-  
-  var camPosX, camPosY, camPosZ, camRotX, camRotY ,camRotZ, controlTargetX , controlTargetY , controlTargetZ ;
+
+  var camPosX, camPosY, camPosZ, camRotX, camRotY, camRotZ, controlTargetX, controlTargetY, controlTargetZ;
 
   var bridge1 = [];
   var bridge2 = [];
@@ -57,15 +57,13 @@
   var C = { "position": { "x": 369.3854947438097, "y": 454.35932352314717, "z": -209.20262692816544 }, "rotation": { "_x": -1.5707953267595884, "_y": 4.275900921096171e-9, "_z": 0.0042757238964344635, "_order": "XYZ" }, "quaternion": { "_x": -0.7071048117193711, "_y": 0.0015116962851839959, "_z": 0.0015116947734212728, "_w": 0.7071055188559668 }, "fov": 75, "aspect": 1.3333333333333333, "near": 0.1, "far": 5000, "zoom": 1, "target": { "x": 369.38549280101427, "y": -2.2019625328676434e-15, "z": -209.2030813035315 }, "object_zoom": 1 };
 
   //空橋1
-  var bridgeData1 = [{ "index": 0, "name": "light", "position": { "x": 20, "y": 20, "z": 20 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#005eee", "center": null }, { "index": 1, "name": "sphere", "position": { "x": 15.8, "y": 7, "z": 22 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#005eee", "center": null }, { "index": 2, "name": "Group_29.stl", "position": { "x": 3.5, "y": 2.5, "z": 43 }, "scale": { "x": 10, "y": 1.5, "z": 1 }, "rotation": { "_x": 0, "_y": 2.2689280275926285, "_z": 0, "_order": "XYZ" }, "color": "#555555", "center": null }, { "index": 3, "name": "T.stl", "position": { "x": 0, "y": 3, "z": -4 }, "scale": { "x": 0.3, "y": 0.2, "z": 0.35 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ee0000", "center": null }, { "index": 4, "name": "a380.stl", "position": { "x": 30, "y": -1, "z": 40 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#005500", "center": null }, { "index": 5, "name": "JetBridge.stl", "position": { "x": 8.5, "y": 2.5, "z": 5 }, "scale": { "x": 1, "y": 0.9, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0.4363323129985824, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 10, "y": 4, "z": 10 } }, { "index": 6, "name": "JetBridge.stl", "position": { "x": 14, "y": 2, "z": 17 }, "scale": { "x": 1, "y": 0.4, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 1.2217304763960306, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 15.8, "y": 4, "z": 22 } }, { "index": 7, "name": "BuildingwithStair1.stl", "position": { "x": 0, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee", "center": null }, { "index": 8, "name": "BuildingwithStair1.stl", "position": { "x": 70, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee", "center": null }, { "index": 9, "name": "BuildingwithStair1.stl", "position": { "x": 35, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee", "center": null }, { "index": 10, "name": "label", "position": { "x": 35, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee", "center": null }]
-
-   ;
+  var bridgeData1 = [{"index":0,"name":"Group_29.stl","position":{"x":1,"y":3,"z":38.5},"scale":{"x":25,"y":1.5,"z":1.5},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":-1.5707963267948966,"_order":"XYZ"},"color":"#eeeeee","center":{"x":2,"y":5,"z":41}},{"index":1,"name":"Group_29.stl","position":{"x":40,"y":3,"z":6},"scale":{"x":30,"y":2,"z":2},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#eeeeee","center":{"x":41,"y":5,"z":9}},{"index":2,"name":"T.stl","position":{"x":0,"y":3,"z":-3},"scale":{"x":0.3,"y":0.2,"z":0.35},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#ee0000","center":{"x":0,"y":0,"z":0}},{"index":3,"name":"JetBridge.stl","position":{"x":7,"y":3,"z":3},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":1.5707963267948966,"_order":"XYZ"},"color":"#eeeeee","center":{"x":9,"y":5,"z":9}},{"index":4,"name":"JetBridge.stl","position":{"x":23,"y":2,"z":3},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":1.5707963267948966,"_order":"XYZ"},"color":"#eeeeee","center":{"x":24,"y":5,"z":9.5}},{"index":5,"name":"JetBridge.stl","position":{"x":0,"y":4,"z":5},"scale":{"x":1,"y":0.9,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#eeeeee","center":{"x":2,"y":5,"z":11}},{"index":6,"name":"JetBridge.stl","position":{"x":0,"y":3,"z":19},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#eeeeee","center":{"x":2,"y":5,"z":25}},{"index":7,"name":"BuildingwithStair1.stl","position":{"x":0,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#999999","center":null},{"index":8,"name":"BuildingwithStair1.stl","position":{"x":70,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#999999","center":null},{"index":9,"name":"BuildingwithStair1.stl","position":{"x":35,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#999999","center":null}, { "index": 10, "name": "label", "position": { "x": 35, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee", "center": null }];
 
   //空橋2
-  var bridgeData2 = [{ "index": 0, "name": "T.stl", "position": { "x": 75, "y": 2, "z": -25 }, "scale": { "x": 0.5, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 3.141592653589793, "_z": 0, "_order": "XYZ" }, "color": "#ee0000" }, { "index": 1, "name": "Group_29.stl", "position": { "x": 66.5, "y": 4.5, "z": -68 }, "scale": { "x": 10, "y": 1.5, "z": 1 }, "rotation": { "_x": 0, "_y": 2.2689280275926285, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#555555" }, { "index": 2, "name": "JetBridge.stl", "position": { "x": 72, "y": -2, "z": -50 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#eeeeee" }, { "index": 3, "name": "JetBridge.stl", "position": { "x": 60, "y": -2, "z": -50 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#eeeeee" }, { "index": 4, "name": "a380.stl", "position": { "x": 50, "y": 0, "z": -80 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#005500" }, { "index": 5, "name": "BuildingwithStair1.stl", "position": { "x": 0, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#00eeee" }, { "index": 6, "name": "BuildingwithStair1.stl", "position": { "x": 70, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#00eeee" }, { "index": 7, "name": "BuildingwithStair1.stl", "position": { "x": 35, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#00eeee" }, { "index": 10, "name": "label", "position": { "x": 35, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee", "center": null }];
+  var bridgeData2 = [{"index":0,"name":"sphere","position":{"x":69.5,"y":7,"z":-69},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#005eee","center":{"x":0,"y":0,"z":0}},{"index":1,"name":"Group_29.stl","position":{"x":22,"y":3,"z":-42},"scale":{"x":25,"y":2,"z":2},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#eeeeee","center":{"x":31,"y":5,"z":-39}},{"index":2,"name":"Group_29.stl","position":{"x":58,"y":4,"z":-74},"scale":{"x":30,"y":2,"z":2},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":-1.5707963267948966,"_order":"XYZ"},"color":"#eeeeee","center":{"x":68.5,"y":5,"z":-71}},{"index":3,"name":"T.stl","position":{"x":71,"y":3,"z":-26},"scale":{"x":0.3,"y":0.2,"z":0.35},"rotation":{"_x":0,"_y":3.141592653589793,"_z":0,"_order":"XYZ"},"color":"#ee0000"},{"index":4,"name":"JetBridge.stl","position":{"x":60,"y":3.5,"z":-45},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":4.71238898038469,"_order":"XYZ"},"color":"#eeeeee","center":{"x":62,"y":5,"z":-39}},{"index":5,"name":"JetBridge.stl","position":{"x":46,"y":4,"z":-45},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":4.71238898038469,"_order":"XYZ"},"color":"#eeeeee","center":{"x":47.5,"y":5,"z":-39}},{"index":6,"name":"JetBridge.stl","position":{"x":67.5,"y":3.5,"z":-47},"scale":{"x":1,"y":0.9,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#eeeeee","center":{"x":69,"y":5,"z":-41}},{"index":7,"name":"JetBridge.stl","position":{"x":67,"y":3,"z":-60},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#eeeeee","center":{"x":69,"y":5,"z":-54}},{"index":8,"name":"BuildingwithStair1.stl","position":{"x":0,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#999999","center":null},{"index":9,"name":"BuildingwithStair1.stl","position":{"x":70,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#999999","center":null},{"index":10,"name":"BuildingwithStair1.stl","position":{"x":35,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":3.141592653589793,"_order":"XYZ"},"color":"#999999","center":null}, { "index": 10, "name": "label", "position": { "x": 35, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee", "center": null }];
 
   //空橋3
-  var bridgeData3 = [{ "index": 0, "name": "JetBridge.stl", "position": { "x": 0, "y": -2, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 1.5707963267948966, "_order": "XYZ" }, "color": "#eeeeee" }, { "index": 1, "name": "JetBridge.stl", "position": { "x": 15, "y": -2, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 1.5707963267948966, "_order": "XYZ" }, "color": "#eeeeee" }, { "index": 2, "name": "a380.stl", "position": { "x": -25, "y": 0, "z": 5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 1.5707963267948966, "_order": "XYZ" }, "color": "#005500" }, { "index": 10, "name": "label", "position": { "x": 35, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee", "center": null }];
+  var bridgeData3 = [{"index":0,"name":"Group_29.stl","position":{"x":-53,"y":4,"z":-54},"scale":{"x":30,"y":2,"z":2},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":0,"_order":"XYZ"},"color":"#eeeeee","center":{"x":-42,"y":5,"z":-51}},{"index":1,"name":"JetBridge.stl","position":{"x":-17,"y":3,"z":-54},"scale":{"x":1,"y":0.9,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":-1.5707963267948966,"_order":"XYZ"},"color":"#eeeeee","center":{"x":-12,"y":5,"z":-48}},{"index":2,"name":"JetBridge.stl","position":{"x":-29,"y":4,"z":-57},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":-1.5707963267948966,"_order":"XYZ"},"color":"#eeeeee","center":{"x":-27,"y":5,"z":-51}},{"index":3,"name":"BuildingwithStair1.stl","position":{"x":0,"y":0,"z":-15},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":-1.5707963267948966,"_order":"XYZ"},"color":"#999999","center":null},{"index":4,"name":"BuildingwithStair1.stl","position":{"x":0,"y":0,"z":-50},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":-1.5707963267948966,"_y":0,"_z":-1.5707963267948966,"_order":"XYZ"},"color":"#999999","center":null}, { "index": 10, "name": "label", "position": { "x": 35, "y": 0, "z": -15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 3.141592653589793, "_order": "XYZ" }, "color": "#00eeee", "center": null }];
 
   //主建築
   var mainBuilding = [{ "index": 0, "name": "Concept.stl", "position": { "x": 70, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }, { "index": 1, "name": "Concept.stl", "position": { "x": 170, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }, { "index": 2, "name": "Concept.stl", "position": { "x": 270, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }, { "index": 3, "name": "Concept.stl", "position": { "x": 370, "y": 0, "z": -70 }, "scale": { "x": 50, "y": 200, "z": 65 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555" }];
@@ -120,7 +118,7 @@
 
    // 更新控制器和相机
    controls.update();
-   
+
    let sumX = 0, sumY = 0, sumZ = 0;
    let count = 0;
 
@@ -203,6 +201,30 @@
   }
 
 
+  function clearPlane(no) {
+   var i1 = bridge_code1.findIndex(x => x == no);
+   var i2 = bridge_code2.findIndex(x => x == no);
+   var i3 = bridge_code3.findIndex(x => x == no);
+   if (i1 > -1) {
+    var p1 = bridge1.findIndex(x => x.obj_type == 'plane');
+    scene.remove(bridge1[p1]);
+    bridge1.remove(p1);
+    bridge_planeModel1[p1] = '';
+   }
+   else if (i2 > -1) {
+    var p2 = bridge2.findIndex(x => x.obj_type == 'plane');
+    scene.remove(bridge2[p2]);
+    bridge2.remove(p2);
+    bridge_planeModel2[p2] = '';
+   }
+   else if (i3 > -1) {
+    var p3 = bridge3.findIndex(x => x.obj_type == 'plane');
+    scene.remove(bridge3[p3]);
+    bridge3.remove(p3);
+    bridge_planeModel3[p3] = '';
+   }
+  }
+
 
   function addModel(_objCollect, labelData, item, c, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0) {
    const loader = new STLLoader();
@@ -221,7 +243,7 @@
      );
      var newPos = rotatePoint(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement,
       item.center.x, item.center.y, item.center.z,
-      item.rotation._x, item.rotation._y, item.rotation._z)
+      item.rotation._x * 180 / Math.PI, item.rotation._y * 180 / Math.PI, item.rotation._z * 180 / Math.PI)
 
      stlModel.position.set(newPos.x, newPos.y, newPos.z);
     }
@@ -261,12 +283,12 @@
          item.rotation._y,
          item.rotation._z
         );
-        var newPos = rotatePoint(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement,
+        var newPos = rotatePoint(item.position.x , item.position.y, item.position.z,
          item.center.x, item.center.y, item.center.z,
-         item.rotation._x, item.rotation._y, item.rotation._z)
+         item.rotation._x * 180 / Math.PI, item.rotation._y * 180 / Math.PI, item.rotation._z * 180 / Math.PI)
 
         // 在这个闭包内，i和item是被正确捕获的
-        stlModel.position.set(newPos.x, newPos.y, newPos.z);
+        stlModel.position.set(newPos.x+ c * xIncrement, newPos.y, newPos.z - zOffset - c * zIncrement);
        }
        else {
 
@@ -403,7 +425,7 @@
    // 呼叫 loadModels 函數來加載和顯示所有模型
    loadModels(bridge1, bridge_code1, bridgeData1, 0, 98);
    loadModels(bridge2, bridge_code2, bridgeData2, 0, 98, 405);
-   loadModels(bridge3, bridge_code3, bridgeData3, 50, 0, 80, 70);
+   loadModels(bridge3, bridge_code3, bridgeData3, 0, 0, 45, 70);
    loadModels([[]], null, mainBuilding);
 
 
@@ -458,13 +480,13 @@
    var camRotation = cameraFolder.addFolder('Rotation');
 
    // 添加位置和旋转的控制
-    camPosX = camPosition.add(camera.position, 'x', -500, 500);
-    camPosY = camPosition.add(camera.position, 'y', -500, 500);
-    camPosZ = camPosition.add(camera.position, 'z', -500, 500);
+   camPosX = camPosition.add(camera.position, 'x', -500, 500);
+   camPosY = camPosition.add(camera.position, 'y', -500, 500);
+   camPosZ = camPosition.add(camera.position, 'z', -500, 500);
 
-    camRotX = camRotation.add(camera.rotation, 'x', -Math.PI, Math.PI);
-    camRotY = camRotation.add(camera.rotation, 'y', -Math.PI, Math.PI);
-    camRotZ = camRotation.add(camera.rotation, 'z', -Math.PI, Math.PI);
+   camRotX = camRotation.add(camera.rotation, 'x', -Math.PI, Math.PI);
+   camRotY = camRotation.add(camera.rotation, 'y', -Math.PI, Math.PI);
+   camRotZ = camRotation.add(camera.rotation, 'z', -Math.PI, Math.PI);
 
    cameraFolder.open();
    camPosition.open();
@@ -472,9 +494,9 @@
 
    // 添加OrbitControls的目标点控制
    var controlsFolder = gui.addFolder('OrbitControls Target');
-    controlTargetX = controlsFolder.add(controls.target, 'x', -1000, 1000);
-    controlTargetY = controlsFolder.add(controls.target, 'y', -1000, 1000);
-    controlTargetZ = controlsFolder.add(controls.target, 'z', -1000, 1000);
+   controlTargetX = controlsFolder.add(controls.target, 'x', -1000, 1000);
+   controlTargetY = controlsFolder.add(controls.target, 'y', -1000, 1000);
+   controlTargetZ = controlsFolder.add(controls.target, 'z', -1000, 1000);
    controlsFolder.open();
    gui.add({ resetCameraAndControls }, 'resetCameraAndControls').name('Reset Camera');
    gui.add(labelInfo, 'selectedLabel').name('Selected Label');
