@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>bimModel</title>
+  <script src="dat.gui.min.js"></script>
+  <style>
+    /* 设置 GUI 容器的样式 */
+    .dg.main {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+    }
+
+    .label {
+      z-index: 1000 !important;
+      /* 确保层级足够高 */
+    }
+  </style>
+</head>
+
+<body>
+  <div id="bimModel" style="width: 80vw; height: 80vh; position: relative;"></div>
+  <script type="module">
+    var container = document.getElementById('bimModel');
+    import * as THREE from './three.js';
+    import { OrbitControls } from './OrbitControls.js';
+
+    import { OBJLoader } from './OBJLoader.js';
+    import { STLLoader } from './STLLoader.js';
+    import { CSS2DRenderer, CSS2DObject } from './CSS2DRenderer.js';
+
+    //參數區
+
+    let camera, scene, renderer, labelRenderer, controls, raycaster, mouse, light;
+
+    let camPosX, camPosY, camPosZ, camRotX, camRotY, camRotZ, controlTargetX, controlTargetY, controlTargetZ;
+
+
+    var colors = {};
+    //滑鼠事件
+    let labelInfo = { gateClick: 'None', gateDblClick: 'None', gateMouseover: 'None', modelClick: 'None' };
+
+    //操控面板
+    let gui = new dat.GUI();
+
+    //camera 設定
+    let C = { "position": { "x": -97.08197306941595, "y": 84.8121893288692, "z": -14.119854285811542 }, "rotation": { "_x": -2.533768298213951, "_y": -0.9795455596112768, "_z": -2.6178150761361985, "_order": "XYZ" }, "zoom": 1, "quaternion": { "_x": -0.08202120969628814, "_y": -0.849738313549651, "_z": -0.1388564570576895, "_w": 0.501932469540613 }, "fov": 75, "aspect": 1.193220338983051, "near": 0.1, "far": 5000, "target": { "x": 124.12463636240228, "y": -1.3039239359690554e-15, "z": 107.79185311878362 } };
+
+    //空橋1
+    let bridgeData = [{ "index": 0, "name": "sphere", "obj_type": "undefined", "position": { "x": 2, "y": 8, "z": 11 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 1, "name": "sphere", "obj_type": "A", "position": { "x": 0, "y": 6, "z": -3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 2, "name": "sphere", "obj_type": "B", "position": { "x": 1, "y": 3, "z": -2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 3, "name": "sphere", "obj_type": "C", "position": { "x": 0, "y": 4, "z": -2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff55ee", "center": null }, { "index": 4, "name": "sphere", "obj_type": "D", "position": { "x": 1, "y": 7, "z": 2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 5, "name": "sphere", "obj_type": "E", "position": { "x": 3, "y": 8.5, "z": 10 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 6, "name": "sphere", "obj_type": "F", "position": { "x": 0, "y": 3, "z": 10 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 7, "name": "sphere", "obj_type": "G", "position": { "x": 2, "y": 0, "z": 9 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 8, "name": "sphere", "obj_type": "H", "position": { "x": -1.5, "y": 6, "z": 13 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 9, "name": "sphere", "obj_type": "I", "position": { "x": -1, "y": 6, "z": 15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 10, "name": "sphere", "obj_type": "J", "position": { "x": 0, "y": 5, "z": 15 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 11, "name": "sphere", "obj_type": "K", "position": { "x": 0, "y": 0, "z": 8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 12, "name": "sphere", "obj_type": "L", "position": { "x": -1, "y": 8, "z": 14 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 13, "name": "sphere", "obj_type": "M", "position": { "x": 0, "y": 6, "z": 3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 14, "name": "sphere", "obj_type": "N", "position": { "x": 1.5, "y": 8, "z": 6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 15, "name": "sphere", "obj_type": "O", "position": { "x": 0, "y": 6, "z": 6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 16, "name": "sphere", "obj_type": "P", "position": { "x": 0, "y": 4, "z": 1.43 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 17, "name": "sphere", "obj_type": "Q", "position": { "x": 0, "y": 4, "z": 5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 18, "name": "sphere", "obj_type": "R", "position": { "x": 1, "y": 8, "z": 13 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 19, "name": "sphere", "obj_type": "S", "position": { "x": 0, "y": 5, "z": 9 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 20, "name": "sphere", "obj_type": "T", "position": { "x": 0, "y": 6, "z": 10 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#0055ee", "center": null }, { "index": 21, "name": "JetBridge.stl", "obj_type": "undefined", "position": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 0, "y": 0, "z": 0 } }];
+
+
+    let _objCollect = [];
+
+
+    //Method區
+
+    function rotatePoint(px, py, pz, cx, cy, cz, rx, ry, rz) {
+      // 将角度从度转换为弧度
+      rx = rx * Math.PI / 180;
+      ry = ry * Math.PI / 180;
+      rz = rz * Math.PI / 180;
+
+      // 创建点的三维向量
+      let pointVector = new THREE.Vector3(px, py, pz);
+
+      // 创建中心点的三维向量
+      let centerVector = new THREE.Vector3(cx, cy, cz);
+
+      // 计算相对于中心点的向量
+      pointVector.sub(centerVector);
+
+      // 创建一个空的四元数用于旋转
+      let quaternion = new THREE.Quaternion();
+
+      // 绕 Z 轴旋转
+      quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), rz);
+      pointVector.applyQuaternion(quaternion);
+
+      // 绕 Y 轴旋转
+      quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), ry);
+      pointVector.applyQuaternion(quaternion);
+
+      // 绕 X 轴旋转
+      quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), rx);
+      pointVector.applyQuaternion(quaternion);
+
+      // 将旋转后的点向量加回中心点向量，恢复其世界坐标
+      pointVector.add(centerVector);
+
+      // 返回旋转后的点坐标
+      return pointVector;
+    }
+
+    //重設
+    function resetCameraAndControls() {
+      // 设置相机的默认位置和旋转
+      camera.position.set(C.position.x, C.position.y, C.position.z); // 初始位置
+      camera.rotation.set(C.rotation._x, C.rotation._y, C.rotation._z); // 初始旋转
+
+      // 设置控制器的目标点
+      controls.target.set(C.target.x, C.target.y, C.target.z);
+
+      // 更新控制器和相机
+      controls.update();
+
+      let sumX = 0, sumY = 0, sumZ = 0;
+      let count = 0;
+
+      // 计算所有对象的坐标平均值
+      scene.traverse(function (object) {
+        if (object.isMesh) {
+          sumX += object.position.x;
+          sumY += object.position.y;
+          sumZ += object.position.z;
+          count++;
+        }
+      });
+
+      const centerX = sumX / count;
+      const centerY = sumY / count;
+      const centerZ = sumZ / count;
+
+      // 设置摄像机看向新的中心点
+      camera.lookAt(centerX, centerY, centerZ);
+      camera.updateProjectionMatrix();
+
+      // 同步更新 GUI 显示
+      camPosX.setValue(camera.position.x);
+      camPosY.setValue(camera.position.y);
+      camPosZ.setValue(camera.position.z);
+      camRotX.setValue(camera.rotation.x);
+      camRotY.setValue(camera.rotation.y);
+      camRotZ.setValue(camera.rotation.z);
+      controlTargetX.setValue(controls.target.x);
+      controlTargetY.setValue(controls.target.y);
+      controlTargetZ.setValue(controls.target.z);
+    }
+
+    //載入模型
+    function loadModels(tmpData) {
+      tmpData.forEach((item, i) => {
+        if (item.name.indexOf('.stl') > -1) {
+          const loader = new STLLoader();
+          loader.load(item.name, function (geometry) {
+            var material = new THREE.MeshPhongMaterial({ color: item.color });
+            var stlModel = new THREE.Mesh(geometry, material);
+            stlModel.obj_name = item.name;
+            if (item.obj_type != '') stlModel.obj_type = item.obj_type;
+            scene.add(stlModel);
+
+            // 設置模型位置、縮放和旋轉
+
+            stlModel.rotation.set(
+              item.rotation._x,
+              item.rotation._y,
+              item.rotation._z
+            );
+            // 在这个闭包内，i和item是被正确捕获的
+            stlModel.position.set(item.position.x * 10, item.position.y * 10, item.position.z * 10);
+
+
+            stlModel.scale.set(item.scale.x * 10, item.scale.y * 10, item.scale.z * 10);
+
+            _objCollect.push(stlModel);
+          });
+        }
+        else if (item.name.indexOf('sphere') > -1) {
+          const sphereSize = 1;
+          const bulbGeometry = new THREE.SphereGeometry(sphereSize, 16, 8);
+          const bulbMaterial = new THREE.MeshBasicMaterial({ color: item.color }); // 與光源顏色相同
+          const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
+          bulb.position.set(item.position.x * 10, item.position.y * 10, item.position.z * 10);  // 設置與光源相同的位置
+          bulb.obj_name = item.name;
+          if (item.obj_type != '') bulb.obj_type = item.obj_type;
+          scene.add(bulb);
+          _objCollect.push(bulb);
+
+          const _Div = document.createElement("div");
+          _Div.style.padding = '2px';
+          _Div.style.color = '#fff';
+          _Div.style.fontSize = '10px';
+          _Div.style.position = 'absolute';
+          _Div.style.backgroundColor = 'rgba(25,25,25,0.5)';
+          _Div.style.borderRadius = '5px';
+          _Div.className = "label";
+          _Div.textContent = item.obj_type;
+          _Div.style.marginTop = '2px';
+
+          _Div.addEventListener('mouseover', function () {
+            // 滑鼠移到登機門圖示錨點
+            _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
+            labelInfo.gateMouseover = labelData[c]; // 更新 GUI 显示的标签信息
+            gui.updateDisplay(); // 更新 GUI 显示
+          });
+          _Div.addEventListener('mouseout', function () {
+            _Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
+          });
+          const _Label = new CSS2DObject(_Div);
+          _Label.position.set(item.position.x, item.position.y + 1, item.position.z);
+          bulb.add(_Label);
+
+        }
+
+      });
+
+    }
+
+    function onMouseDown(event) {
+      // 计算鼠标在场景中的位置 
+      mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
+      mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
+
+      // 更新raycaster的射线方向
+      raycaster.setFromCamera(mouse, camera);
+
+      // 计算物体和射线的交点
+      const intersects = raycaster.intersectObjects(scene.children);
+
+      if (intersects.length > 0) {
+        // 如果有物体被选中 
+        if (intersects[0].object.label) {
+          gui.updateDisplay(); // 更新 GUI 显示
+        }
+      }
+    }
+
+    function onMouseDblClick(event) {
+      // 计算鼠标在场景中的位置 
+      mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
+      mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
+
+      // 更新raycaster的射线方向
+      raycaster.setFromCamera(mouse, camera);
+
+      // 计算物体和射线的交点
+      const intersects = raycaster.intersectObjects(scene.children);
+
+      if (intersects.length > 0) {
+        // 如果有物体被选中 
+        if (intersects[0].object.label) {
+          gui.updateDisplay(); // 更新 GUI 显示
+        }
+      }
+    }
+    function onMouseClick(event) {
+      // 计算鼠标在场景中的位置 
+      mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
+      mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
+
+      // 更新raycaster的射线方向
+      raycaster.setFromCamera(mouse, camera);
+
+      // 计算物体和射线的交点
+      const intersects = raycaster.intersectObjects(scene.children);
+
+      if (intersects.length > 0) {
+        // 如果有物体被选中 
+        if (intersects[0].object.label) {
+          gui.updateDisplay(); // 更新 GUI 显示
+        }
+      }
+    }
+
+    function init() {
+      // Scene setup
+      scene = new THREE.Scene();
+      // 添加天空背景
+      scene.background = new THREE.Color('skyblue');
+      // 添加地面
+      var planeGeometry = new THREE.PlaneGeometry(10000, 10000); // 創建一個平面幾何體，寬和長均為10000
+      var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xc0f8b1 }); // 為平面創建材質，設定顏色為淺綠色
+      var plane = new THREE.Mesh(planeGeometry, planeMaterial); // 使用幾何體和材質創建Mesh
+      plane.rotation.x = -Math.PI / 2; // 將平面旋轉為水平，面向上方
+      plane.position.y = -1; // 將地面位置稍微下降，避免與模型重疊
+      scene.add(plane); // 將平面添加到場景中
+
+      // 創建相機
+      camera = new THREE.PerspectiveCamera(C.fov, container.offsetWidth / container.offsetHeight, C.near, C.far); // 使用配置參數創建透視相機
+      camera.position.set(C.position.x, C.position.y, C.position.z); // 設定相機位置
+      camera.rotation.set(C.rotation._x, C.rotation._y, C.rotation._z); // 設定相機旋轉
+      camera.quaternion.set(C.quaternion._x, C.quaternion._y, C.quaternion._z, C.quaternion._w); // 設定相機四元數，用於控制旋轉
+      camera.zoom = C.zoom; // 設定相機的縮放級別
+      camera.updateProjectionMatrix(); // 更新相機的投影矩陣
+
+      // 初始化渲染器
+      renderer = new THREE.WebGLRenderer(); // 創建WebGL渲染器
+      renderer.setSize(container.offsetWidth, container.offsetHeight);
+      container.appendChild(renderer.domElement); // 將渲染器的DOM元素掛載到HTML中的指定元素上
+
+      labelRenderer = new CSS2DRenderer();
+      labelRenderer.setSize(container.offsetWidth, container.offsetHeight);
+      labelRenderer.domElement.style.position = "absolute";
+      labelRenderer.domElement.style.top = "0px";
+      container.appendChild(labelRenderer.domElement);
+      // 添加照明
+      light = new THREE.DirectionalLight(0xffffff, 1); // 創建一個白色的方向光源
+      light.position.set(1, 1, 1).normalize(); // 設定光源的位置並正規化
+      scene.add(light); // 將光源添加到場景中
+
+      // 實例化OrbitControls，允許用戶通過拖動來旋轉視角，滾動來縮放
+      controls = new OrbitControls(camera, labelRenderer.domElement);
+      controls.enableDamping = true; // 啟用阻尼效果，使交互更加平滑
+      controls.dampingFactor = 0.25; // 設定阻尼系數
+      controls.screenSpacePanning = false; // 禁用屏幕空間平移
+      controls.target.set(C.target.x, C.target.y, C.target.z); // 設定控制的目標點
+      controls.update(); // 更新控制器的內部狀態
+
+      // 设置最小极角为0，防止低于地平面
+      // Math.PI / 2 是90度，意味着视线平行于地面，不允许更低
+      controls.minPolarAngle = 0; // 不允许移动到地面以下
+      controls.maxPolarAngle = Math.PI / 2; // 最大旋转角度
+      // Handle STL upload 
+
+      // 呼叫 loadModels 函數來加載和顯示所有模型
+      loadModels(bridgeData);
+
+      let sumX = 0, sumY = 0, sumZ = 0;
+      let count = 0;
+
+      // 计算所有对象的坐标平均值
+      scene.traverse(function (object) {
+        if (object.isMesh) {
+          sumX += object.position.x;
+          sumY += object.position.y;
+          sumZ += object.position.z;
+          count++;
+        }
+      });
+
+      const centerX = sumX / count;
+      const centerY = sumY / count;
+      const centerZ = sumZ / count;
+
+      // 设置摄像机看向新的中心点
+      camera.lookAt(centerX, centerY, centerZ);
+      camera.updateProjectionMatrix();
+
+      // Raycaster和鼠标位置
+      raycaster = new THREE.Raycaster();
+      mouse = new THREE.Vector2();
+
+      // 滑鼠事件
+      window.addEventListener('mousedown', onMouseDown, false);
+      window.addEventListener('click', onMouseClick, false);
+      window.addEventListener('dblclick', onMouseDblClick, false);
+
+      var cameraFolder = gui.addFolder('Camera');
+      var camPosition = cameraFolder.addFolder('Position');
+      var camRotation = cameraFolder.addFolder('Rotation');
+
+      // 添加位置和旋转的控制
+      camPosX = camPosition.add(camera.position, 'x', -500, 500);
+      camPosY = camPosition.add(camera.position, 'y', -500, 500);
+      camPosZ = camPosition.add(camera.position, 'z', -500, 500);
+
+      camRotX = camRotation.add(camera.rotation, 'x', -Math.PI, Math.PI);
+      camRotY = camRotation.add(camera.rotation, 'y', -Math.PI, Math.PI);
+      camRotZ = camRotation.add(camera.rotation, 'z', -Math.PI, Math.PI);
+
+      cameraFolder.open();
+      camPosition.open();
+      camRotation.open();
+
+      // 添加OrbitControls的目标点控制
+      var controlsFolder = gui.addFolder('OrbitControls Target');
+      controlTargetX = controlsFolder.add(controls.target, 'x', -1000, 1000);
+      controlTargetY = controlsFolder.add(controls.target, 'y', -1000, 1000);
+      controlTargetZ = controlsFolder.add(controls.target, 'z', -1000, 1000);
+      controlsFolder.open();
+      gui.add({ resetCameraAndControls }, 'resetCameraAndControls').name('Reset Camera');
+
+      // 从 'A' 到 'T'
+      var startChar = 'A'.charCodeAt(0);
+      var endChar = 'T'.charCodeAt(0);
+
+      for (let i = startChar; i <= endChar; i++) {
+        let char = String.fromCharCode(i);
+        // 创建颜色属性和初始值
+        colors[char] = "#ffffff";
+
+        // 添加颜色选择器到 GUI
+        gui.addColor(colors, char).name(`Color ${char}`).onChange(function (value) {
+          // 更新颜色
+          var i = _objCollect.findIndex(x=>x.obj_type==this.property);
+          _objCollect[i].material.color.set(value);
+        });
+      }
+
+      // 监听控制器的改变事件
+      controls.addEventListener('change', () => {
+
+        // 更新 GUI 控件
+        camPosX.setValue(camera.position.x);
+        camPosY.setValue(camera.position.y);
+        camPosZ.setValue(camera.position.z);
+
+        camRotX.setValue(camera.rotation.x);
+        camRotY.setValue(camera.rotation.y);
+        camRotZ.setValue(camera.rotation.z);
+
+        controlTargetX.setValue(controls.target.x);
+        controlTargetY.setValue(controls.target.y);
+        controlTargetZ.setValue(controls.target.z);
+      });
+
+
+      animate();
+    }
+
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update(); // 只有当 enableDamping 或 autoRotate 被设置时才需要
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+
+    init();
+
+
+    function bim_launchView(elementId) {
+
+    }
+
+    function ap_didLaunchView() {
+
+    }
+
+    function bim_setOverallData(overallData) {
+
+    }
+
+    function ap_showBridgeInfo(bridgeId) {
+
+    }
+
+    function ap_showBridgeDetailInfo(bridgeId, detailIndex) {
+
+    }
+
+    function ap_didEnterBridgeScene(bridgeId) {
+
+    }
+
+    function bim_setBridgeData(bridgeData) {
+
+    }
+
+    function ap_showBridgePositionInfo(bridgeId, position) {
+
+    }
+
+    function ap_didLeaveBridgeScene(bridgeId) {
+
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+ <meta charset="UTF-8">
+ <title>bimModel</title>
+ <script src="dat.gui.min.js"></script>
+ <style>
+  /* 设置 GUI 容器的样式 */
+  .dg.main {
+   position: absolute;
+   top: 10px;
+   right: 10px;
+   z-index: 1000;
+  }
+
+  .label {
+   z-index: 1000 !important;
+   /* 确保层级足够高 */
+  }
+ </style>
+</head>
+
+<body>
+ <div id="bimModel" style="width: 80vw; height: 80vh; position: relative;"></div>
+ <script type="module">
+  var container = document.getElementById('bimModel');
+  import * as THREE from './three.js';
+  import { OrbitControls } from './OrbitControls.js';
+
+  import { OBJLoader } from './OBJLoader.js';
+  import { STLLoader } from './STLLoader.js';
+  import { CSS2DRenderer, CSS2DObject } from './CSS2DRenderer.js';
+
+  //參數區
+  let planeModels = {
+   selectedModel: ''
+  };
+
+  let allModels = [
+   'A380', 'A350-900', 'A330-300', 'A321neo',
+   '787-10', '777-300ER', '747-400F', '737-800'
+  ];
+
+  let bridgeAngles = {
+   rotationA1: 0,
+   rotationA2: 0,
+   rotationA3: 0,
+   rotationB1: 0,
+   rotationB2: 0,
+   rotationB3: 0,
+   rotationAS1: 1,
+   rotationAS2: 1,
+   rotationAS3: 1,
+   rotationBS1: 1,
+   rotationBS2: 1,
+   rotationBS3: 1
+  };
+
+  let camera, scene, renderer, labelRenderer, controls, raycaster, mouse, light, axesHelper;
+
+  let camPosX, camPosY, camPosZ, camRotX, camRotY, camRotZ, controlTargetX, controlTargetY, controlTargetZ;
+
+  //根據方向建立三個空橋陣列存放3d object
+  let bridge1 = [];
+  let bridge2 = [];
+  let bridge3 = [];
+
+  //空橋代碼
+  let bridge_code1 = ['C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18'];
+  let bridge_code2 = ['D11', 'D12', 'D13', 'D14', 'D15', 'D16', 'D17', 'D18'];
+  let bridge_code3 = ['F5', 'F4', 'F3', 'F2', 'F1'];
+
+  //飛機暫存
+  let bridge_planeModel1 = ['', '', '', '', '', '', '', ''];
+  let bridge_planeModel2 = ['', '', '', '', '', '', '', ''];
+  let bridge_planeModel3 = ['', '', '', '', ''];
+
+
+  let bridgeAngles1 = {};
+  let bridgeAngles2 = {};
+  let bridgeAngles3 = {};
+
+  //滑鼠事件
+  let labelInfo = { gateClick: 'None', gateDblClick: 'None', gateMouseover: 'None', modelClick: 'None' };
+
+  //操控面板
+  let gui = new dat.GUI();
+
+  //camera 設定
+  let C = {"position":{"x":4.8558501974213435,"y":55.471161695347924,"z":-12.940578077427551},"rotation":{"_x":-1.5707963267671337,"_y":0.0000010000444489179362,"_z":1.5707685651488488,"_order":"XYZ"},"zoom":1,"quaternion":{"_x":-0.5000066903486973,"_y":0.4999933095478984,"_z":0.4999928095326145,"_w":0.5000071903778626},"fov":75,"aspect":1.273972602739726,"near":0.1,"far":5000,"target":{"x":4.855794723794015,"y":4.277898176463075e-15,"z":-12.94057807896759}};
+
+  //空橋1
+  let bridgeData1 =[{"index":0,"name":"Group_29.stl","obj_type":"undefined","position":{"x":10,"y":-0.1,"z":9},"scale":{"x":0.35,"y":0.35,"z":0.6},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#999999","center":{"x":10.5,"y":0,"z":9.1}},{"index":1,"name":"Group_29.stl","obj_type":"undefined","position":{"x":5.6,"y":-0.1,"z":3.5},"scale":{"x":0.35,"y":0.35,"z":0.6},"rotation":{"_x":0,"_y":3.141592653589793,"_z":0,"_order":"XYZ"},"color":"#999909","center":{"x":6.15,"y":0,"z":4}},{"index":2,"name":"cube.stl","obj_type":"undefined","position":{"x":0,"y":-1,"z":-0.5},"scale":{"x":0.7,"y":0.5,"z":2.1},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#eeee0e","center":{"x":0,"y":0,"z":0}},{"index":3,"name":"cube.stl","obj_type":"undefined","position":{"x":2,"y":0,"z":9},"scale":{"x":0.8,"y":0.1,"z":0.1},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#990000","center":null},{"index":4,"name":"cube.stl","obj_type":"undefined","position":{"x":6,"y":0,"z":10},"scale":{"x":0.4,"y":0.1,"z":0.1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#990000","center":null},{"index":5,"name":"cube.stl","obj_type":"undefined","position":{"x":6.5,"y":0,"z":9.5},"scale":{"x":0.08,"y":0.08,"z":0.08},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#eeeeee","center":null},{"index":6,"name":"cube.stl","obj_type":"undefined","position":{"x":6,"y":0,"z":8},"scale":{"x":0.08,"y":0.08,"z":0.08},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#eeeeee","center":null},{"index":7,"name":"JetBridge.stl","obj_type":"A1","position":{"x":6.8,"y":-0.9,"z":9.7},"scale":{"x":0.2,"y":0.2,"z":0.2},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#999999","center":{"x":7,"y":0,"z":9.3}},{"index":8,"name":"JetBridge.stl","obj_type":"undefined","position":{"x":5.75,"y":-0.9,"z":8},"scale":{"x":0.2,"y":0.2,"z":0.2},"rotation":{"_x":0,"_y":3.141592653589793,"_z":0,"_order":"XYZ"},"color":"#999909","center":{"x":6.16,"y":0,"z":7.5}}];
+
+  //空橋2
+  let bridgeData2 = [{"index":0,"name":"Group_29.stl","obj_type":"undefined","position":{"x":-7,"y":-0.1,"z":0.5},"scale":{"x":0.35,"y":0.35,"z":0.6},"rotation":{"_x":0,"_y":-1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#999999","center":{"x":-6.6,"y":0,"z":0.7}},{"index":1,"name":"Group_29.stl","obj_type":"undefined","position":{"x":-2.8,"y":-0.1,"z":5.7},"scale":{"x":0.35,"y":0.35,"z":0.6},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#999909","center":{"x":-2.4,"y":0,"z":5.84}},{"index":2,"name":"cube.stl","obj_type":"undefined","position":{"x":0,"y":-1,"z":0},"scale":{"x":0.7,"y":0.5,"z":2.1},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#eeee0e","center":{"x":0,"y":0,"z":0}},{"index":3,"name":"cube.stl","obj_type":"undefined","position":{"x":1.8,"y":0,"z":1},"scale":{"x":0.8,"y":0.1,"z":0.1},"rotation":{"_x":0,"_y":3.141592653589793,"_z":0,"_order":"XYZ"},"color":"#990000","center":null},{"index":4,"name":"cube.stl","obj_type":"undefined","position":{"x":-2.7,"y":0,"z":2},"scale":{"x":0.4,"y":0.1,"z":0.1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#990000","center":null},{"index":5,"name":"cube.stl","obj_type":"undefined","position":{"x":-3,"y":0,"z":1},"scale":{"x":0.08,"y":0.08,"z":0.08},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#eeeeee","center":null},{"index":6,"name":"cube.stl","obj_type":"undefined","position":{"x":-2.65,"y":0,"z":2.4},"scale":{"x":0.08,"y":0.08,"z":0.08},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#eeeeee","center":null},{"index":7,"name":"JetBridge.stl","obj_type":"A1","position":{"x":-3.5,"y":-0.9,"z":1.1},"scale":{"x":0.2,"y":0.2,"z":0.2},"rotation":{"_x":0,"_y":-1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#999999","center":{"x":-3.2,"y":0,"z":0.83}},{"index":8,"name":"JetBridge.stl","obj_type":"undefined","position":{"x":-2.7,"y":-0.9,"z":2.8},"scale":{"x":0.2,"y":0.2,"z":0.2},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#999909","center":{"x":-2.4,"y":0,"z":2.5}}];
+
+  //空橋3
+  let bridgeData3 = [{"index":0,"name":"Group_29.stl","obj_type":"undefined","position":{"x":0.4,"y":-0.05,"z":7.8},"scale":{"x":0.35,"y":0.35,"z":0.6},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#999999","center":{"x":0.75,"y":0,"z":7.9}},{"index":1,"name":"cube.stl","obj_type":"undefined","position":{"x":0,"y":-1,"z":0},"scale":{"x":0.3,"y":0.4,"z":1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#eeee0e","center":{"x":0,"y":0,"z":0}},{"index":2,"name":"cube.stl","obj_type":"undefined","position":{"x":0.5,"y":0,"z":4},"scale":{"x":0.8,"y":0.1,"z":0.1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#990000","center":null},{"index":3,"name":"cube.stl","obj_type":"undefined","position":{"x":0.55,"y":0,"z":4},"scale":{"x":0.08,"y":0.08,"z":0.08},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#eeeeee","center":null},{"index":4,"name":"JetBridge.stl","obj_type":"undefined","position":{"x":0.5,"y":-0.9,"z":5},"scale":{"x":0.2,"y":0.2,"z":0.2},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#999909","center":{"x":0.75,"y":0,"z":4.7}}];
+
+  //主建築
+  let mainBuilding =[{"index":0,"name":"cube.stl","obj_type":"undefined","position":{"x":-14,"y":-1,"z":-20},"scale":{"x":0.8,"y":0.3,"z":8},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#006600","center":{"x":0,"y":0,"z":0}},{"index":1,"name":"cube.stl","obj_type":"undefined","position":{"x":9,"y":-1,"z":-20},"scale":{"x":0.8,"y":0.3,"z":8},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#006600","center":{"x":0,"y":0,"z":0}},{"index":2,"name":"cube.stl","obj_type":"出境1","position":{"x":-23,"y":0.5,"z":-1},"scale":{"x":2,"y":0.2,"z":0.4},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#880000","center":{"x":0,"y":0,"z":0}},{"index":3,"name":"cube.stl","obj_type":"入境2","position":{"x":12,"y":-0.5,"z":-1},"scale":{"x":2,"y":0.2,"z":0.4},"rotation":{"_x":0,"_y":0.4363323129985824,"_z":0,"_order":"XYZ"},"color":"#880000","center":{"x":21.7,"y":0,"z":0}},{"index":4,"name":"cube.stl","obj_type":"入境1","position":{"x":-23,"y":-0.5,"z":-1},"scale":{"x":2.2,"y":0.2,"z":0.4},"rotation":{"_x":0,"_y":-0.4363323129985824,"_z":0,"_order":"XYZ"},"color":"#880000","center":{"x":-22.5,"y":0,"z":0.1}},{"index":5,"name":"cube.stl","obj_type":"出境2","position":{"x":12,"y":0.5,"z":-1},"scale":{"x":2,"y":0.2,"z":0.4},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#880000","center":{"x":0,"y":0,"z":0}},{"index":6,"name":"pillar.stl","obj_type":"undefined","position":{"x":-20,"y":-1,"z":-6},"scale":{"x":1,"y":1.6,"z":1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#888888","center":{"x":0,"y":0,"z":0}},{"index":7,"name":"pillar.stl","obj_type":"undefined","position":{"x":-20,"y":-1,"z":4},"scale":{"x":1,"y":1.6,"z":1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#888888","center":{"x":0,"y":0,"z":0}},{"index":8,"name":"pillar.stl","obj_type":"undefined","position":{"x":20,"y":-1,"z":-6},"scale":{"x":1,"y":1.6,"z":1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#888888","center":{"x":0,"y":0,"z":0}},{"index":9,"name":"pillar.stl","obj_type":"undefined","position":{"x":20,"y":-1,"z":4},"scale":{"x":1,"y":1.6,"z":1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#888888","center":{"x":0,"y":0,"z":0}},{"index":10,"name":"top3.stl","obj_type":"undefined","position":{"x":0,"y":2,"z":0},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#888888","center":{"x":0,"y":0,"z":0}}];
+
+  //飛機模型
+  let plane = [{ "index": 0, "name": "a380.stl", "position": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 1, "name": "A350-900.stl", "position": { "x": 65, "y": 0, "z": 0 }, "scale": { "x": 0.35, "y": 0.35, "z": 0.35 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#555555", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "A330-300.stl", "position": { "x": -24, "y": 42, "z": 0 }, "scale": { "x": 2, "y": 2, "z": 2 }, "rotation": { "_x": -1.5707963267948966, "_y": 0, "_z": 1.5707963267948966, "_order": "XYZ" }, "color": "#555555", "center": { "x": 0, "y": 0, "z": 0 } }];
+
+
+  //Method區
+
+  //p點以c點旋轉
+  function rotateAndScalePoint(px, py, pz, cx, cy, cz, rx, ry, rz, sx = 1, sy = 1, sz = 1) {
+   // 将角度从度转换为弧度
+   rx = rx * Math.PI / 180;
+   ry = ry * Math.PI / 180;
+   rz = rz * Math.PI / 180;
+
+   // 创建点的三维向量
+   let pointVector = new THREE.Vector3(px, py, pz);
+
+   // 创建中心点的三维向量
+   let centerVector = new THREE.Vector3(cx, cy, cz);
+
+   // 计算相对于中心点的向量
+   pointVector.sub(centerVector);
+
+   // 创建一个空的四元数用于旋转
+   let quaternion = new THREE.Quaternion();
+
+   // 绕 Z 轴旋转
+   quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), rz);
+   pointVector.applyQuaternion(quaternion);
+
+   // 绕 Y 轴旋转
+   quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), ry);
+   pointVector.applyQuaternion(quaternion);
+
+   // 绕 X 轴旋转
+   quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), rx);
+   pointVector.applyQuaternion(quaternion);
+
+   // 应用缩放
+   pointVector.multiply(new THREE.Vector3(sx, sy, sz));
+
+   // 将旋转并缩放后的点向量加回中心点向量，恢复其世界坐标
+   pointVector.add(centerVector);
+
+   // 返回旋转并缩放后的点坐标
+   return pointVector;
+  }
+
+  function rotatePoint(px, py, pz, cx, cy, cz, rx, ry, rz) {
+   // 将角度从度转换为弧度
+   rx = rx * Math.PI / 180;
+   ry = ry * Math.PI / 180;
+   rz = rz * Math.PI / 180;
+
+   // 创建点的三维向量
+   let pointVector = new THREE.Vector3(px, py, pz);
+
+   // 创建中心点的三维向量
+   let centerVector = new THREE.Vector3(cx, cy, cz);
+
+   // 计算相对于中心点的向量
+   pointVector.sub(centerVector);
+
+   // 创建一个空的四元数用于旋转
+   let quaternion = new THREE.Quaternion();
+
+   // 绕 Z 轴旋转
+   quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), rz);
+   pointVector.applyQuaternion(quaternion);
+
+   // 绕 Y 轴旋转
+   quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), ry);
+   pointVector.applyQuaternion(quaternion);
+
+   // 绕 X 轴旋转
+   quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), rx);
+   pointVector.applyQuaternion(quaternion);
+
+   // 将旋转后的点向量加回中心点向量，恢复其世界坐标
+   pointVector.add(centerVector);
+
+   // 返回旋转后的点坐标
+   return pointVector;
+  }
+
+  //重設
+  function resetCameraAndControls() {
+   // 设置相机的默认位置和旋转
+   camera.position.set(C.position.x, C.position.y, C.position.z); // 初始位置
+   camera.rotation.set(C.rotation._x, C.rotation._y, C.rotation._z); // 初始旋转
+
+   // 设置控制器的目标点
+   controls.target.set(C.target.x, C.target.y, C.target.z);
+
+   // 更新控制器和相机
+   controls.update();
+
+   let sumX = 0, sumY = 0, sumZ = 0;
+   let count = 0;
+
+   // 计算所有对象的坐标平均值
+   scene.traverse(function (object) {
+    if (object.isMesh) {
+     sumX += object.position.x;
+     sumY += object.position.y;
+     sumZ += object.position.z;
+     count++;
+    }
+   });
+
+   const centerX = sumX / count;
+   const centerY = sumY / count;
+   const centerZ = sumZ / count;
+
+   // 设置摄像机看向新的中心点
+   camera.lookAt(centerX, centerY, centerZ);
+   camera.updateProjectionMatrix();
+
+   // 同步更新 GUI 显示
+   camPosX.setValue(camera.position.x);
+   camPosY.setValue(camera.position.y);
+   camPosZ.setValue(camera.position.z);
+   camRotX.setValue(camera.rotation.x);
+   camRotY.setValue(camera.rotation.y);
+   camRotZ.setValue(camera.rotation.z);
+   controlTargetX.setValue(controls.target.x);
+   controlTargetY.setValue(controls.target.y);
+   controlTargetZ.setValue(controls.target.z);
+  }
+
+  //清空空橋
+  function clearAllplane() {
+   bridge1.forEach(function (subArray, index) {
+    bridge_planeModel1[index] = '';
+    bridge1[index] = subArray.filter(function (item) {
+     if (item.obj_name == 'a380.stl') scene.remove(item);
+     if (item.obj_type == 'plane') scene.remove(item);
+     return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
+    });
+   });
+   bridge2.forEach(function (subArray, index) {
+    bridge_planeModel2[index] = '';
+    bridge2[index] = subArray.filter(function (item) {
+     if (item.obj_name == 'a380.stl') scene.remove(item);
+     if (item.obj_type == 'plane') scene.remove(item);
+     return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
+    });
+   });
+   bridge3.forEach(function (subArray, index) {
+    bridge_planeModel3[index] = '';
+    bridge3[index] = subArray.filter(function (item) {
+     if (item.obj_name == 'a380.stl') scene.remove(item);
+     if (item.obj_type == 'plane') scene.remove(item);
+     return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
+    });
+   });
+
+
+   //重設空橋
+   for (var c = 0; c < 8; c++) {
+    rotateBridge(bridgeData1, bridge1[c], c, 'A', 90, 0, 0, 1, 1, 2, 0, 98);
+    rotateBridge(bridgeData1, bridge1[c], c, 'B', 0, 0, 0, 1, 1, 2, 0, 98);
+    bridgeAngles1[bridge_code1[c]] = { 'A1': 90, 'A2': 0, 'A3': 0, 'B1': 0, 'B2': 0, 'B3': 0, 'AS1': 1, 'AS2': 1, 'AS3': 1, 'BS1': 1, 'BS2': 1, 'BS3': 1 };
+   }
+   for (var c = 0; c < 8; c++) {
+    rotateBridge(bridgeData2, bridge2[c], c, 'A', -90, 0, 0, 1, 1, 2, 0, 98, 405);
+    rotateBridge(bridgeData2, bridge2[c], c, 'B', 180, 0, 0, 1, 1, 2, 0, 98, 405);
+    bridgeAngles2[bridge_code2[c]] = { 'A1': -90, 'A2': 0, 'A3': 0, 'B1': 180, 'B2': 0, 'B3': 0, 'AS1': 1, 'AS2': 1, 'AS3': 1, 'BS1': 1, 'BS2': 1, 'BS3': 1 };
+   }
+   for (var c = 0; c < 5; c++) {
+    rotateBridge(bridgeData3, bridge3[c], c, 'A', -90, 0, 0, 1, 1, 2, 0, 0, 45, 70);
+    bridgeAngles3[bridge_code3[c]] = { 'A1': -90, 'A2': 0, 'A3': 0, 'AS1': 1, 'AS2': 1, 'AS3': 1 };
+   }
+
+  }
+  function setBridgeAngle(AB) {
+   var no = labelInfo.gateDblClick;
+
+   var i1 = bridge_code1.findIndex(x => x == no);
+   var i2 = bridge_code2.findIndex(x => x == no);
+   var i3 = bridge_code3.findIndex(x => x == no);
+
+   if (i1 > -1) {
+    bridgeAngles1[bridge_code1[i1]] = {
+     'A1': bridgeAngles.rotationA1, 'A2': bridgeAngles.rotationA2, 'A3': bridgeAngles.rotationA3,
+     'B1': bridgeAngles.rotationB1, 'B2': bridgeAngles.rotationB2, 'B3': bridgeAngles.rotationB3,
+     'AS1': bridgeAngles.rotationAS1, 'AS2': bridgeAngles.rotationAS2, 'AS3': bridgeAngles.rotationAS3,
+     'BS1': bridgeAngles.rotationBS1, 'BS2': bridgeAngles.rotationBS2, 'BS3': bridgeAngles.rotationBS3
+    };
+    if (AB == 'A')
+     rotateBridge(bridgeData1, bridge1[i1], i1, AB,
+      bridgeAngles.rotationA1, bridgeAngles.rotationA2, bridgeAngles.rotationA3,
+      bridgeAngles.rotationAS1, bridgeAngles.rotationAS2, bridgeAngles.rotationAS3, 0, 98);
+    if (AB == 'B')
+     rotateBridge(bridgeData1, bridge1[i1], i1, AB,
+      bridgeAngles.rotationB1, bridgeAngles.rotationB2, bridgeAngles.rotationB3,
+      bridgeAngles.rotationBS1, bridgeAngles.rotationBS2, bridgeAngles.rotationBS3, 0, 98);
+   }
+   if (i2 > -1) {
+    bridgeAngles2[bridge_code2[i2]] = {
+     'A1': bridgeAngles.rotationA1, 'A2': bridgeAngles.rotationA2, 'A3': bridgeAngles.rotationA3,
+     'B1': bridgeAngles.rotationB1, 'B2': bridgeAngles.rotationB2, 'B3': bridgeAngles.rotationB3,
+     'AS1': bridgeAngles.rotationAS1, 'AS2': bridgeAngles.rotationAS2, 'AS3': bridgeAngles.rotationAS3,
+     'BS1': bridgeAngles.rotationBS1, 'BS2': bridgeAngles.rotationBS2, 'BS3': bridgeAngles.rotationBS3
+    };
+    if (AB == 'A')
+     rotateBridge(bridgeData2, bridge2[i2], i2, AB, 
+     bridgeAngles.rotationA1 - 180, bridgeAngles.rotationA2, bridgeAngles.rotationA3,
+      bridgeAngles.rotationAS1, bridgeAngles.rotationAS2, bridgeAngles.rotationAS3, 0, 98, 405);
+    if (AB == 'B')
+     rotateBridge(bridgeData2, bridge2[i2], i2, AB,
+      bridgeAngles.rotationB1 + 180, bridgeAngles.rotationB2, bridgeAngles.rotationB3,
+      bridgeAngles.rotationBS1, bridgeAngles.rotationBS2, bridgeAngles.rotationBS3, 0, 98, 405);
+   }
+
+   if (i3 > -1) {
+    bridgeAngles3[bridge_code3[i3]] = {
+     'A1': bridgeAngles.rotationA1, 'A2': bridgeAngles.rotationA2, 'A3': bridgeAngles.rotationA3,
+     'AS1': bridgeAngles.rotationAS1, 'AS2': bridgeAngles.rotationAS2, 'AS3': bridgeAngles.rotationAS3,
+    };
+    rotateBridge(bridgeData3, bridge3[i3], i3, AB,
+     bridgeAngles.rotationA1 - 90, bridgeAngles.rotationA2, bridgeAngles.rotationA3,
+     bridgeAngles.rotationAS1, bridgeAngles.rotationAS2, bridgeAngles.rotationAS3, 0, 0, 45, 70);
+   }
+  }
+
+  //設定飛機
+  function setPlane(no, m) {
+   var no = labelInfo.gateClick;
+   var m = planeModels.selectedModel;
+   var i1 = bridge_code1.findIndex(x => x == no);
+   var i2 = bridge_code2.findIndex(x => x == no);
+   var i3 = bridge_code3.findIndex(x => x == no);
+   var i = plane.findIndex(x => x.name.indexOf(m) > -1);
+   if (i > -1) {
+    if (i1 > -1) {
+     addModel(bridge1, bridge_code1, plane[i], i1, 0, 98);
+     bridge_planeModel1[i1] = m;
+    }
+    if (i2 > -1) {
+     addModel(bridge2, bridge_code2, plane[i], i2, 0, 98, 405);
+     bridge_planeModel2[i2] = m;
+    }
+    if (i3 > -1) {
+     addModel(bridge3, bridge_code3, plane[i], i3, 50, 0, 80, 70);
+     bridge_planeModel2[i2] = m;
+    }
+   }
+  }
+
+  //清除飛機
+  function clearPlane(no) {
+   var i1 = bridge_code1.findIndex(x => x == no);
+   var i2 = bridge_code2.findIndex(x => x == no);
+   var i3 = bridge_code3.findIndex(x => x == no);
+   if (i1 > -1) {
+    var p1 = bridge1.findIndex(x => x.obj_type == 'plane');
+    scene.remove(bridge1[p1]);
+    bridge1.remove(p1);
+    bridge_planeModel1[p1] = '';
+   }
+   else if (i2 > -1) {
+    var p2 = bridge2.findIndex(x => x.obj_type == 'plane');
+    scene.remove(bridge2[p2]);
+    bridge2.remove(p2);
+    bridge_planeModel2[p2] = '';
+   }
+   else if (i3 > -1) {
+    var p3 = bridge3.findIndex(x => x.obj_type == 'plane');
+    scene.remove(bridge3[p3]);
+    bridge3.remove(p3);
+    bridge_planeModel3[p3] = '';
+   }
+
+
+
+  }
+
+  //空橋旋轉
+  // rotateBridge(bridgeData1, bridge1, 3, 'A', 90, 0, 0, 0, 98)
+  function rotateBridge(tmp, stlModels, c, N, A1, A2, A3, S1, S2, S3, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0) {
+
+   //找原始設定
+   var idxA1 = JSON.parse(JSON.stringify(tmp[tmp.findIndex(x => x.obj_type == N + '1')]));
+   var idxA2 = JSON.parse(JSON.stringify(tmp[tmp.findIndex(x => x.obj_type == N + '2')]));
+   var idxA3 = JSON.parse(JSON.stringify(tmp[tmp.findIndex(x => x.obj_type == N + '3')]));
+
+   var stlModel1 = stlModels[stlModels.findIndex(x => x.obj_type == N + '1')];
+   var stlModel2 = stlModels[stlModels.findIndex(x => x.obj_type == N + '2')];
+   var stlModel3 = stlModels[stlModels.findIndex(x => x.obj_type == N + '3')];
+
+   var centerA1 = idxA1.center;
+   var centerA2 = idxA2.center;
+   var centerA3 = idxA3.center;
+   var rotateA1 = idxA1.rotation;
+   var rotateA2 = idxA2.rotation;
+   var rotateA3 = idxA3.rotation;
+   var posA1 = idxA1.position;
+   var posA2 = idxA2.position;
+   var posA3 = idxA3.position;
+   var scaleA1 = idxA1.scale;
+   var scaleA2 = idxA2.scale;
+   var scaleA3 = idxA3.scale;
+
+   // A1角度 pos依據center旋轉 設rotate後要重算positioin
+   idxA1.rotation = { _x: rotateA1._x, _y: A1 / 180 * Math.PI, _z: rotateA1._z };
+   idxA1.scale = { x: 1, y: 1, z: S1 };
+   var newPosA1 = rotateAndScalePoint(posA1.x, posA1.y, posA1.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI, 1, 1, S1);
+   idxA1.position = { x: newPosA1.x, y: newPosA1.y, z: newPosA1.z };
+
+
+   var newPosA2 = rotateAndScalePoint(posA2.x, posA2.y, posA2.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI, 1, 1, S1);
+   var newCenterA2 = rotateAndScalePoint(centerA2.x, centerA2.y, centerA2.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI, 1, 1, S1);
+
+   var newPosA3 = rotateAndScalePoint(posA3.x, posA3.y, posA3.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI, 1, 1, S1);
+   var newCenterA3 = rotateAndScalePoint(centerA3.x, centerA3.y, centerA3.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI, 1, 1, S1);
+
+
+   idxA2.position = { x: newPosA2.x, y: newPosA2.y, z: newPosA2.z };
+   idxA2.rotation = { _x: rotateA2._x, _y: (A1 + A2) / 180 * Math.PI, _z: rotateA2._z };
+   idxA2.scale = { x: 1, y: 1, z: S2 };
+   newPosA2 = rotateAndScalePoint(newPosA2.x, newPosA2.y, newPosA2.z, newCenterA2.x, newCenterA2.y, newCenterA2.z, rotateA1._x * 180 / Math.PI, A2, rotateA1._z * 180 / Math.PI, 1, 1, S2);
+
+   //最後設定 並偏移
+   idxA2.position = { x: newPosA2.x, y: newPosA2.y, z: newPosA2.z };
+
+
+   idxA3.position = { x: newPosA3.x, y: newPosA3.y, z: newPosA3.z };
+   idxA3.rotation = { _x: rotateA3._x, _y: (A1 + A2) / 180 * Math.PI, _z: rotateA3._z };
+
+   newPosA3 = rotateAndScalePoint(newPosA3.x, newPosA3.y, newPosA3.z, newCenterA2.x, newCenterA2.y, newCenterA2.z, rotateA2._x * 180 / Math.PI, A2, rotateA2._z * 180 / Math.PI, 1, 1, S2);
+   newCenterA3 = rotateAndScalePoint(newCenterA3.x, newCenterA3.y, newCenterA3.z, newCenterA2.x, newCenterA2.y, newCenterA2.z, rotateA2._x * 180 / Math.PI, A2, rotateA2._z * 180 / Math.PI, 1, 1, S2);
+
+   newPosA3 = rotateAndScalePoint(newPosA3.x, newPosA3.y, newPosA3.z, newCenterA3.x, newCenterA3.y, newCenterA3.z, rotateA3._x * 180 / Math.PI, A3, rotateA3._z * 180 / Math.PI, 1, 1, 1);
+
+   //最後設定 並偏移
+   idxA3.position = { x: newPosA3.x, y: newPosA3.y, z: newPosA3.z };
+   idxA3.rotation = { _x: rotateA3._x, _y: (A1 + A2 + A3) / 180 * Math.PI, _z: rotateA3._z };
+   idxA3.scale = { x: 2, y: 2, z: S2 };
+
+
+   stlModel1.rotation.set(idxA1.rotation._x, idxA1.rotation._y, idxA1.rotation._z);
+   stlModel2.rotation.set(idxA2.rotation._x, idxA2.rotation._y, idxA2.rotation._z);
+   stlModel3.rotation.set(idxA3.rotation._x, idxA3.rotation._y, idxA3.rotation._z);
+   stlModel1.position.set(idxA1.position.x + c * xIncrement, idxA1.position.y, idxA1.position.z - zOffset - c * zIncrement);
+   stlModel2.position.set(idxA2.position.x + c * xIncrement, idxA2.position.y, idxA2.position.z - zOffset - c * zIncrement);
+   stlModel3.position.set(idxA3.position.x + c * xIncrement, idxA3.position.y, idxA3.position.z - zOffset - c * zIncrement);
+   stlModel1.scale.set(1, 1, S1);
+   stlModel2.scale.set(1, 1, S2);
+   stlModel3.scale.set(2, 2, S3);
+
+  }
+
+  //增加模型
+  function addModel(_objCollect, labelData, item, c, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0) {
+   const loader = new STLLoader();
+   loader.load(item.name, function (geometry) {
+    var material = new THREE.MeshPhongMaterial({ color: item.color });
+    var stlModel = new THREE.Mesh(geometry, material);
+    stlModel.obj_name = item.name;
+    stlModel.obj_type = 'plane';
+    if (labelData) stlModel.label = labelData[c];
+    scene.add(stlModel);
+    if (item.center) {
+     stlModel.rotation.set(
+      item.rotation._x,
+      item.rotation._y,
+      item.rotation._z
+     );
+     var newPos = rotatePoint(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement,
+      item.center.x, item.center.y, item.center.z,
+      item.rotation._x * 180 / Math.PI, item.rotation._y * 180 / Math.PI, item.rotation._z * 180 / Math.PI)
+
+     stlModel.position.set(newPos.x, newPos.y, newPos.z);
+    }
+    else {
+     stlModel.rotation.set(
+      item.rotation._x,
+      item.rotation._y,
+      item.rotation._z
+     );
+     stlModel.position.set(item.position.x + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);
+    }
+
+    stlModel.scale.set(item.scale.x, item.scale.y, item.scale.z);
+
+    _objCollect[c].push(stlModel);
+   });
+  }
+
+  //載入模型
+  function loadModels(_objCollect, labelData, tmpData, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0) {
+   //  promises
+   const promises = [];
+
+
+   for (let c = 0; c < _objCollect.length; c++) {
+    tmpData.forEach((item, i) => {
+     const promise = new Promise((resolve, reject) => {
+      if (item.name.indexOf('.stl') > -1) {
+       const loader = new STLLoader();
+       loader.load(item.name, function (geometry) {
+        var material = new THREE.MeshPhongMaterial({ color: item.color });
+        var stlModel = new THREE.Mesh(geometry, material);
+        stlModel.obj_name = item.name;
+        if (item.obj_type != '') stlModel.obj_type = item.obj_type;
+        if (labelData) stlModel.label = labelData[c];
+        scene.add(stlModel);
+
+        // 設置模型位置、縮放和旋轉
+
+        if (item.center) {
+         stlModel.rotation.set(
+          item.rotation._x,
+          item.rotation._y,
+          item.rotation._z
+         );
+         var newPos = rotatePoint(item.position.x, item.position.y, item.position.z,
+          item.center.x, item.center.y, item.center.z,
+          item.rotation._x * 180 / Math.PI, item.rotation._y * 180 / Math.PI, item.rotation._z * 180 / Math.PI)
+
+         // 在这个闭包内，i和item是被正确捕获的
+         stlModel.position.set(newPos.x + xOffset + c * xIncrement, newPos.y, newPos.z - zOffset - c * zIncrement);
+        }
+        else {
+
+         stlModel.rotation.set(
+          item.rotation._x,
+          item.rotation._y,
+          item.rotation._z
+         );
+         // 在这个闭包内，i和item是被正确捕获的
+         stlModel.position.set(item.position.x + xOffset + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);
+        }
+
+        stlModel.scale.set(item.scale.x, item.scale.y, item.scale.z);
+
+        _objCollect[c].push(stlModel);
+        resolve();
+       });
+      }
+      else if (item.name.indexOf('light') > -1) {
+       const pointLight = new THREE.PointLight(item.color, 1, 50); // 紅色光源
+       pointLight.position.set(item.position.x + xOffset + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement); // 設定光源位置
+       pointLight.obj_name = item.name;
+       if (labelData) pointLight.label = labelData[c];
+       scene.add(pointLight);
+       _objCollect[c].push(pointLight);
+
+       resolve();
+      }
+      else if (item.name.indexOf('sphere') > -1) {
+       const sphereSize = 0.5;
+       const bulbGeometry = new THREE.SphereGeometry(sphereSize, 16, 8);
+       const bulbMaterial = new THREE.MeshBasicMaterial({ color: item.color }); // 與光源顏色相同
+       const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
+       bulb.position.set(item.position.x + xOffset + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);  // 設置與光源相同的位置
+       bulb.obj_name = item.name;
+       if (labelData) bulb.label = labelData[c];
+       scene.add(bulb);
+       _objCollect[c].push(bulb);
+
+       resolve();
+      }
+      else if (item.name.indexOf('label') > -1 && labelData) {
+
+       // 添加一個 3D 物體
+       const geometry = new THREE.BoxGeometry();
+       const material = new THREE.MeshBasicMaterial({ color: 0x003300 });
+       const cube = new THREE.Mesh(geometry, material);
+       cube.obj_name = item.name;
+       if (labelData) cube.label = labelData[c];
+       scene.add(cube);
+       const _Div = document.createElement("div");
+       _Div.style.padding = '5px 10px';
+       _Div.style.color = '#fff';
+       _Div.style.fontSize = '16px';
+       _Div.style.position = 'absolute';
+       _Div.style.backgroundColor = 'rgba(25,25,25,0.5)';
+       _Div.style.borderRadius = '5px';
+       _Div.className = "label";
+       _Div.textContent = labelData[c];
+       _Div.style.marginTop = "-1em";
+
+       _Div.addEventListener('mouseover', function () {
+        // 滑鼠移到登機門圖示錨點
+        _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
+        labelInfo.gateMouseover = labelData[c]; // 更新 GUI 显示的标签信息
+        gui.updateDisplay(); // 更新 GUI 显示
+       });
+       _Div.addEventListener('mouseout', function () {
+        _Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
+       });
+       const _Label = new CSS2DObject(_Div);
+       _Label.position.set(item.position.x + xOffset + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);
+       cube.add(_Label);
+
+       resolve();
+      }
+
+     });
+     promises.push(promise);
+    });
+   }
+   Promise.all(promises).then(() => {
+    clearAllplane();
+    console.log("All models have been loaded:",);
+
+   }).catch(error => {
+    console.error("Error loading models:", error);
+   });
+  }
+
+  function onMouseDown(event) {
+   // 计算鼠标在场景中的位置 
+   mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
+   mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
+
+   // 更新raycaster的射线方向
+   raycaster.setFromCamera(mouse, camera);
+
+   // 计算物体和射线的交点
+   const intersects = raycaster.intersectObjects(scene.children);
+
+   if (intersects.length > 0) {
+    // 如果有物体被选中 
+    if (intersects[0].object.label) {
+     labelInfo.modelClick = intersects[0].object.label;
+     gui.updateDisplay(); // 更新 GUI 显示
+     
+    }
+     axesHelper.position.copy(intersects[0].point);
+   }
+  }
+
+  function onMouseDblClick(event) {
+   // 计算鼠标在场景中的位置 
+   mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
+   mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
+
+   // 更新raycaster的射线方向
+   raycaster.setFromCamera(mouse, camera);
+
+   // 计算物体和射线的交点
+   const intersects = raycaster.intersectObjects(scene.children);
+
+   if (intersects.length > 0) {
+    // 如果有物体被选中 
+    if (intersects[0].object.label) {
+     labelInfo.gateDblClick = intersects[0].object.label;
+     gui.updateDisplay(); // 更新 GUI 显示
+
+     
+    }
+   }
+  }
+  function onMouseClick(event) {
+   // 计算鼠标在场景中的位置 
+   mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
+   mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
+
+   // 更新raycaster的射线方向
+   raycaster.setFromCamera(mouse, camera);
+
+   // 计算物体和射线的交点
+   const intersects = raycaster.intersectObjects(scene.children);
+
+   if (intersects.length > 0) {
+    // 如果有物体被选中 
+    if (intersects[0].object.label) {
+     labelInfo.gateClick = intersects[0].object.label;
+     gui.updateDisplay(); // 更新 GUI 显示
+    }
+   }
+  } 
+
+  function onMouseMove(event) {
+   // 计算鼠标在场景中的位置 
+   mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
+   mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
+
+   // 更新raycaster的射线方向
+   raycaster.setFromCamera(mouse, camera);
+
+   // 计算物体和射线的交点
+   const intersects = raycaster.intersectObjects(scene.children);
+
+   if (intersects.length > 0) {
+        console.log("交点位置：", intersects[0].point);
+     axesHelper.position.copy(intersects[0].point);
+   }
+  }
+  function init() {
+   // Scene setup
+   scene = new THREE.Scene();
+   // 添加天空背景
+   scene.background = new THREE.Color('skyblue');
+   // 添加地面
+   var planeGeometry = new THREE.PlaneGeometry(10000, 10000); // 創建一個平面幾何體，寬和長均為10000
+   var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xc0f8b1 }); // 為平面創建材質，設定顏色為淺綠色
+   var plane = new THREE.Mesh(planeGeometry, planeMaterial); // 使用幾何體和材質創建Mesh
+   plane.rotation.x = -Math.PI / 2; // 將平面旋轉為水平，面向上方
+   plane.position.y = -1; // 將地面位置稍微下降，避免與模型重疊
+   scene.add(plane); // 將平面添加到場景中
+
+   // 創建相機
+   camera = new THREE.PerspectiveCamera(C.fov, container.offsetWidth / container.offsetHeight, C.near, C.far); // 使用配置參數創建透視相機
+   camera.position.set(C.position.x, C.position.y, C.position.z); // 設定相機位置
+   camera.rotation.set(C.rotation._x, C.rotation._y, C.rotation._z); // 設定相機旋轉
+   camera.quaternion.set(C.quaternion._x, C.quaternion._y, C.quaternion._z, C.quaternion._w); // 設定相機四元數，用於控制旋轉
+   camera.zoom = C.zoom; // 設定相機的縮放級別
+   camera.updateProjectionMatrix(); // 更新相機的投影矩陣
+
+   // 初始化渲染器
+   renderer = new THREE.WebGLRenderer(); // 創建WebGL渲染器
+   renderer.setSize(container.offsetWidth, container.offsetHeight);
+   container.appendChild(renderer.domElement); // 將渲染器的DOM元素掛載到HTML中的指定元素上
+
+   labelRenderer = new CSS2DRenderer();
+   labelRenderer.setSize(container.offsetWidth, container.offsetHeight);
+   labelRenderer.domElement.style.position = "absolute";
+   labelRenderer.domElement.style.top = "0px";
+   container.appendChild(labelRenderer.domElement);
+   // 添加照明
+   light = new THREE.DirectionalLight(0xffffff, 1); // 創建一個白色的方向光源
+   light.position.set(1, 1, 1).normalize(); // 設定光源的位置並正規化
+   scene.add(light); // 將光源添加到場景中
+
+   
+   axesHelper = new THREE.AxesHelper(5);
+   scene.add(axesHelper);
+
+
+   // 實例化OrbitControls，允許用戶通過拖動來旋轉視角，滾動來縮放
+   controls = new OrbitControls(camera, labelRenderer.domElement);
+   controls.enableDamping = true; // 啟用阻尼效果，使交互更加平滑
+   controls.dampingFactor = 0.25; // 設定阻尼系數
+   controls.screenSpacePanning = false; // 禁用屏幕空間平移
+   controls.target.set(C.target.x, C.target.y, C.target.z); // 設定控制的目標點
+   controls.update(); // 更新控制器的內部狀態
+
+   // 设置最小极角为0，防止低于地平面
+   // Math.PI / 2 是90度，意味着视线平行于地面，不允许更低
+   controls.minPolarAngle = 0; // 不允许移动到地面以下
+   controls.maxPolarAngle = Math.PI / 2; // 最大旋转角度
+   for (var c = 0; c < 8; c++)
+    bridge1.push([]);
+   for (var c = 0; c < 8; c++)
+    bridge2.push([]);
+   for (var c = 0; c < 5; c++)
+    bridge3.push([]);
+   // Handle STL upload 
+
+   // 呼叫 loadModels 函數來加載和顯示所有模型
+   loadModels(bridge1, bridge_code1, bridgeData1, 20, 0, -20, 10);
+   loadModels(bridge2, bridge_code2, bridgeData2, -25, 0, -20, 10);
+   loadModels(bridge3, bridge_code3, bridgeData3, -12, 5, -23, 0);
+   loadModels([[]], null, mainBuilding);
+
+   let sumX = 0, sumY = 0, sumZ = 0;
+   let count = 0;
+
+   // 计算所有对象的坐标平均值
+   scene.traverse(function (object) {
+    if (object.isMesh) {
+     sumX += object.position.x;
+     sumY += object.position.y;
+     sumZ += object.position.z;
+     count++;
+    }
+   });
+
+   const centerX = sumX / count;
+   const centerY = sumY / count;
+   const centerZ = sumZ / count;
+
+   // 设置摄像机看向新的中心点
+   camera.lookAt(centerX, centerY, centerZ);
+   camera.updateProjectionMatrix();
+
+   // Raycaster和鼠标位置
+   raycaster = new THREE.Raycaster();
+   mouse = new THREE.Vector2();
+
+   // 滑鼠事件
+   window.addEventListener('mousedown', onMouseDown, false);
+   window.addEventListener('click', onMouseClick, false);
+   window.addEventListener('dblclick', onMouseDblClick, false);
+   window.addEventListener('mousemove', onMouseMove, false);
+
+   var cameraFolder = gui.addFolder('Camera');
+   var camPosition = cameraFolder.addFolder('Position');
+   var camRotation = cameraFolder.addFolder('Rotation');
+
+   // 添加位置和旋转的控制
+   camPosX = camPosition.add(camera.position, 'x', -500, 500);
+   camPosY = camPosition.add(camera.position, 'y', -500, 500);
+   camPosZ = camPosition.add(camera.position, 'z', -500, 500);
+
+   camRotX = camRotation.add(camera.rotation, 'x', -Math.PI, Math.PI);
+   camRotY = camRotation.add(camera.rotation, 'y', -Math.PI, Math.PI);
+   camRotZ = camRotation.add(camera.rotation, 'z', -Math.PI, Math.PI);
+
+   cameraFolder.open();
+   camPosition.open();
+   camRotation.open();
+
+   // 添加OrbitControls的目标点控制
+   var controlsFolder = gui.addFolder('OrbitControls Target');
+   controlTargetX = controlsFolder.add(controls.target, 'x', -1000, 1000);
+   controlTargetY = controlsFolder.add(controls.target, 'y', -1000, 1000);
+   controlTargetZ = controlsFolder.add(controls.target, 'z', -1000, 1000);
+   controlsFolder.open();
+   gui.add({ resetCameraAndControls }, 'resetCameraAndControls').name('Reset Camera');
+   gui.add(labelInfo, 'gateClick').name('gateClick');
+   gui.add(labelInfo, 'gateDblClick').name('gateDblClick');
+   gui.add(labelInfo, 'gateMouseover').name('gateMouseover');
+   gui.add(labelInfo, 'modelClick').name('modelClick');
+   var modelController = gui.add(planeModels, 'selectedModel', allModels).name('Aircraft Models');
+   modelController.onChange(function (value) {
+    console.log("Selected Model: " + value);
+    setPlane();
+   });
+   gui.add({ clearAllplane }, 'clearAllplane').name('Clear All Plane');
+
+
+   var bridgeAngle = cameraFolder.addFolder('bridgeAngle');
+   bridgeAngle.add(bridgeAngles, 'rotationA1', -90, 90).name('A1').onChange(function (angle) {
+    setBridgeAngle('A');
+   });
+   bridgeAngle.add(bridgeAngles, 'rotationA2', -90, 90).name('A2').onChange(function (angle) {
+    setBridgeAngle('A');
+
+   });
+   bridgeAngle.add(bridgeAngles, 'rotationA3', -90, 90).name('A3').onChange(function (angle) {
+    setBridgeAngle('A');
+
+   });
+   bridgeAngle.add(bridgeAngles, 'rotationAS1', 0.8, 1.2).name('AS1').onChange(function (angle) {
+    setBridgeAngle('A');
+   });
+   bridgeAngle.add(bridgeAngles, 'rotationAS2', 0.8, 1.2).name('AS2').onChange(function (angle) {
+    setBridgeAngle('A');
+
+   });
+   bridgeAngle.add(bridgeAngles, 'rotationAS3', 1, 4).name('AS3').onChange(function (angle) {
+    setBridgeAngle('A');
+
+   });
+   bridgeAngle.add(bridgeAngles, 'rotationB1', -90, 90).name('B1').onChange(function (angle) {
+    setBridgeAngle('B');
+
+   });
+   bridgeAngle.add(bridgeAngles, 'rotationB2', -90, 90).name('B2').onChange(function (angle) {
+    setBridgeAngle('B');
+
+   });
+   bridgeAngle.add(bridgeAngles, 'rotationB3', -90, 90).name('B3').onChange(function (angle) {
+    setBridgeAngle('B');
+
+   });
+   bridgeAngle.add(bridgeAngles, 'rotationBS1', 0.8, 1.2).name('BS1').onChange(function (angle) {
+    setBridgeAngle('B');
+   });
+   bridgeAngle.add(bridgeAngles, 'rotationBS2', 0.8, 1.2).name('BS2').onChange(function (angle) {
+    setBridgeAngle('B');
+
+   });
+   bridgeAngle.add(bridgeAngles, 'rotationBS3', 1, 4).name('BS3').onChange(function (angle) {
+    setBridgeAngle('B');
+
+   });
+   bridgeAngle.open();
+
+   // 监听控制器的改变事件
+   controls.addEventListener('change', () => {
+//    console.log( JSON.stringify({
+//      position: camera.position,
+//      rotation: camera.rotation,
+//      zoom: camera.zoom,
+//      quaternion: camera.quaternion,
+//      fov: camera.fov,
+//      aspect: camera.aspect,
+//      near: camera.near,
+//      far: camera.far,
+// target:controls.target
+//     }));
+    // 更新 GUI 控件
+    camPosX.setValue(camera.position.x);
+    camPosY.setValue(camera.position.y);
+    camPosZ.setValue(camera.position.z);
+
+    camRotX.setValue(camera.rotation.x);
+    camRotY.setValue(camera.rotation.y);
+    camRotZ.setValue(camera.rotation.z);
+
+    controlTargetX.setValue(controls.target.x);
+    controlTargetY.setValue(controls.target.y);
+    controlTargetZ.setValue(controls.target.z);
+   });
+
+
+   animate();
+  }
+
+
+  function animate() {
+   requestAnimationFrame(animate);
+   controls.update(); // 只有当 enableDamping 或 autoRotate 被设置时才需要
+   renderer.render(scene, camera);
+   labelRenderer.render(scene, camera);
+  }
+
+  init();
+
+
+  function bim_launchView(elementId) {
+
+  }
+
+  function ap_didLaunchView() {
+
+  }
+
+  function bim_setOverallData(overallData) {
+
+  }
+
+  function ap_showBridgeInfo(bridgeId) {
+
+  }
+
+  function ap_showBridgeDetailInfo(bridgeId, detailIndex) {
+
+  }
+
+  function ap_didEnterBridgeScene(bridgeId) {
+
+  }
+
+  function bim_setBridgeData(bridgeData) {
+
+  }
+
+  function ap_showBridgePositionInfo(bridgeId, position) {
+
+  }
+
+  function ap_didLeaveBridgeScene(bridgeId) {
+
+  }
+ </script>
+</body>
+
+</html>

@@ -263,7 +263,7 @@
 
       }
       else if (tmp[i].name.indexOf('sphere') > -1) {
-       const sphereSize = 0.5;
+       const sphereSize = 0.1;
        const bulbGeometry = new THREE.SphereGeometry(sphereSize, 16, 8);
        const bulbMaterial = new THREE.MeshBasicMaterial({ color: tmp[i].color }); // 與光源顏色相同
        const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
