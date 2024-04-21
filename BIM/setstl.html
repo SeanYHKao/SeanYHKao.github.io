@@ -54,14 +54,18 @@
  <div>
   <label>A1 : <input type="number" id="A1" value="0"></label>
   <label>A2 : <input type="number" id="A2" value="0"></label>
-  <label>A3 : <input type="number" id="A3" value="0"></label>
+  <label>SA3 : <input type="number" id="SA3" value="0"></label>
+  <label>A4 : <input type="number" id="A4" value="0"></label>
+  <label>SA4 : <input type="number" id="SA4" value="0"></label>
  </div>
 
 
  <div>
   <label>B1 : <input type="number" id="B1" value="0"></label>
   <label>B2 : <input type="number" id="B2" value="0"></label>
-  <label>B3 : <input type="number" id="B3" value="0"></label>
+  <label>SB3 : <input type="number" id="SB3" value="0"></label>
+  <label>B4 : <input type="number" id="B4" value="0"></label>
+  <label>SB4 : <input type="number" id="SB4" value="0"></label>
  </div>
 
  <textarea id="json">
@@ -95,34 +99,14 @@
     ry = ry * Math.PI / 180;
     rz = rz * Math.PI / 180;
 
-    // 创建点的三维向量
     let pointVector = new THREE.Vector3(px, py, pz);
-
-    // 创建中心点的三维向量
     let centerVector = new THREE.Vector3(cx, cy, cz);
 
-    // 计算相对于中心点的向量
-    pointVector.sub(centerVector);
-
-    // 创建一个空的四元数用于旋转
+    let offsetVector = pointVector.clone().sub(centerVector);
     let quaternion = new THREE.Quaternion();
-
-    // 绕 Z 轴旋转
-    quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), rz);
-    pointVector.applyQuaternion(quaternion);
-
-    // 绕 Y 轴旋转
-    quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), ry);
-    pointVector.applyQuaternion(quaternion);
-
-    // 绕 X 轴旋转
-    quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), rx);
-    pointVector.applyQuaternion(quaternion);
-
-    // 将旋转后的点向量加回中心点向量，恢复其世界坐标
-    pointVector.add(centerVector);
-
-    // 返回旋转后的点坐标
+    quaternion.setFromEuler(new THREE.Euler(rx, ry, rz));
+    offsetVector.applyQuaternion(quaternion);
+    pointVector = centerVector.clone().add(offsetVector);
     return pointVector;
 }
 
@@ -382,10 +366,14 @@
 
    document.getElementById('A1').addEventListener('input', rotateBridge);
    document.getElementById('A2').addEventListener('input', rotateBridge);
-   document.getElementById('A3').addEventListener('input', rotateBridge);
+   document.getElementById('SA3').addEventListener('input', rotateBridge);
+   document.getElementById('A4').addEventListener('input', rotateBridge);
+   document.getElementById('SA4').addEventListener('input', rotateBridge);
    document.getElementById('B1').addEventListener('input', rotateBridge);
    document.getElementById('B2').addEventListener('input', rotateBridge);
-   document.getElementById('B3').addEventListener('input', rotateBridge);
+   document.getElementById('SB3').addEventListener('input', rotateBridge);
+   document.getElementById('B4').addEventListener('input', rotateBridge);
+   document.getElementById('SB4').addEventListener('input', rotateBridge);
 
    animate();
   }
@@ -414,6 +402,66 @@
   window.addEventListener('mousemove', onMouseMove, false);
 
   function rotateBridge() {
+
+var tmp = JSON.parse(document.getElementById('json').value);
+const A1 = parseFloat(document.getElementById('A1').value);
+const A2 = parseFloat(document.getElementById('A2').value);
+const SA3 = parseFloat(document.getElementById('SA3').value);
+const A4 = parseFloat(document.getElementById('A4').value);
+const SA4 = parseFloat(document.getElementById('SA4').value);
+
+const B1 = parseFloat(document.getElementById('B1').value);
+const B2 = parseFloat(document.getElementById('B2').value);
+const SB3 = parseFloat(document.getElementById('SB3').value);
+const B4 = parseFloat(document.getElementById('B4').value);
+const SB4 = parseFloat(document.getElementById('SB4').value);
+
+var idxA1 = tmp.findIndex(x => x.obj_type == 'A1');
+var idxA2 = tmp.findIndex(x => x.obj_type == 'A2');
+var idxA3 = tmp.findIndex(x => x.obj_type == 'A3');
+var idxA4 = tmp.findIndex(x => x.obj_type == 'A4');
+
+var idxB1 = tmp.findIndex(x => x.obj_type == 'B1');
+var idxB2 = tmp.findIndex(x => x.obj_type == 'B2');
+var idxB3 = tmp.findIndex(x => x.obj_type == 'B3');
+var idxB4 = tmp.findIndex(x => x.obj_type == 'B4');
+
+var centerA1 =  tmp[idxA1].center;
+var centerA2 =  tmp[idxA2].center;
+var centerA3 = tmp[idxA3].center;
+var centerA4 = tmp[idxA4].center;
+var rotateA1 = tmp[idxA1].rotation;
+var rotateA2 = tmp[idxA2].rotation;
+var rotateA3 = tmp[idxA3].rotation;
+var rotateA4 = tmp[idxA4].rotation;
+var posA1 = tmp[idxA1].position;
+var posA2 = tmp[idxA2].position;
+var posA3 = tmp[idxA3].position;
+var posA4 = tmp[idxA4].position;
+
+
+var newPosA2 = rotatePoint(posA2.x, posA2.y, posA2.z, centerA2.x, centerA2.y, centerA2.z, 0, A2, 0);
+stlModels[idxA2].rotation.set(0, A2 / 180 * Math.PI, 0);
+stlModels[idxA2].position.set(newPosA2.x, newPosA2.y, newPosA2.z);
+
+var newPosA3 = rotatePoint(posA3.x, posA3.y, posA3.z + SA3, centerA2.x, centerA2.y, centerA2.z, 0, A2, 0);
+stlModels[idxA3].rotation.set(0, A2 / 180 * Math.PI, 0);
+stlModels[idxA3].position.set(newPosA3.x, newPosA3.y, newPosA3.z);
+
+var newPosA4 = rotatePoint(posA4.x, posA4.y, posA4.z + SA3, centerA2.x, centerA2.y, centerA2.z, 0, A2, 0);
+stlModels[idxA4].rotation.set(0, (A2 + A4) / 180 * Math.PI, 0);
+ 
+stlModels[idxA4].position.set(newPosA4.x, newPosA4.y, newPosA4.z);
+
+var newCenterA4 = rotatePoint(centerA4.x, centerA4.y, centerA4.z + SA3, centerA2.x, centerA2.y, centerA2.z, 0, A2, 0);
+
+newPosA4 = rotatePoint(newPosA4.x, newPosA4.y, newPosA4.z, newCenterA4.x, newCenterA4.y, newCenterA4.z, rotateA4._x * 180 / Math.PI,  A4, rotateA4._z * 180 / Math.PI);
+
+stlModels[idxA4].position.set(newPosA4.x, newPosA4.y, newPosA4.z);
+stlModels[idxA4].scale.set(0.35, 0.35, SA4);
+ }
+
+  function rotateBridge1() {
 
    var tmp = JSON.parse(document.getElementById('json').value);
    const A1 = parseFloat(document.getElementById('A1').value);
