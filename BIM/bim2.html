@@ -16,7 +16,12 @@
 
     .label {
       z-index: 1000 !important;
+      display: block;
       /* 确保层级足够高 */
+    }
+
+    .none {
+      display: none !important;
     }
   </style>
 </head>
@@ -27,8 +32,8 @@
   </div>
   <div style=" position: absolute; top:80vh; left:0;"><br />
     <textarea id="json" style="width:200px; height:100px"></textarea>
-    <button>bim_setOverallData</button>
-    <button>bim_setBridgeData</button>
+    <button id="setOverallData">bim_setOverallData</button>
+    <button id="setBridgeData">bim_setBridgeData</button>
   </div>
   <script type="module">
     var container = document.getElementById('bimModel');
@@ -118,7 +123,7 @@
     //飛機模型
     let planeData = [{ "index": 0, "name": "a380.stl", "obj_type": "A380", "position": { "x": -9, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 1, "name": "a350-900.stl", "obj_type": "A350-900", "position": { "x": -17, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "a330-300.stl", "obj_type": "A330-300", "position": { "x": -25, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 3, "name": "a321neo.stl", "obj_type": "A321neo", "position": { "x": -33, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 4, "name": "787-8.stl", "obj_type": "787-10", "position": { "x": -41, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 5, "name": "777.stl", "obj_type": "777-300ER", "position": { "x": -50, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 6, "name": "747-400.stl", "obj_type": "747-400F", "position": { "x": -59, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 7, "name": "B737.stl", "obj_type": "737-800", "position": { "x": -69, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }];
 
-    let _objPlaneCollect = [,,,,,,,]; //飛機模型
+    let _objPlaneCollect = [, , , , , , ,]; //飛機模型
 
     let plane_move = {
       from:
@@ -265,29 +270,37 @@
       controlTargetZ.setValue(controls.target.z);
     }
 
-    function play() {
+    function play(start, end) {
       var no = labelInfo.gateDblClick;
-      runplay(no, 0);
+      if (!start) start = 0;
+      if (!end) end = 100;
+      runplay(no, 0, start, end);
     }
 
-    function runplay(n, t) {
-      if (t >= 100) {
-        clearPlane(n);
+    function runplay(n, t, start, end, p) {
+      if (t >= end) {
+        if (t >= 100) {
+          clearPlane(n);
+        }
         return;
       }
       const c = {};
       if (t == 0) {
+        if(p)
+        {
+          setPlane(n, p)
+        }
         runPlaneXY(n, plane_move.from.planeX, plane_move.from.planeY);
         runBridge(n, plane_move.from.A2, plane_move.from.A3,
           plane_move.from.B2, plane_move.from.B3,
           plane_move.from.AS2, plane_move.from.AS3,
           plane_move.from.BS2, plane_move.from.BS3);
+        t = start;
       }
       if (t < 25) {
         for (const key in plane_move.from) {
           c[key] = plane_move.from[key] + (t / 25) * (plane_move.to[key] - plane_move.from[key]);
         }
-        console.log(c.planeX, c.planeY)
         runPlaneXY(n, c.planeX, c.planeY)
       }
       else if (t < 50) {
@@ -309,7 +322,7 @@
         runPlaneXY(n, c.planeX, c.planeY)
       }
       setTimeout(() => {
-        runplay(n, t + 1)
+        runplay(n, t + 1, start, end)
       }, 100);
     }
 
@@ -321,6 +334,8 @@
           if (item.obj_type == 'plane') scene.remove(item);
           return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
         });
+        setPlaneData(bridge_code1[index], '');
+        setWindData(bridge_code1[index], '');
       });
       bridge2.forEach(function (subArray, index) {
         bridge_planeModel2[index] = '';
@@ -328,6 +343,8 @@
           if (item.obj_type == 'plane') scene.remove(item);
           return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
         });
+        setPlaneData(bridge_code2[index], '');
+        setWindData(bridge_code2[index], '');
       });
       bridge3.forEach(function (subArray, index) {
         bridge_planeModel3[index] = '';
@@ -335,6 +352,8 @@
           if (item.obj_type == 'plane') scene.remove(item);
           return item.obj_name !== 'a380.stl';  // 只保留 object_name 不等于 'xxx' 的对象
         });
+        setPlaneData(bridge_code3[index], '');
+        setWindData(bridge_code3[index], '');
       });
 
 
@@ -443,11 +462,11 @@
           'BS2': BS2, 'BS3': BS3
         };
         rotateBridge(bridgeData2, bridge2[i2], i2, 'A',
-          A2, A3,
+          A2 - 180, A3,
           AS2, AS3,
           -25, 0, -20, 10);
         rotateBridge(bridgeData2, bridge2[i2], i2, 'B',
-          B2, B3,
+          B2 - 180, B3,
           BS2, BS3,
           -25, 0, -20, 10);
       }
@@ -458,7 +477,7 @@
           'AS2': AS2, 'AS3': AS3,
         };
         rotateBridge(bridgeData3, bridge3[i3], i3, 'A',
-          A2, A3,
+          A2 - 90, A3,
           AS2, AS3,
           -12, 5, -23, 0);
       }
@@ -466,10 +485,12 @@
 
     function setWindData(no, data) {
       document.getElementById(no + "_wind").innerText = data;
+      document.getElementById(no + "_wind").className = (data == '' ? 'none' : 'label')
     }
 
     function setPlaneData(no, data) {
       document.getElementById(no + "_plane").innerHTML = data;
+      document.getElementById(no + "_plane").className = (data == '' ? 'none' : 'label')
     }
 
     function setLabelDataColor(no, data) {
@@ -498,13 +519,13 @@
         var i = bridge2[i2].findIndex(x => x.obj_type == 'plane');
         xOffset = -25; xIncrement = 0; zOffset = -20; zIncrement = 10;
         bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, 90 / 180 * Math.PI, bridge2[i2][i].rotation._z);
-        bridge2[i2][i].position.set(-px + xOffset + i2 * xIncrement, -1, py - zOffset - i2 * zIncrement);
+        bridge2[i2][i].position.set(-px + 2 + xOffset + i2 * xIncrement, -1, py + 1 - zOffset - i2 * zIncrement);
       }
       if (i3 > -1) {
         var i = bridge3[i3].findIndex(x => x.obj_type == 'plane');
         xOffset = -12; xIncrement = 5; zOffset = -23; zIncrement = 0;
-        bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, 0, bridge2[i2][i].rotation._z);
-        bridge2[i3][i].position.set(px + xOffset + i3 * xIncrement, -1, py - zOffset - i3 * zIncrement);
+        bridge3[i3][i].rotation.set(bridge3[i3][i].rotation._x, 180 / 180 * Math.PI, bridge3[i3][i].rotation._z);
+        bridge3[i3][i].position.set(py / 2 + xOffset + i3 * xIncrement, -1, px - 2 - zOffset - i3 * zIncrement);
       }
     }
 
@@ -536,12 +557,13 @@
     function setPlane(no, m) {
       if (!no) no = labelInfo.gateClick;
       clearPlane(no);
-      if(!m) m = planeModels.selectedModel;
+      if (!m) m = planeModels.selectedModel;
       var i1 = bridge_code1.findIndex(x => x == no);
       var i2 = bridge_code2.findIndex(x => x == no);
       var i3 = bridge_code3.findIndex(x => x == no);
 
       var i = planeData.findIndex(x => x.obj_type == m);
+      if(i==-1) i = 0;
       /*
     function addModel(_objCollect, labelData, name, c, 
     position, rotation, center, scale, color, 
@@ -552,18 +574,22 @@
             { x: 0, y: 0, z: 0 }, { _x: 0, _y: -90 / 180 * Math.PI, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#6666ff',
             20, 0, -20, 10);
           bridge_planeModel1[i1] = m;
+
+          runPlaneXY(no, plane_move.from.planeX, plane_move.from.planeY);
         }
         if (i2 > -1) {
           addModel(bridge2, bridge_code2, _objPlaneCollect[i], i2,
             { x: 0, y: 0, z: 0 }, { _x: 0, _y: 90 / 180 * Math.PI, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#6666ff',
             -25, 0, -20, 10);
           bridge_planeModel2[i2] = m;
+          runPlaneXY(no, plane_move.from.planeX, plane_move.from.planeY);
         }
         if (i3 > -1) {
           addModel(bridge3, bridge_code3, _objPlaneCollect[i], i3,
             { x: 0, y: 0, z: 0 }, { _x: 0, _y: 180 / 180 * Math.PI, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#6666ff',
             50, 0, 80, 70);
-          bridge_planeModel2[i2] = m;
+          bridge_planeModel3[i3] = m;
+          runPlaneXY(no, plane_move.from.planeX, plane_move.from.planeY);
         }
       }
     }
@@ -583,7 +609,7 @@
       }
       else if (i2 > -1) {
         var p2 = bridge2[i2].findIndex(x => x.obj_type == 'plane');
-        if (p1 > -1) {
+        if (p2 > -1) {
           scene.remove(bridge2[i2][p2]);
           bridge2[i2].splice(p2, 1);
           bridge_planeModel2[p2] = '';
@@ -591,7 +617,7 @@
       }
       else if (i3 > -1) {
         var p3 = bridge3[i3].findIndex(x => x.obj_type == 'plane');
-        if (p1 > -1) {
+        if (p3 > -1) {
           scene.remove(bridge3[i3][p3]);
           bridge3[i3].splice(p3, 1);
           bridge_planeModel3[p3] = '';
@@ -745,7 +771,7 @@
 
     //載入模型
     function loadModels(promises, _objCollect, labelData, tmpData, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0, reflectivity = 1, emissive = '0x000000', transparent = false, opacity = 1) {
-    
+
       for (let c = 0; c < _objCollect.length; c++) {
         tmpData.forEach((item, i) => {
           const promise = new Promise((resolve, reject) => {
@@ -753,7 +779,7 @@
               console.log(item.name);
               const loader = new STLLoader();
               loader.load(item.name, function (geometry) {
-                if(xOffset == -100000)  //飛機
+                if (xOffset == -100000)  //飛機
                 {
                   _objCollect[c] = geometry;
                   resolve();
@@ -765,7 +791,7 @@
                 stlModel.obj_name = item.name;
                 if (item.obj_type != '') stlModel.obj_type = item.obj_type;
                 if (labelData) stlModel.label = labelData[c];
-                  scene.add(stlModel);
+                scene.add(stlModel);
                 // 設置模型位置、縮放和旋轉
 
                 if (item.center) {
@@ -819,10 +845,10 @@
                     gui.updateDisplay(); // 更新 GUI 显示
                   });
                   _Div.addEventListener('mouseout', function (e) {
-                    _Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
+                    //_Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
                   });
                   const _Label = new CSS2DObject(_Div);
-                  _Label.position.set(-3, 20, 0);
+                  _Label.position.set(-3, 20, 10);
                   stlModel.add(_Label);
 
 
@@ -841,7 +867,7 @@
 
 
                   const _Label2 = new CSS2DObject(_Div2);
-                  _Label2.position.set(3, 20, 0);
+                  _Label2.position.set(3, 20, 10);
                   stlModel.add(_Label2);
 
 
@@ -859,7 +885,7 @@
 
 
                   const _Label3 = new CSS2DObject(_Div3);
-                  _Label3.position.set(10, 20, 0);
+                  _Label3.position.set(10, 20, 10);
                   stlModel.add(_Label3);
 
                 }
@@ -920,7 +946,26 @@
     }
 
     function onMouseDblClick(event) {
-      if (labelInfo.gateMouseover) labelInfo.gateDblClick = labelInfo.gateMouseover;
+      if (bimModel_bridge.style.visibility == 'visible') {
+        //回去
+        gui_bridge.domElement.style.display = 'none';
+        gui.domElement.style.display = 'block';
+        bimModel.style.visibility = 'visible';
+        bimModel_bridge.style.visibility = 'hidden';
+        labelInfo.gateDblClick = 'None';
+        resetCameraAndControls();
+        return;
+      }
+      if (labelInfo.gateMouseover) {
+        if (labelInfo.gateDblClick == labelInfo.gateMouseover) {
+          // 第二次DblClick 轉場景
+          gui_bridge.domElement.style.display = 'block';
+          gui.domElement.style.display = 'none';
+          bimModel.style.visibility = 'hidden';
+          bimModel_bridge.style.visibility = 'visible';
+        }
+        labelInfo.gateDblClick = labelInfo.gateMouseover;
+      }
       // 计算鼠标在场景中的位置 
       mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
       mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
@@ -981,19 +1026,18 @@
       }
     }
 
-    function loadAllModels()
-    { 
+    function loadAllModels() {
       const promises = [];
 
 
-      
+
       loadModels(promises, bridge1, bridge_code1, bridgeData1, 20, 0, -20, 10);
       loadModels(promises, bridge2, bridge_code2, bridgeData2, -25, 0, -20, 10);
       loadModels(promises, bridge3, bridge_code3, bridgeData3, -12, 5, -23, 0);
       loadModels(promises, [[]], null, mainBuilding, 0, 0, 0, 0, 0.1, '#333333');
       loadModels(promises, _objPlaneCollect, null, planeData, -100000); // -100000 不顯示
 
-      
+
       Promise.all(promises).then(() => {
         clearAllplane();
         console.log("All models have been loaded:",);
@@ -1212,6 +1256,10 @@
       });
 
 
+
+      document.getElementById('setOverallData').addEventListener('click', setOverallData);
+      document.getElementById('setBridgeData').addEventListener('click', setBridgeData);
+
       animate();
     }
 
@@ -1269,11 +1317,9 @@
           _Div.addEventListener('mouseover', function () {
             // 滑鼠移到登機門圖示錨點
             _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
-            labelInfo.gateMouseover = labelData[c]; // 更新 GUI 显示的标签信息
-            gui.updateDisplay(); // 更新 GUI 显示
           });
           _Div.addEventListener('mouseout', function () {
-            _Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
+            //_Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
           });
           const _Label = new CSS2DObject(_Div);
           _Label.position.set(item.position.x, item.position.y + 1, item.position.z);
@@ -1371,8 +1417,8 @@
         // 添加颜色选择器到 GUI
         gui_bridge.addColor(colors_bridge, char).name(`Color ${char}`).onChange(function (value) {
           // 更新颜色
-          var i = _objCollect.findIndex(x => x.obj_type == this.property);
-          _objCollect[i].material.color.set(value);
+          var i = _objCollect_bridge.findIndex(x => x.obj_type == this.property);
+          _objCollect_bridge[i].material.color.set(value);
         });
       }
       gui_bridge.domElement.style.display = 'none';
@@ -1408,9 +1454,33 @@
 
     }
 
+    function setOverallData() {
+      bim_setOverallData(JSON.parse(document.getElementById("json").value));
+    }
+
+    let lastStatus = {}
+
     function bim_setOverallData(overallData) {
       overallData.gates.forEach(element => {
+        setPlaneData(element.id, element.flightLegInfo.flightNumber + ' ' + element.flightLegInfo.aircraftType + '<br/>' + element.flightLegInfo.aTime + '<br/>' + element.flightLegInfo.dTime)
+        setLabelDataColor(element.id, element.statusColor);
+        setWindData(element.id, '');
+        if (element.windSpeedAvg && element.windSpeedMax) setWindData(element.id, element.windSpeedAvg + '/' + element.windSpeedMax);
+        setWindDataColor(element.id, element.statusColor);
 
+        if (!lastStatus[element.id]) lastStatus[element.id] = { aTime: null, status: null };
+
+        // aTime 值由 null 轉為有值時，播放飛機進場動畫。 (aTime==null && new_aTime!=null)
+        if (lastStatus[element.id].aTime == null && element.flightLegInfo.aTime != null) runplay(element.id, 0, 0, 25, element.flightLegInfo.aircraftType);
+        //由不為 4(服務)轉為 4(服務)時，播放空橋靠橋動畫。 (status!=4 && new_status==4)
+        if (lastStatus[element.id].status != 4 && element.status == 4) runplay(element.id, 25, 25, 50);
+        //當 status 值由 4(服務)轉為 2(閒置)或 5(撤橋)時，播放空橋撤橋動畫。(status==4 && (new_status==2 || new_status==5))
+        if (lastStatus[element.id].status == 4 && (element.status == 2 || element.status == 5)) runplay(element.id, 0, 50, 75);
+        //當aTime 由有值轉為 null 時，播放飛機離場動畫。(aTime!=null && new_aTime==null
+        if (lastStatus[element.id].aTime != null && element.flightLegInfo.aTime == null) runplay(element.id, 0, 75, 100);
+
+
+        lastStatus[element.id] = { aTime: element.flightLegInfo.aTime, status: element.status };
       });
 
     }
@@ -1427,7 +1497,17 @@
 
     }
 
+    function setBridgeData() {
+      bim_setBridgeData(JSON.parse(document.getElementById("json").value));
+    }
+
     function bim_setBridgeData(bridgeData) {
+
+      bridgeData.status.forEach(element => {
+        var i = _objCollect_bridge.findIndex(x => x.obj_type == element.position);
+        _objCollect_bridge[i].material.color.set(element.statusColor);
+
+      });
 
     }
 
