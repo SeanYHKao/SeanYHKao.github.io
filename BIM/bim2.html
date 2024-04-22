@@ -84,7 +84,7 @@
     let planeXY = { x: 0, y: 0 };
 
     //滑鼠事件
-    let labelInfo = { gateClick: 'None', gateDblClick: 'None', gateMouseover: 'None', modelClick: 'None' };
+    let labelInfo = { gateClick: 'None', gateDblClick: 'None', gateMouseover: 'None1', modelClick: 'None' };
 
     //操控面板
     let gui = new dat.GUI();
@@ -102,7 +102,7 @@
     let bridgeData3 = [{ "index": 0, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": 0.4, "y": -0.3, "z": 6.5 }, "scale": { "x": 0.35, "y": 0.35, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 0.8, "y": 0, "z": 6.5 } }, { "index": 1, "name": "cube.stl", "obj_type": "", "position": { "x": 0, "y": -1, "z": 0 }, "scale": { "x": 0.3, "y": 0.4, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#999999", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "cube.stl", "obj_type": "label", "position": { "x": 0.5, "y": 0, "z": 4 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 3, "name": "cube.stl", "obj_type": "A1", "position": { "x": 0.55, "y": 0, "z": 4 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 4, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": 0.75, "y": -0.3, "z": 4.4 }, "scale": { "x": 0.5, "y": 0.5, "z": 0.5 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 0.73, "y": 0, "z": 4.4 } }, { "index": 5, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": 0.6, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1, "z": 0.8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }];
 
     //主建築
-    let mainBuilding = [{ "index": 0, "name": "cube.stl", "obj_type": "undefined", "position": { "x": -14, "y": -1, "z": -20 }, "scale": { "x": 0.8, "y": 0.3, "z": 8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#006600", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 1, "name": "cube.stl", "obj_type": "undefined", "position": { "x": 9, "y": -1, "z": -20 }, "scale": { "x": 0.8, "y": 0.3, "z": 8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#006600", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "cube.stl", "obj_type": "出境1", "position": { "x": -23, "y": 0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 3, "name": "cube.stl", "obj_type": "入境2", "position": { "x": 12, "y": -0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0.4363323129985824, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 21.7, "y": 0, "z": 0 } }, { "index": 4, "name": "cube.stl", "obj_type": "入境1", "position": { "x": -23, "y": -0.5, "z": -1 }, "scale": { "x": 2.2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": -0.4363323129985824, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": -22.5, "y": 0, "z": 0.1 } }, { "index": 5, "name": "cube.stl", "obj_type": "出境2", "position": { "x": 12, "y": 0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 6, "name": "cube.stl", "obj_type": "", "position": { "x": -52, "y": -1, "z": -90 }, "scale": { "x": 20, "y": 0.01, "z": 30 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#dddddd", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 7, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": -20, "y": -1, "z": -6 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 8, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": -20, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 9, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": 20, "y": -1, "z": -6 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 10, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": 20, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 11, "name": "top3.stl", "obj_type": "undefined", "position": { "x": 0, "y": 2, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }];
+    let mainBuilding =[{"index":0,"name":"cube.stl","obj_type":"undefined","position":{"x":-14,"y":-1,"z":-20},"scale":{"x":0.8,"y":0.3,"z":8},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#006600","center":{"x":0,"y":0,"z":0}},{"index":1,"name":"cube.stl","obj_type":"undefined","position":{"x":9,"y":-1,"z":-20},"scale":{"x":0.8,"y":0.3,"z":8},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#006600","center":{"x":0,"y":0,"z":0}},{"index":2,"name":"cube.stl","obj_type":"出境1","position":{"x":-23,"y":0.5,"z":-1},"scale":{"x":2,"y":0.2,"z":0.4},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#880000","center":{"x":0,"y":0,"z":0}},{"index":3,"name":"cube.stl","obj_type":"入境2","position":{"x":12,"y":-0.5,"z":-1},"scale":{"x":2,"y":0.2,"z":0.4},"rotation":{"_x":0,"_y":0.4363323129985824,"_z":0,"_order":"XYZ"},"color":"#880000","center":{"x":21.7,"y":0,"z":0}},{"index":4,"name":"cube.stl","obj_type":"入境1","position":{"x":-23,"y":-0.5,"z":-1},"scale":{"x":2.2,"y":0.2,"z":0.4},"rotation":{"_x":0,"_y":-0.4363323129985824,"_z":0,"_order":"XYZ"},"color":"#880000","center":{"x":-22.5,"y":0,"z":0.1}},{"index":5,"name":"cube.stl","obj_type":"出境2","position":{"x":12,"y":0.5,"z":-1},"scale":{"x":2,"y":0.2,"z":0.4},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#880000","center":{"x":0,"y":0,"z":0}},{"index":6,"name":"cube.stl","obj_type":"","position":{"x":-52,"y":-1,"z":-90},"scale":{"x":20,"y":0.1,"z":30},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#dddddd","center":{"x":0,"y":0,"z":0}},{"index":7,"name":"pillar.stl","obj_type":"undefined","position":{"x":-20,"y":-1,"z":-6},"scale":{"x":1,"y":1.6,"z":1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#888888","center":{"x":0,"y":0,"z":0}},{"index":8,"name":"pillar.stl","obj_type":"undefined","position":{"x":-20,"y":-1,"z":4},"scale":{"x":1,"y":1.6,"z":1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#888888","center":{"x":0,"y":0,"z":0}},{"index":9,"name":"pillar.stl","obj_type":"undefined","position":{"x":20,"y":-1,"z":-6},"scale":{"x":1,"y":1.6,"z":1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#888888","center":{"x":0,"y":0,"z":0}},{"index":10,"name":"pillar.stl","obj_type":"undefined","position":{"x":20,"y":-1,"z":4},"scale":{"x":1,"y":1.6,"z":1},"rotation":{"_x":0,"_y":1.5707963267948966,"_z":0,"_order":"XYZ"},"color":"#888888","center":{"x":0,"y":0,"z":0}},{"index":11,"name":"top3.stl","obj_type":"undefined","position":{"x":0,"y":2,"z":0},"scale":{"x":1,"y":1,"z":1},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#888888","center":{"x":0,"y":0,"z":0}},{"index":12,"name":"cube.stl","obj_type":"undefined","position":{"x":-14,"y":0.5,"z":-20},"scale":{"x":5.5,"y":0.02,"z":8},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#dddddd","center":{"x":0,"y":0,"z":0}},{"index":13,"name":"cube.stl","obj_type":"undefined","position":{"x":-14,"y":1.5,"z":-20},"scale":{"x":5.5,"y":0.02,"z":8},"rotation":{"_x":0,"_y":0,"_z":0,"_order":"XYZ"},"color":"#dddddd","center":{"x":0,"y":0,"z":0}}];
 
     //飛機模型
     let plane = [{ "index": 0, "name": "a380.stl", "obj_type": "A380", "position": { "x": -9, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 1, "name": "a350-900.stl", "obj_type": "A350-900", "position": { "x": -17, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "a330-300.stl", "obj_type": "A330-300", "position": { "x": -25, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 3, "name": "a321neo.stl", "obj_type": "A321neo", "position": { "x": -33, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 4, "name": "787-8.stl", "obj_type": "787-10", "position": { "x": -41, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 5, "name": "777.stl", "obj_type": "777-300ER", "position": { "x": -50, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 6, "name": "747-400.stl", "obj_type": "747-400F", "position": { "x": -59, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 7, "name": "B737.stl", "obj_type": "737-800", "position": { "x": -69, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }];
@@ -242,7 +242,11 @@
     }
 
     function runplay(n, t) {
-      if (t > 100) return;
+      if (t >= 100) 
+      {
+        clearPlane(n);
+        return;
+      }
       const c = {};
       if (t == 0) {
         runPlaneXY(n, plane_move.from.planeX, plane_move.from.planeY);
@@ -446,13 +450,13 @@
       if (i2 > -1) {
         var i = bridge2[i2].findIndex(x => x.obj_type == 'plane');
         xOffset = -25; xIncrement = 0; zOffset = -20; zIncrement = 10;
-        bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, 90 / 180 * Math.PI,  bridge2[i2][i].rotation._z);
+        bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, 90 / 180 * Math.PI, bridge2[i2][i].rotation._z);
         bridge2[i2][i].position.set(-px + xOffset + i2 * xIncrement, -1, py - zOffset - i2 * zIncrement);
       }
       if (i3 > -1) {
         var i = bridge3[i3].findIndex(x => x.obj_type == 'plane');
         xOffset = -12; xIncrement = 5; zOffset = -23; zIncrement = 0;
-        bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, 0,  bridge2[i2][i].rotation._z);
+        bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, 0, bridge2[i2][i].rotation._z);
         bridge2[i3][i].position.set(px + xOffset + i3 * xIncrement, -1, py - zOffset - i3 * zIncrement);
       }
     }
@@ -651,6 +655,33 @@
       });
     }
 
+    function setBridgeCamera(no)
+    {
+      if(!no) no = labelInfo.gateDblClick;
+      let sumX = 0, sumY = 0, sumZ = 0;
+      let count = 0;
+      
+      scene.traverse(function (object) {
+        if (object.isMesh && object.label && object.label == no) {
+          sumX += object.position.x;
+          sumY += object.position.y;
+          sumZ += object.position.z;
+          count++;
+        }
+      });
+
+      const centerX = sumX / count;
+      const centerY = sumY / count;
+      const centerZ = sumZ / count;
+      // 设置摄像机看向新的中心点
+      
+      // 设置控制器的目标点
+      controls.target.set(centerX, centerY, centerZ);
+      camera.lookAt(centerX, centerY, centerZ);
+      camera.updateProjectionMatrix();
+
+    }
+
     //載入模型
     function loadModels(_objCollect, labelData, tmpData, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0) {
       //  promises
@@ -699,6 +730,55 @@
                 stlModel.scale.set(item.scale.x, item.scale.y, item.scale.z);
 
                 _objCollect[c].push(stlModel);
+
+
+                if (item.obj_type.indexOf('label') > -1 && labelData) {
+
+
+                  const _Div = document.createElement("div");
+                  _Div.style.padding = '3px';
+                  _Div.style.color = '#fff';
+                  _Div.style.fontSize = '12px';
+                  _Div.style.position = 'absolute';
+                  _Div.style.backgroundColor = 'rgba(25,25,25,0.5)';
+                  _Div.style.borderRadius = '3px';
+                  _Div.className = "label";
+                  _Div.textContent = labelData[c];
+                  _Div.style.marginTop = "-1em";
+
+                  _Div.addEventListener('mouseover', function () {
+                    // 滑鼠移到登機門圖示錨點
+                    _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
+                    labelInfo.gateMouseover = labelData[c]; // 更新 GUI 显示的标签信息
+                    gui.updateDisplay(); // 更新 GUI 显示
+                  });
+                  _Div.addEventListener('mouseout', function (e) {
+                    _Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
+                  });
+                  const _Label = new CSS2DObject(_Div);
+                  _Label.position.set(-3, 20, 0);
+                  stlModel.add(_Label);
+
+                  
+
+                  const _Div2 = document.createElement("div");
+                  _Div2.style.padding = '3px';
+                  _Div2.style.color = '#fff';
+                  _Div2.style.fontSize = '12px';
+                  _Div2.style.position = 'absolute';
+                  _Div2.style.backgroundColor = 'rgba(25,25,25,0.5)';
+                  _Div2.style.borderRadius = '3px';
+                  _Div2.className = "label";
+                  _Div2.textContent = "10 / 20";
+                  _Div2.style.marginTop = "-1em";
+
+                 
+                  const _Label2 = new CSS2DObject(_Div2);
+                  _Label2.position.set(3, 20, 0);
+                  stlModel.add(_Label2);
+
+                }
+
                 resolve();
               });
             }
@@ -722,41 +802,6 @@
               if (labelData) bulb.label = labelData[c];
               scene.add(bulb);
               _objCollect[c].push(bulb);
-
-              resolve();
-            }
-            if (item.obj_type.indexOf('label') > -1 && labelData) {
-
-              // 添加一個 3D 物體
-              const geometry = new THREE.BoxGeometry();
-              const material = new THREE.MeshBasicMaterial({ color: 0x003300 });
-              const cube = new THREE.Mesh(geometry, material);
-              cube.obj_name = item.name;
-              if (labelData) cube.label = labelData[c];
-              scene.add(cube);
-              const _Div = document.createElement("div");
-              _Div.style.padding = '5px 10px';
-              _Div.style.color = '#fff';
-              _Div.style.fontSize = '16px';
-              _Div.style.position = 'absolute';
-              _Div.style.backgroundColor = 'rgba(25,25,25,0.5)';
-              _Div.style.borderRadius = '5px';
-              _Div.className = "label";
-              _Div.textContent = labelData[c];
-              _Div.style.marginTop = "-1em";
-
-              _Div.addEventListener('mouseover', function () {
-                // 滑鼠移到登機門圖示錨點
-                _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
-                labelInfo.gateMouseover = labelData[c]; // 更新 GUI 显示的标签信息
-                gui.updateDisplay(); // 更新 GUI 显示
-              });
-              _Div.addEventListener('mouseout', function () {
-                _Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
-              });
-              const _Label = new CSS2DObject(_Div);
-              _Label.position.set(item.position.x + xOffset + c * xIncrement, item.position.y, item.position.z - zOffset - c * zIncrement);
-              cube.add(_Label);
 
               resolve();
             }
@@ -797,6 +842,7 @@
     }
 
     function onMouseDblClick(event) {
+      if (labelInfo.gateMouseover) labelInfo.gateDblClick = labelInfo.gateMouseover;
       // 计算鼠标在场景中的位置 
       mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
       mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
@@ -818,7 +864,9 @@
         }
       }
     }
+
     function onMouseClick(event) {
+      if (labelInfo.gateMouseover) labelInfo.gateClick = labelInfo.gateMouseover;
       // 计算鼠标在场景中的位置 
       mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
       mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
@@ -854,6 +902,7 @@
         // axesHelper.position.copy(intersects[0].point);
       }
     }
+
     function init() {
       // Scene setup
       scene = new THREE.Scene();
@@ -965,39 +1014,38 @@
       camRotY = camRotation.add(camera.rotation, 'y', -Math.PI, Math.PI);
       camRotZ = camRotation.add(camera.rotation, 'z', -Math.PI, Math.PI);
 
-      cameraFolder.open();
-      camPosition.open();
-      camRotation.open();
 
       // 添加OrbitControls的目标点控制
       var controlsFolder = gui.addFolder('OrbitControls Target');
       controlTargetX = controlsFolder.add(controls.target, 'x', -1000, 1000);
       controlTargetY = controlsFolder.add(controls.target, 'y', -1000, 1000);
       controlTargetZ = controlsFolder.add(controls.target, 'z', -1000, 1000);
-      controlsFolder.open();
-      gui.add({ resetCameraAndControls }, 'resetCameraAndControls').name('Reset Camera');
-      gui.add(labelInfo, 'gateClick').name('gateClick');
-      gui.add(labelInfo, 'gateDblClick').name('gateDblClick');
-      gui.add(labelInfo, 'gateMouseover').name('gateMouseover');
-      gui.add(labelInfo, 'modelClick').name('modelClick');
-      var modelController = gui.add(planeModels, 'selectedModel', allModels).name('Aircraft Models');
+      cameraFolder.add({ setBridgeCamera }, 'setBridgeCamera').name('setBridgeCamera');
+      cameraFolder.add({ resetCameraAndControls }, 'resetCameraAndControls').name('Reset Camera');
+      var camMouse = gui.addFolder('Mouse');
+      camMouse.add(labelInfo, 'gateClick').name('gateClick');
+      camMouse.add(labelInfo, 'gateDblClick').name('gateDblClick');
+      camMouse.add(labelInfo, 'gateMouseover').name('gateMouseover');
+      camMouse.add(labelInfo, 'modelClick').name('modelClick');
+      var camPlane = gui.addFolder('Plane');
+      var modelController = camPlane.add(planeModels, 'selectedModel', allModels).name('Aircraft Models');
       modelController.onChange(function (value) {
         console.log("Selected Model: " + value);
         setPlane();
       });
-      gui.add(planeXY, 'x', 0, 30).name('planeX').onChange(function () {
+      camPlane.add(planeXY, 'x', 0, 30).name('planeX').onChange(function () {
         setPlaneXY();
 
       });
-      gui.add(planeXY, 'y', -10, 10).name('planeY').onChange(function () {
+      camPlane.add(planeXY, 'y', -10, 10).name('planeY').onChange(function () {
         setPlaneXY();
 
       });
-      gui.add({ play }, 'play').name('play');
-      gui.add({ clearAllplane }, 'clearAllplane').name('Clear All Plane');
+      camPlane.add({ play }, 'play').name('play');
+      camPlane.add({ clearAllplane }, 'clearAllplane').name('Clear All Plane');
 
 
-      var bridgeAngle = cameraFolder.addFolder('bridgeAngle');
+      var bridgeAngle = gui.addFolder('bridgeAngle');
       bridgeAngle.add(bridgeAngles, 'rotationA2', -360, 360).name('A2').onChange(function (angle) {
         setBridgeAngle('A');
 
@@ -1030,22 +1078,9 @@
         setBridgeAngle('B');
 
       });
-      bridgeAngle.open();
 
       // 监听控制器的改变事件
       controls.addEventListener('change', () => {
-        //    console.log( JSON.stringify({
-        //      position: camera.position,
-        //      rotation: camera.rotation,
-        //      zoom: camera.zoom,
-        //      quaternion: camera.quaternion,
-        //      fov: camera.fov,
-        //      aspect: camera.aspect,
-        //      near: camera.near,
-        //      far: camera.far,
-        // target:controls.target
-        //     }));
-        // 更新 GUI 控件
         camPosX.setValue(camera.position.x);
         camPosY.setValue(camera.position.y);
         camPosZ.setValue(camera.position.z);
@@ -1083,6 +1118,9 @@
     }
 
     function bim_setOverallData(overallData) {
+      overallData.gates.forEach(element => {
+        
+      });
 
     }
 
