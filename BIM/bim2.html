@@ -49,6 +49,42 @@
       font-size: 10px;
       color: white;
     }
+
+    #viewAButton {
+      position: absolute;
+      bottom: 40px;
+      left: 10px;
+      background-color: rgba(83, 33, 33);
+      padding: 5px 10px;
+      border-radius: 5px;
+      z-index: 2000;
+      font-size: 10px;
+      color: white;
+    }
+
+    #viewBButton {
+      position: absolute;
+      bottom: 70px;
+      left: 10px;
+      background-color: rgba(83, 33, 33);
+      padding: 5px 10px;
+      border-radius: 5px;
+      z-index: 2000;
+      font-size: 10px;
+      color: white;
+    }
+
+    #viewCButton {
+      position: absolute;
+      bottom: 100px;
+      left: 10px;
+      background-color: rgba(83, 33, 33);
+      padding: 5px 10px;
+      border-radius: 5px;
+      z-index: 2000;
+      font-size: 10px;
+      color: white;
+    }
   </style>
 </head>
 
@@ -61,7 +97,8 @@
       瞬間風速達25節,暫停橋复服務。</div>
   </div>
   <div id="bimModel_bridge" style="visibility: hidden; width: 80vw; height: 80vh; position: absolute; top:0; left:0;">
-    <button id="backButton">返回</button>
+    <button id="backButton">返回</button> <button id="viewAButton">前</button> <button id="viewBButton">中</button> <button
+     id="viewCButton">後</button>
   </div>
   <div style=" position: absolute; top:80vh; left:0;">json:<br />
     <textarea id="json" style="width:200px; height:100px"></textarea><br />
@@ -204,15 +241,20 @@
     var colors_bridge = {};
 
     //camera 設定
-    let C_bridge = { "position": { "x": -31.138908642283276, "y": 21.124547046100854, "z": 20.02802432713419 }, "rotation": { "_x": -0.6343495415501454, "_y": -1.1304057886682897, "_z": -0.5872580951896136, "_order": "XYZ" }, "zoom": 1, "quaternion": { "_x": -0.10482487807797901, "_y": -0.5633217718122143, "_z": -0.07233320219154937, "_w": 0.8163628079469328 }, "fov": 45, "aspect": 2.015748031496063, "near": 0.1, "far": 5000, "target": { "x": 44.496981100130974, "y": 3.4989089747618552e-15, "z": -8.681694858696433 } };
+    let C_bridgeC = { "position": { "x": -31.138908642283276, "y": 21.124547046100854, "z": 20.02802432713419 }, "rotation": { "_x": -0.6343495415501454, "_y": -1.1304057886682897, "_z": -0.5872580951896136, "_order": "XYZ" }, "zoom": 1, "quaternion": { "_x": -0.10482487807797901, "_y": -0.5633217718122143, "_z": -0.07233320219154937, "_w": 0.8163628079469328 }, "fov": 45, "aspect": 2.015748031496063, "near": 0.1, "far": 5000, "target": { "x": 44.496981100130974, "y": 3.4989089747618552e-15, "z": -8.681694858696433 } };
 
+    let C_bridgeB ={"position":{"x":22.071359802592823,"y":24.78459126863992,"z":41.47852024594192},"rotation":{"_x":-0.3937047515318204,"_y":0.052870469233824054,"_z":0.021948228935150135,"_order":"XYZ"},"zoom":1,"quaternion":{"_x":-0.19521890077614165,"_y":0.028065674655406155,"_z":0.005588814423002102,"_w":0.980342115712284},"fov":45,"aspect":2.1044520547945207,"near":0.1,"far":5000,"target":{"x":18.652295555277366,"y":3.5489485507749723e-15,"z":-18.186988965429887}};
+
+    let C_bridgeA = {"position":{"x":57.616532220088516,"y":25.81896852127743,"z":-1.908670778081924},"rotation":{"_x":-1.5594513113168036,"_y":0.9968965660789258,"_z":1.557287223169511,"_order":"XYZ"},"zoom":1,"quaternion":{"_x":-0.20084950068515345,"_y":0.6757069456808736,"_z":0.19938182868205784,"_w":0.680680900293631},"fov":45,"aspect":2.1044520547945207,"near":0.1,"far":5000,"target":{"x":17.67645964620174,"y":3.3247819950130667e-15,"z":-2.201599943268754}};
     //空橋1
-    let bridgeData = [{ "index": 0, "name": "sphere", "obj_type": "A", "position": { "x": -0.8, "y": 11, "z": -0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "B", "position": { "x": 0.1, "y": 4, "z": -1.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "C", "position": { "x": 1.3, "y": 7, "z": 0.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "D", "position": { "x": 7, "y": 12.2, "z": -3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 4, "name": "sphere", "obj_type": "E", "position": { "x": 25.6, "y": 15, "z": -5.1 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 5, "name": "sphere", "obj_type": "F", "position": { "x": 26.1, "y": 6, "z": 0.49 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 6, "name": "sphere", "obj_type": "G", "position": { "x": 26.2, "y": 3, "z": -1.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 7, "name": "sphere", "obj_type": "H", "position": { "x": 34, "y": 10, "z": -2.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 8, "name": "sphere", "obj_type": "I", "position": { "x": 33.5, "y": 10, "z": 1 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 9, "name": "sphere", "obj_type": "J", "position": { "x": 31, "y": 7, "z": 1.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 10, "name": "sphere", "obj_type": "K", "position": { "x": 25.5, "y": 4, "z": 1.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 11, "name": "sphere", "obj_type": "L", "position": { "x": 33.3, "y": 14, "z": 0.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffee", "center": null }, { "index": 12, "name": "sphere", "obj_type": "M", "position": { "x": 3.8, "y": 10, "z": -0.31 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": null }, { "index": 13, "name": "sphere", "obj_type": "N", "position": { "x": 0, "y": 6, "z": -3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 14, "name": "sphere", "obj_type": "O", "position": { "x": 14, "y": 12.5, "z": -3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 15, "name": "sphere", "obj_type": "P", "position": { "x": 2.1, "y": 7, "z": -0.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 16, "name": "sphere", "obj_type": "Q", "position": { "x": 9.1, "y": 7, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 17, "name": "sphere", "obj_type": "R", "position": { "x": 26, "y": 15, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 18, "name": "sphere", "obj_type": "S", "position": { "x": 20.4, "y": 6, "z": 0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 19, "name": "sphere", "obj_type": "T", "position": { "x": 24, "y": 6, "z": 0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 20, "name": "CLE_JetwayGen.stl", "obj_type": "Jetway", "position": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 10, "y": 10, "z": 10 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 21, "name": "a380.stl", "obj_type": "undefined", "position": { "x": 42, "y": 0, "z": 19 }, "scale": { "x": 10, "y": 10, "z": 10 }, "rotation": { "_x": 0, "_y": 3.141592653589793, "_z": 0, "_order": "XYZ" }, "color": "#0000ff", "center": null }];
+    let bridgeData = [{ "index": 0, "name": "sphere", "obj_type": "A", "position": { "x": -0.8, "y": 11, "z": -0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "B", "position": { "x": 0.1, "y": 4, "z": -1.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "C", "position": { "x": 1.3, "y": 7, "z": 0.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "D", "position": { "x": 7, "y": 12.2, "z": -3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 4, "name": "sphere", "obj_type": "E", "position": { "x": 25.6, "y": 15, "z": -5.1 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 5, "name": "sphere", "obj_type": "F", "position": { "x": 26.1, "y": 6, "z": 0.49 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 6, "name": "sphere", "obj_type": "G", "position": { "x": 26.2, "y": 3, "z": -1.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 7, "name": "sphere", "obj_type": "H", "position": { "x": 34, "y": 10, "z": -2.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 8, "name": "sphere", "obj_type": "I", "position": { "x": 33.5, "y": 10, "z": 1 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 9, "name": "sphere", "obj_type": "J", "position": { "x": 33, "y": 11, "z": -1.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 10, "name": "sphere", "obj_type": "K", "position": { "x": 25.5, "y": 4, "z": 1.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 11, "name": "sphere", "obj_type": "L", "position": { "x": 33.5, "y": 6, "z": -1 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffee", "center": null }, { "index": 12, "name": "sphere", "obj_type": "M", "position": { "x": 3.8, "y": 10, "z": -0.31 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": null }, { "index": 13, "name": "sphere", "obj_type": "N", "position": { "x": 34, "y": 12, "z": -5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffff00", "center": null }, { "index": 14, "name": "sphere", "obj_type": "O", "position": { "x": 34, "y": 12, "z": -3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#00ffff", "center": null }, { "index": 15, "name": "sphere", "obj_type": "P", "position": { "x": 2.1, "y": 7, "z": -0.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 16, "name": "sphere", "obj_type": "Q", "position": { "x": 9.1, "y": 7, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 17, "name": "sphere", "obj_type": "R", "position": { "x": 26, "y": 15, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 18, "name": "sphere", "obj_type": "S", "position": { "x": 20.4, "y": 6, "z": 0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 19, "name": "sphere", "obj_type": "T", "position": { "x": 24, "y": 6, "z": 0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 20, "name": "CLE_JetwayGen.stl", "obj_type": "Jetway", "position": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 10, "y": 10, "z": 10 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 21, "name": "a380.stl", "obj_type": "undefined", "position": { "x": 45, "y": 0, "z": 19 }, "scale": { "x": 10, "y": 10, "z": 10 }, "rotation": { "_x": 0, "_y": 3.141592653589793, "_z": 0, "_order": "XYZ" }, "color": "#0000ff", "center": null }];
 
 
     let _objCollect_bridge = [];
 
     let _collect_intervalId = {};
+
+    let _collect_intervalId_bridge = {};
 
     //Method區
 
@@ -316,7 +358,7 @@
     }
 
     function play(start, end) {
-      var no = labelInfo.gateDblClick;
+      var no = labelInfo.gateClick;
       if (!start) start = 0;
       if (!end) end = 100;
       runplay(no, 0, start, end);
@@ -420,7 +462,7 @@
     }
 
     function setBridgeAngle(AB) {
-      var no = labelInfo.gateDblClick;
+      var no = labelInfo.gateClick;
 
       var i1 = bridge_code1.findIndex(x => x == no);
       var i2 = bridge_code2.findIndex(x => x == no);
@@ -574,8 +616,7 @@
     }
 
     function setPlaneXY() {
-      console.log(labelInfo.gateDblClick);
-      var no = labelInfo.gateDblClick;
+      var no = labelInfo.gateClick;
       var xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0;
       var i1 = bridge_code1.findIndex(x => x == no);
       var i2 = bridge_code2.findIndex(x => x == no);
@@ -790,7 +831,7 @@
     }
 
     function setBridgeCamera(no) {
-      if (!no) no = labelInfo.gateDblClick;
+      if (!no) no = labelInfo.gateClick;
       let sumX = 0, sumY = 0, sumZ = 0;
       let count = 0;
 
@@ -831,6 +872,103 @@
 
     }
 
+    function clearFlash(no, b, i) {
+      if (_collect_intervalId[`${no}_${b}_${i}`]) {
+        clearInterval(_collect_intervalId[`${no}_${b}_${i}`]);
+        _collect_intervalId[`${no}_${b}_${i}`] = false;
+      }
+    }
+
+    function setFlash(no, b, i) {
+      if (_collect_intervalId[`${no}_${b}_${i}`]) return;
+      _collect_intervalId[`${no}_${b}_${i}`] = setInterval(function (no, b, i) {
+        setVisible(no, b, i, null, true);
+      }, 500, no, b, i); // 设置闪烁间隔（毫秒）
+    }
+
+
+    function setVisible(no, b, i, isHidden, reverse) {
+      const _bridges = [bridge1, bridge2, bridge3];
+      const _bridgeCodes = [bridge_code1, bridge_code2, bridge_code3];
+
+      for (let j = 0; j < _bridgeCodes.length; j++) {
+        const _index = _bridgeCodes[j].findIndex(x => x == no);
+        if (_index > -1) {
+          const _bridge = _bridges[j];
+          const _types = ['L', 'LA', 'LB', `AL${i}`, `BL${i}`];
+          for (let k = 0; k < _types.length; k++) {
+            const _type = _types[k];
+            let p;
+            if (b == null && i == null) {
+              p = _bridge[_index].findIndex(x => x.obj_type == _type);
+            } else if (b != null && b.indexOf("_A") > -1 && i == null && _type == 'LA') {
+              p = _bridge[_index].findIndex(x => x.obj_type == _type);
+            } else if (b != null && b.indexOf("_B") > -1 && i == null && _type == 'LB') {
+              p = _bridge[_index].findIndex(x => x.obj_type == _type);
+            } else if (b != null && b.indexOf("_A") > -1 && i != null && _type == `AL${i}`) {
+              p = _bridge[_index].findIndex(x => x.obj_type == _type);
+            } else if (b != null && b.indexOf("_B") > -1 && i != null && _type == `BL${i}`) {
+              p = _bridge[_index].findIndex(x => x.obj_type == _type);
+            }
+            if (p > -1) {
+              if (reverse) {
+                isHidden = !_bridge[_index][p].material.transparent;
+              }
+
+              if (isHidden) {
+                _bridge[_index][p].material.transparent = true;
+                _bridge[_index][p].material.opacity = 0;
+              }
+              else {
+                _bridge[_index][p].material.transparent = false;
+                _bridge[_index][p].material.opacity = 1;
+              }
+              break;
+
+            }
+          }
+          break;
+        }
+      }
+    }
+
+
+
+    function setColor(no, b, i, c) {
+
+      const _bridges = [bridge1, bridge2, bridge3];
+      const _bridgeCodes = [bridge_code1, bridge_code2, bridge_code3];
+
+      for (let j = 0; j < _bridgeCodes.length; j++) {
+        const _index = _bridgeCodes[j].findIndex(x => x == no);
+        if (_index > -1) {
+          const _bridge = _bridges[j];
+          const _types = ['L', 'LA', 'LB', `AL${i}`, `BL${i}`];
+          for (let k = 0; k < _types.length; k++) {
+            const _type = _types[k];
+            let p;
+            if (b == null && i == null) {
+              p = _bridge[_index].findIndex(x => x.obj_type == _type);
+            } else if (b != null && b.indexOf("_A") > -1 && i == null && _type == 'LA') {
+              p = _bridge[_index].findIndex(x => x.obj_type == _type);
+            } else if (b != null && b.indexOf("_B") > -1 && i == null && _type == 'LB') {
+              p = _bridge[_index].findIndex(x => x.obj_type == _type);
+            } else if (b != null && b.indexOf("_A") > -1 && i != null && _type == `AL${i}`) {
+              p = _bridge[_index].findIndex(x => x.obj_type == _type);
+            } else if (b != null && b.indexOf("_B") > -1 && i != null && _type == `BL${i}`) {
+              p = _bridge[_index].findIndex(x => x.obj_type == _type);
+            }
+            if (p > -1) {
+              _bridge[_index][p].material.color.set(c);
+              break;
+
+            }
+          }
+          break;
+        }
+      }
+    }
+
     //載入模型
     function loadModels(promises, _objCollect, labelData, tmpData, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0, reflectivity = 1, emissive = '0x000000', transparent = false, opacity = 1) {
 
@@ -838,7 +976,6 @@
         tmpData.forEach((item, i) => {
           const promise = new Promise((resolve, reject) => {
             if (item.name.indexOf('.stl') > -1) {
-              console.log(item.name);
               const loader = new STLLoader();
               loader.load(item.name, function (geometry) {
                 if (xOffset == -100000)  //飛機
@@ -1192,7 +1329,7 @@
       gui_bridge.domElement.style.display = 'none';
       gui.domElement.style.display = 'block';
       bimModel.style.visibility = 'visible';
-      bimModel_bridge.style.visibility = 'hidden'; 
+      bimModel_bridge.style.visibility = 'hidden';
       resetCameraAndControls();
       ap_didLeaveBridgeScene(enterBridgeId);
     }
@@ -1397,20 +1534,20 @@
 
       var bridge_data_folder = gui.addFolder('bridge_data');
       bridge_data_folder.add({ value: '' }, 'value').name('wind data').onChange(function (value) {
-        setWindData(labelInfo.gateDblClick, value)
+        setWindData(labelInfo.gateClick, value)
       });
 
       bridge_data_folder.add({ value: '' }, 'value').name('plane data').onChange(function (value) {
-        setPlaneData(labelInfo.gateDblClick, value)
+        setPlaneData(labelInfo.gateClick, value)
       });
       bridge_data_folder.add({ value: '' }, 'value').name('label color').onChange(function (value) {
-        setLabelDataColor(labelInfo.gateDblClick, value)
+        setLabelDataColor(labelInfo.gateClick, value)
       });
       bridge_data_folder.add({ value: '' }, 'value').name('wind color').onChange(function (value) {
-        setWindDataColor(labelInfo.gateDblClick, value)
+        setWindDataColor(labelInfo.gateClick, value)
       });
       bridge_data_folder.add({ value: '' }, 'value').name('plane color').onChange(function (value) {
-        setPlaneDataColor(labelInfo.gateDblClick, value)
+        setPlaneDataColor(labelInfo.gateClick, value)
       });
 
 
@@ -1438,9 +1575,9 @@
       animate();
     }
     function clearFlash_bridge(c) {
-      if (_collect_intervalId[c]) {
-        clearInterval(_collect_intervalId[c]);
-        _collect_intervalId[c] = false;
+      if (_collect_intervalId_bridge[c]) {
+        clearInterval(_collect_intervalId_bridge[c]);
+        _collect_intervalId_bridge[c] = false;
         var i = _objCollect_bridge.findIndex(x => x.obj_type == c);
         _objCollect_bridge[i].material.opacity = 1; // 切换透明度
         _objCollect_bridge[i].material.transparent = false;
@@ -1449,7 +1586,7 @@
 
     function setFlash_bridge(c) {
       clearFlash_bridge(c);
-      _collect_intervalId[c] = setInterval(function (c) {
+      _collect_intervalId_bridge[c] = setInterval(function (c) {
         var i = _objCollect_bridge.findIndex(x => x.obj_type == c);
         _objCollect_bridge[i].material.transparent = true;
         _objCollect_bridge[i].material.opacity = (_objCollect_bridge[i].material.opacity === 1) ? 0 : 1; // 切换透明度
@@ -1486,7 +1623,7 @@
           });
         }
         else if (item.name.indexOf('sphere') > -1) {
-          const sphereSize = 0.1;
+          const sphereSize = 0.3;
           const bulbGeometry = new THREE.SphereGeometry(sphereSize, 16, 8);
           const bulbMaterial = new THREE.MeshBasicMaterial({ color: item.color }); // 與光源顏色相同
           const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
@@ -1536,14 +1673,14 @@
 
       if (intersects.length > 0) {
         // 如果有物体被选中 
-        var idx = intersects.findIndex(x => x.object.label);
+        var idx = intersects.findIndex(x => x.object.obj_type);
         if (idx > -1) {
-          
+          console.log(intersects[idx].object.obj_type);
         }
       }
     }
 
-    function onMouseDblClick_bridge(event) { 
+    function onMouseDblClick_bridge(event) {
       // 计算鼠标在场景中的位置 
       mouse_bridge.x = (event.clientX / container_bridge.offsetWidth) * 2 - 1;
       mouse_bridge.y = -(event.clientY / container_bridge.offsetHeight) * 2 + 1;
@@ -1555,14 +1692,15 @@
       const intersects = raycaster_bridge.intersectObjects(scene_bridge.children);
 
       if (intersects.length > 0) {
-        intersects.forEach(element => {
-          
-        });
-        
+        var idx = intersects.findIndex(x => x.object.obj_type);
+        if (idx > -1) {
+          console.log(intersects[idx].object.obj_type);
+        }
+
       }
     }
 
-    function onMouseClick_bridge(event) { 
+    function onMouseClick_bridge(event) {
       // 如果是2d
 
       // 计算鼠标在场景中的位置 
@@ -1577,8 +1715,10 @@
 
       if (intersects.length > 0) {
         // 如果有物体被选中 
-        intersects.forEach(element => {
-        });
+        var idx = intersects.findIndex(x => x.object.obj_type);
+        if (idx > -1) {
+          console.log(intersects[idx].object.obj_type);
+        }
       }
     }
 
@@ -1594,8 +1734,8 @@
       const intersects = raycaster_bridge.intersectObjects(scene_bridge.children);
 
       if (intersects.length > 0) {
-        intersects.forEach(element => { 
-        });  
+        intersects.forEach(element => {
+        });
       }
     }
 
@@ -1615,11 +1755,11 @@
       scene_bridge.add(plane_bridge); // 將平面添加到場景中
 
       // 創建相機
-      camera_bridge = new THREE.PerspectiveCamera(C_bridge.fov, container_bridge.offsetWidth / container_bridge.offsetHeight, C_bridge.near, C_bridge.far); // 使用配置參數創建透視相機
-      camera_bridge.position.set(C_bridge.position.x, C_bridge.position.y, C_bridge.position.z); // 設定相機位置
-      camera_bridge.rotation.set(C_bridge.rotation._x, C_bridge.rotation._y, C_bridge.rotation._z); // 設定相機旋轉
-      camera_bridge.quaternion.set(C_bridge.quaternion._x, C_bridge.quaternion._y, C_bridge.quaternion._z, C_bridge.quaternion._w); // 設定相機四元數，用於控制旋轉
-      camera_bridge.zoom = C_bridge.zoom; // 設定相機的縮放級別
+      camera_bridge = new THREE.PerspectiveCamera(C_bridgeC.fov, container_bridge.offsetWidth / container_bridge.offsetHeight, C_bridgeC.near, C_bridgeC.far); // 使用配置參數創建透視相機
+      camera_bridge.position.set(C_bridgeC.position.x, C_bridgeC.position.y, C_bridgeC.position.z); // 設定相機位置
+      camera_bridge.rotation.set(C_bridgeC.rotation._x, C_bridgeC.rotation._y, C_bridgeC.rotation._z); // 設定相機旋轉
+      camera_bridge.quaternion.set(C_bridgeC.quaternion._x, C_bridgeC.quaternion._y, C_bridgeC.quaternion._z, C_bridgeC.quaternion._w); // 設定相機四元數，用於控制旋轉
+      camera_bridge.zoom = C_bridgeC.zoom; // 設定相機的縮放級別
       camera_bridge.updateProjectionMatrix(); // 更新相機的投影矩陣
 
       // 初始化渲染器
@@ -1642,7 +1782,7 @@
       controls_bridge.enableDamping = true; // 啟用阻尼效果，使交互更加平滑
       controls_bridge.dampingFactor = 0.25; // 設定阻尼系數
       controls_bridge.screenSpacePanning = false; // 禁用屏幕空間平移
-      controls_bridge.target.set(C_bridge.target.x, C_bridge.target.y, C_bridge.target.z); // 設定控制的目標點
+      controls_bridge.target.set(C_bridgeC.target.x, C_bridgeC.target.y, C_bridgeC.target.z); // 設定控制的目標點
       controls_bridge.update(); // 更新控制器的內部狀態
 
       // 设置最小极角为0，防止低于地平面
@@ -1654,7 +1794,44 @@
       // 呼叫 loadModels 函數來加載和顯示所有模型
       loadModels_bridge(bridgeData);
 
-      document.getElementById('backButton').addEventListener('click',  backOrverAll);
+      document.getElementById('backButton').addEventListener('click', backOrverAll);
+      document.getElementById('viewAButton').addEventListener('click', function () {
+
+        camera_bridge.position.set(C_bridgeA.position.x, C_bridgeA.position.y, C_bridgeA.position.z); // 設定相機位置
+        camera_bridge.rotation.set(C_bridgeA.rotation._x, C_bridgeA.rotation._y, C_bridgeA.rotation._z); // 設定相機旋轉
+        camera_bridge.quaternion.set(C_bridgeA.quaternion._x, C_bridgeA.quaternion._y, C_bridgeA.quaternion._z, C_bridgeA.quaternion._w); // 設定相機四元數，用於控制旋轉
+        camera_bridge.zoom = C_bridgeA.zoom; // 設定相機的縮放級別
+        camera_bridge.updateProjectionMatrix(); // 更新相機的投影矩陣
+
+        controls_bridge.target.set(C_bridgeA.target.x, C_bridgeA.target.y, C_bridgeA.target.z); // 設定控制的目標點
+        controls_bridge.update(); // 更新控制器的內部狀態
+
+      });
+      document.getElementById('viewBButton').addEventListener('click', function () {
+
+
+        camera_bridge.position.set(C_bridgeB.position.x, C_bridgeB.position.y, C_bridgeB.position.z); // 設定相機位置
+        camera_bridge.rotation.set(C_bridgeB.rotation._x, C_bridgeB.rotation._y, C_bridgeB.rotation._z); // 設定相機旋轉
+        camera_bridge.quaternion.set(C_bridgeB.quaternion._x, C_bridgeB.quaternion._y, C_bridgeB.quaternion._z, C_bridgeB.quaternion._w); // 設定相機四元數，用於控制旋轉
+        camera_bridge.zoom = C_bridgeB.zoom; // 設定相機的縮放級別
+        camera_bridge.updateProjectionMatrix(); // 更新相機的投影矩陣
+
+        controls_bridge.target.set(C_bridgeB.target.x, C_bridgeB.target.y, C_bridgeB.target.z); // 設定控制的目標點
+        controls_bridge.update(); // 更新控制器的內部狀態
+
+      });
+      document.getElementById('viewCButton').addEventListener('click', function () {
+
+
+        camera_bridge.position.set(C_bridgeC.position.x, C_bridgeC.position.y, C_bridgeC.position.z); // 設定相機位置
+        camera_bridge.rotation.set(C_bridgeC.rotation._x, C_bridgeC.rotation._y, C_bridgeC.rotation._z); // 設定相機旋轉
+        camera_bridge.quaternion.set(C_bridgeC.quaternion._x, C_bridgeC.quaternion._y, C_bridgeC.quaternion._z, C_bridgeC.quaternion._w); // 設定相機四元數，用於控制旋轉
+        camera_bridge.zoom = C_bridgeC.zoom; // 設定相機的縮放級別
+        camera_bridge.updateProjectionMatrix(); // 更新相機的投影矩陣
+
+        controls_bridge.target.set(C_bridgeC.target.x, C_bridgeC.target.y, C_bridgeC.target.z); // 設定控制的目標點
+        controls_bridge.update(); // 更新控制器的內部狀態
+      });
       raycaster_bridge = new THREE.Raycaster();
       mouse_bridge = new THREE.Vector2();
       // 滑鼠事件
@@ -1765,6 +1942,35 @@
         //當aTime 由有值轉為 null 時，播放飛機離場動畫。(aTime!=null && new_aTime==null
         if (lastStatus[element.id].aTime != null && element.flightLegInfo.aTime == null) runplay(element.id, 0, 75, 100);
 
+
+        //isHidden 是否隱藏。(true: 隱藏, false: 顯示)
+        //isFlash 是否閃爍。(true: 閃爍, false: 不閃爍)
+        if (element.isFlash)
+          setFlash(element.id);
+        else
+          clearFlash(element.id);
+        setVisible(element.id, null, null, element.isHidden);
+        setColor(element.id, null, null, element.statusColor);
+        element.bridges.forEach(b_element => {
+
+          if (b_element.isFlash)
+            setFlash(b_element.id);
+          else
+            clearFlash(b_element.id);
+          setVisible(element.id, b_element.id, null, b_element.isHidden);
+          setColor(element.id, b_element.id, null, b_element.statusColor);
+
+          b_element.details.forEach((bi_element, index) => {
+
+            if (b_element.isFlash)
+              setFlash(b_element.id);
+            else
+              clearFlash(b_element.id);
+            setVisible(element.id, b_element.id, index, b_element.isHidden);
+            setColor(element.id, b_element.id, index, b_element.statusColor);
+          });
+
+        });
 
         lastStatus[element.id] = { aTime: element.flightLegInfo.aTime, status: element.status };
       });
