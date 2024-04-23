@@ -884,7 +884,7 @@
 
                   _Div.addEventListener('mouseover', function () {
                     // 滑鼠移到登機門圖示錨點
-                    _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
+                    // _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
                     labelInfo.gateMouseover = labelData[c]; // 更新 GUI 显示的标签信息
                     gui.updateDisplay(); // 更新 GUI 显示
                   });
@@ -959,6 +959,63 @@
               scene.add(bulb);
               _objCollect[c].push(bulb);
 
+
+              if (item.obj_type == "AL1" && labelData) {
+                const _Div = document.createElement("div");
+                _Div.id = labelData[c];
+                _Div.style.padding = '3px';
+                _Div.style.color = '#fff';
+                _Div.style.fontSize = '12px';
+                _Div.style.position = 'absolute';
+                _Div.style.backgroundColor = 'rgba(25,25,25,0.5)';
+                _Div.style.borderRadius = '3px';
+                _Div.className = "label";
+                _Div.textContent = labelData[c] + "_A";
+                _Div.style.marginTop = "-1em";
+
+                _Div.addEventListener('mouseover', function () {
+                  // 滑鼠移到登機門圖示錨點
+                  // _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
+                  labelInfo.gateMouseover = labelData[c] + "_A"; // 更新 GUI 显示的标签信息
+                  gui.updateDisplay(); // 更新 GUI 显示
+                });
+                _Div.addEventListener('mouseout', function (e) {
+                  //_Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
+                });
+                const _Label = new CSS2DObject(_Div);
+                _Label.position.set(0, 0, 0);
+                bulb.add(_Label);
+
+
+              }
+              if (item.obj_type == "BL1" && labelData) {
+                const _Div = document.createElement("div");
+                _Div.id = labelData[c];
+                _Div.style.padding = '3px';
+                _Div.style.color = '#fff';
+                _Div.style.fontSize = '12px';
+                _Div.style.position = 'absolute';
+                _Div.style.backgroundColor = 'rgba(25,25,25,0.5)';
+                _Div.style.borderRadius = '3px';
+                _Div.className = "label";
+                _Div.textContent = labelData[c] + "_B";
+                _Div.style.marginTop = "-1em";
+
+                _Div.addEventListener('mouseover', function () {
+                  // 滑鼠移到登機門圖示錨點
+                  // _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
+                  labelInfo.gateMouseover = labelData[c] + "_B"; // 更新 GUI 显示的标签信息
+                  gui.updateDisplay(); // 更新 GUI 显示
+                });
+                _Div.addEventListener('mouseout', function (e) {
+                  //_Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
+                });
+                const _Label = new CSS2DObject(_Div);
+                _Label.position.set(0, 0, 0);
+                bulb.add(_Label);
+
+
+              }
               resolve();
             }
 
