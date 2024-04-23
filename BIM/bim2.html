@@ -37,6 +37,18 @@
       font-size: 10px;
       color: white;
     }
+
+    #backButton {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background-color: rgba(83, 33, 33);
+      padding: 5px 10px;
+      border-radius: 5px;
+      z-index: 2000;
+      font-size: 10px;
+      color: white;
+    }
   </style>
 </head>
 
@@ -49,6 +61,7 @@
       瞬間風速達25節,暫停橋复服務。</div>
   </div>
   <div id="bimModel_bridge" style="visibility: hidden; width: 80vw; height: 80vh; position: absolute; top:0; left:0;">
+    <button id="backButton">返回</button>
   </div>
   <div style=" position: absolute; top:80vh; left:0;">json:<br />
     <textarea id="json" style="width:200px; height:100px"></textarea><br />
@@ -100,7 +113,7 @@
     let camPosX, camPosY, camPosZ, camRotX, camRotY, camRotZ, controlTargetX, controlTargetY, controlTargetZ;
 
 
-    let camera_bridge, scene_bridge, renderer_bridge, labelRenderer_bridge, controls_bridge, raycaster_bridge, mouse_bridge, light_bridge;
+    let camera_bridge, scene_bridge, renderer_bridge, labelRenderer_bridge, controls_bridge, raycaster_bridge, mouse_bridge, light_bridge, axesHelper_bridge;
 
     //根據方向建立三個空橋陣列存放3d object
     let bridge1 = [];
@@ -126,8 +139,13 @@
 
     let intervalId = {};
 
+    let enterBridgeId;
+
     //滑鼠事件
-    let labelInfo = { gateClick: 'None', gateDblClick: 'None', gateMouseover: 'None1', modelClick: 'None' };
+    let labelInfo = {
+      gateClick: 'None', gateDblClick: 'None', gateMouseover: 'None',
+      bridgeClick: 'None', bridgeDblClick: 'None', bridgeMouseover: 'None', modelClick: 'None'
+    };
 
     //操控面板
     let gui = new dat.GUI();
@@ -136,13 +154,13 @@
     let C = { "position": { "x": -1.5989615626517384, "y": 83.61388808536435, "z": -16.485932169549844 }, "rotation": { "_x": -1.5707963267671246, "_y": 0.0000010003774455482065, "_z": 1.5707685651481607, "_order": "XYZ" }, "zoom": 1, "quaternion": { "_x": -0.500006690265619, "_y": 0.4999933096309743, "_z": 0.49999280944919444, "_w": 0.500007190461285 }, "fov": 45, "aspect": 2.015748031496063, "near": 0.1, "far": 5000, "target": { "x": -1.5990452080995163, "y": 3.889352887216332e-15, "z": -16.48593217187198 } };
 
     //空橋1
-    let bridgeData1 = [{ "index": 0, "name": "sphere", "obj_type": "AL1", "position": { "x": 6.2, "y": 0.5, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "AL2", "position": { "x": 6.2, "y": 0.5, "z": 9 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "AL3", "position": { "x": 6.2, "y": 0.5, "z": 10.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "BL1", "position": { "x": 7.1, "y": 0.5, "z": 9.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 4, "name": "sphere", "obj_type": "BL2", "position": { "x": 7.1, "y": 0.5, "z": 11 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 5, "name": "sphere", "obj_type": "BL3", "position": { "x": 7.1, "y": 0.5, "z": 12.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 6, "name": "cube.stl", "obj_type": "", "position": { "x": 0, "y": -1, "z": -0.5 }, "scale": { "x": 0.7, "y": 0.5, "z": 2.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#999999", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 7, "name": "cube.stl", "obj_type": "label", "position": { "x": 2, "y": 0, "z": 9 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 8, "name": "cube.stl", "obj_type": "", "position": { "x": 6, "y": 0, "z": 10 }, "scale": { "x": 0.4, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 9, "name": "cube.stl", "obj_type": "B1", "position": { "x": 6.5, "y": 0, "z": 9.5 }, "scale": { "x": 0.1, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 10, "name": "cube.stl", "obj_type": "A1", "position": { "x": 6, "y": 0, "z": 8 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 11, "name": "Group_29.stl", "obj_type": "B4", "position": { "x": 6.7, "y": -0.3, "z": 12.8 }, "scale": { "x": 0.35, "y": 0.35, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 7, "y": 0, "z": 12.8 } }, { "index": 12, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": 5.8, "y": -0.3, "z": 10.5 }, "scale": { "x": 0.35, "y": 0.35, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.15, "y": 0, "z": 10.57 } }, { "index": 13, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": 6.2, "y": -1, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.25, "y": 0, "z": 7.3 } }, { "index": 14, "name": "JetwayConnector.stl", "obj_type": "B2", "position": { "x": 7.1, "y": -1, "z": 9.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 7.12, "y": 0, "z": 9.77 } }, { "index": 15, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": 6, "y": -1, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.21, "y": 0, "z": 7.3 } }, { "index": 16, "name": "CLE_JetwayGen.stl", "obj_type": "B3", "position": { "x": 6.9, "y": -1, "z": 9.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.21, "y": 0, "z": 7.3 } }];
+    let bridgeData1 = [{ "index": 0, "name": "sphere", "obj_type": "L", "position": { "x": 4, "y": 0.5, "z": 9.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "LA", "position": { "x": 6.2, "y": 0.5, "z": 8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "LB", "position": { "x": 6.2, "y": 0.5, "z": 9.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "AL1", "position": { "x": 6.2, "y": 0.5, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 4, "name": "sphere", "obj_type": "AL2", "position": { "x": 6.2, "y": 0.5, "z": 9 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 5, "name": "sphere", "obj_type": "AL3", "position": { "x": 6.2, "y": 0.5, "z": 10.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 6, "name": "sphere", "obj_type": "BL1", "position": { "x": 7.1, "y": 0.5, "z": 9.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 7, "name": "sphere", "obj_type": "BL2", "position": { "x": 7.1, "y": 0.5, "z": 11 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 8, "name": "sphere", "obj_type": "BL3", "position": { "x": 7.1, "y": 0.5, "z": 12.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 9, "name": "cube.stl", "obj_type": "", "position": { "x": 0, "y": -1, "z": -0.5 }, "scale": { "x": 0.7, "y": 0.5, "z": 2.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#999999", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 10, "name": "cube.stl", "obj_type": "label", "position": { "x": 2, "y": 0, "z": 9 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 11, "name": "cube.stl", "obj_type": "", "position": { "x": 6, "y": 0, "z": 10 }, "scale": { "x": 0.4, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 12, "name": "cube.stl", "obj_type": "B1", "position": { "x": 6.5, "y": 0, "z": 9.5 }, "scale": { "x": 0.1, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 13, "name": "cube.stl", "obj_type": "A1", "position": { "x": 6, "y": 0, "z": 8 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 14, "name": "Group_29.stl", "obj_type": "B4", "position": { "x": 6.7, "y": -0.3, "z": 12.8 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 7, "y": 0, "z": 12.8 } }, { "index": 15, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": 5.8, "y": -0.3, "z": 10.5 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.15, "y": 0, "z": 10.57 } }, { "index": 16, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": 6.2, "y": -1, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.25, "y": 0, "z": 7.3 } }, { "index": 17, "name": "JetwayConnector.stl", "obj_type": "B2", "position": { "x": 7.1, "y": -1, "z": 9.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 7.12, "y": 0, "z": 9.77 } }, { "index": 18, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": 6, "y": -1, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.21, "y": 0, "z": 7.3 } }, { "index": 19, "name": "CLE_JetwayGen.stl", "obj_type": "B3", "position": { "x": 6.9, "y": -1, "z": 9.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.21, "y": 0, "z": 7.3 } }];
 
     //空橋2
-    let bridgeData2 = [{ "index": 0, "name": "sphere", "obj_type": "AL1", "position": { "x": -2.3, "y": 0.5, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "AL2", "position": { "x": -2.3, "y": 0.5, "z": 4.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "AL3", "position": { "x": -2.3, "y": 0.5, "z": 5.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "BL1", "position": { "x": -3.7, "y": 0.5, "z": 0.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 4, "name": "sphere", "obj_type": "BL2", "position": { "x": -3.7, "y": 0.5, "z": 2.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 5, "name": "sphere", "obj_type": "BL3", "position": { "x": -3.7, "y": 0.5, "z": 3.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 6, "name": "cube.stl", "obj_type": "", "position": { "x": 0, "y": -1, "z": 0 }, "scale": { "x": 0.7, "y": 0.5, "z": 2.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#999999", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 7, "name": "cube.stl", "obj_type": "label", "position": { "x": 1.8, "y": 0, "z": 1 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 3.141592653589793, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 8, "name": "cube.stl", "obj_type": "", "position": { "x": -2.7, "y": 0, "z": 2 }, "scale": { "x": 0.4, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 9, "name": "cube.stl", "obj_type": "B1", "position": { "x": -3.5, "y": 0, "z": 1 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.2 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 10, "name": "cube.stl", "obj_type": "A1", "position": { "x": -2.65, "y": 0, "z": 2.4 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 11, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": -2.4, "y": -1, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.46, "y": 0, "z": 2.68 } }, { "index": 12, "name": "JetwayConnector.stl", "obj_type": "B2", "position": { "x": -3.8, "y": -1, "z": 0.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.83, "y": 0, "z": 0.77 } }, { "index": 13, "name": "Group_29.stl", "obj_type": "B4", "position": { "x": -4.2, "y": -0.3, "z": 3.9 }, "scale": { "x": 0.35, "y": 0.35, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.77, "y": 0, "z": 3.93 } }, { "index": 14, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": -2.8, "y": -0.3, "z": 5.7 }, "scale": { "x": 0.35, "y": 0.35, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.36, "y": 0, "z": 5.77 } }, { "index": 15, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": -2.6, "y": -1, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.46, "y": 0, "z": 2.68 } }, { "index": 16, "name": "CLE_JetwayGen.stl", "obj_type": "B3", "position": { "x": -4, "y": -1, "z": 0.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.83, "y": 0, "z": 0.77 } }];
+    let bridgeData2 = [{ "index": 0, "name": "sphere", "obj_type": "L", "position": { "x": -0.5, "y": 0.5, "z": 0.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "LA", "position": { "x": -2.3, "y": 0.5, "z": 1.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "LB", "position": { "x": -2.3, "y": 0.5, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "AL1", "position": { "x": -2.3, "y": 0.5, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 4, "name": "sphere", "obj_type": "AL2", "position": { "x": -2.3, "y": 0.5, "z": 4.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 5, "name": "sphere", "obj_type": "AL3", "position": { "x": -2.3, "y": 0.5, "z": 5.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 6, "name": "sphere", "obj_type": "BL1", "position": { "x": -3.7, "y": 0.5, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 7, "name": "sphere", "obj_type": "BL2", "position": { "x": -3.7, "y": 0.5, "z": 2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 8, "name": "sphere", "obj_type": "BL3", "position": { "x": -3.7, "y": 0.5, "z": 3.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 9, "name": "cube.stl", "obj_type": "", "position": { "x": 0, "y": -1, "z": 0 }, "scale": { "x": 0.7, "y": 0.5, "z": 2.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#999999", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 10, "name": "cube.stl", "obj_type": "label", "position": { "x": 1.8, "y": 0, "z": 1 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 3.141592653589793, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 11, "name": "cube.stl", "obj_type": "", "position": { "x": -2.7, "y": 0, "z": 2 }, "scale": { "x": 0.4, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 12, "name": "cube.stl", "obj_type": "B1", "position": { "x": -3.5, "y": 0, "z": 0.5 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.2 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 13, "name": "cube.stl", "obj_type": "A1", "position": { "x": -2.65, "y": 0, "z": 2.4 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 14, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": -2.4, "y": -1, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.46, "y": 0, "z": 2.68 } }, { "index": 15, "name": "JetwayConnector.stl", "obj_type": "B2", "position": { "x": -3.8, "y": -1, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.83, "y": 0, "z": 0.27 } }, { "index": 16, "name": "Group_29.stl", "obj_type": "B4", "position": { "x": -4.2, "y": -0.3, "z": 3.4 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.77, "y": 0, "z": 3.43 } }, { "index": 17, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": -2.8, "y": -0.3, "z": 5.7 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.36, "y": 0, "z": 5.77 } }, { "index": 18, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": -2.6, "y": -1, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.46, "y": 0, "z": 2.68 } }, { "index": 19, "name": "CLE_JetwayGen.stl", "obj_type": "B3", "position": { "x": -4, "y": -1, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.83, "y": 0, "z": 0.27 } }];
 
     //空橋3
-    let bridgeData3 = [{ "index": 0, "name": "sphere", "obj_type": "AL1", "position": { "x": 0.8, "y": 0.5, "z": 4.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "AL2", "position": { "x": 0.8, "y": 0.5, "z": 5.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "AL3", "position": { "x": 0.8, "y": 0.5, "z": 6.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "cube.stl", "obj_type": "", "position": { "x": 0, "y": -1, "z": 0 }, "scale": { "x": 0.3, "y": 0.4, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#999999", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 4, "name": "cube.stl", "obj_type": "label", "position": { "x": 0.5, "y": 0, "z": 4 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 5, "name": "cube.stl", "obj_type": "A1", "position": { "x": 0.55, "y": 0, "z": 4 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 6, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": 0.4, "y": -0.3, "z": 6.5 }, "scale": { "x": 0.35, "y": 0.35, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 0.8, "y": 0, "z": 6.5 } }, { "index": 7, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": 0.75, "y": -0.3, "z": 4.4 }, "scale": { "x": 0.5, "y": 0.5, "z": 0.5 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 0.73, "y": 0, "z": 4.4 } }, { "index": 8, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": 0.6, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1, "z": 0.8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }];
+    let bridgeData3 = [{ "index": 0, "name": "sphere", "obj_type": "L", "position": { "x": 0.8, "y": 0.5, "z": 0.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "AL1", "position": { "x": 0.8, "y": 0.5, "z": 3.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "AL1", "position": { "x": 0.8, "y": 0.5, "z": 4.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "AL2", "position": { "x": 0.8, "y": 0.5, "z": 5.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 4, "name": "sphere", "obj_type": "AL3", "position": { "x": 0.8, "y": 0.5, "z": 6.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 5, "name": "cube.stl", "obj_type": "", "position": { "x": 0, "y": -1, "z": 0 }, "scale": { "x": 0.3, "y": 0.4, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#999999", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 6, "name": "cube.stl", "obj_type": "label", "position": { "x": 0.5, "y": 0, "z": 4 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 7, "name": "cube.stl", "obj_type": "A1", "position": { "x": 0.55, "y": 0, "z": 4 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 8, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": 0.4, "y": -0.3, "z": 6.5 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 0.8, "y": 0, "z": 6.5 } }, { "index": 9, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": 0.75, "y": -0.3, "z": 4.4 }, "scale": { "x": 0.5, "y": 0.5, "z": 0.5 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 0.73, "y": 0, "z": 4.4 } }, { "index": 10, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": 0.6, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1, "z": 0.8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }];
 
     //主建築
     let mainBuilding = [{ "index": 0, "name": "cube.stl", "obj_type": "undefined", "position": { "x": -14, "y": -1, "z": -20 }, "scale": { "x": 0.2, "y": 0.5, "z": 8.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#006600", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 1, "name": "cube.stl", "obj_type": "undefined", "position": { "x": 13, "y": -1, "z": -20 }, "scale": { "x": 0.2, "y": 0.5, "z": 8.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#006600", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "cube.stl", "obj_type": "出境1", "position": { "x": -23, "y": 0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 3, "name": "cube.stl", "obj_type": "入境2", "position": { "x": 12, "y": -0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0.4363323129985824, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 21.7, "y": 0, "z": 0 } }, { "index": 4, "name": "cube.stl", "obj_type": "入境1", "position": { "x": -23, "y": -0.5, "z": -1 }, "scale": { "x": 2.2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": -0.4363323129985824, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": -22.5, "y": 0, "z": 0.1 } }, { "index": 5, "name": "cube.stl", "obj_type": "出境2", "position": { "x": 12, "y": 0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 6, "name": "cube.stl", "obj_type": "", "position": { "x": -52, "y": -1.1, "z": -90 }, "scale": { "x": 20, "y": 0.05, "z": 30 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#dddddd", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 7, "name": "cube.stl", "obj_type": "undefined", "position": { "x": -14, "y": 0.5, "z": -20 }, "scale": { "x": 5.5, "y": 0.02, "z": 8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#dddddd", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 8, "name": "cube.stl", "obj_type": "undefined", "position": { "x": -14, "y": 1.5, "z": -20 }, "scale": { "x": 5.5, "y": 0.1, "z": 8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#dddddd", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 9, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": -20, "y": -1, "z": -6 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 10, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": -20, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 11, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": 20, "y": -1, "z": -6 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 12, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": 20, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 13, "name": "top3.stl", "obj_type": "undefined", "position": { "x": 0, "y": 2, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }];
@@ -881,6 +899,7 @@
                   _Div.className = "label";
                   _Div.textContent = labelData[c];
                   _Div.style.marginTop = "-1em";
+                  if (labelData) _Div.label = labelData[c];
 
                   _Div.addEventListener('mouseover', function () {
                     // 滑鼠移到登機門圖示錨點
@@ -908,6 +927,7 @@
                   _Div2.className = "label";
                   _Div2.textContent = "10 / 20";
                   _Div2.style.marginTop = "-1em";
+                  if (labelData) _Div2.label = labelData[c];
 
 
                   const _Label2 = new CSS2DObject(_Div2);
@@ -926,6 +946,7 @@
                   _Div3.className = "label";
                   _Div3.innerHTML = "C000  1234<br>抵達時間<br>離開時間";
                   _Div3.style.marginTop = "-1em";
+                  if (labelData) _Div3.label = labelData[c];
 
 
                   const _Label3 = new CSS2DObject(_Div3);
@@ -972,11 +993,12 @@
                 _Div.className = "label";
                 _Div.textContent = labelData[c] + "_A";
                 _Div.style.marginTop = "-1em";
+                if (labelData) _Div.label = labelData[c];
 
                 _Div.addEventListener('mouseover', function () {
                   // 滑鼠移到登機門圖示錨點
                   // _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
-                  labelInfo.gateMouseover = labelData[c] + "_A"; // 更新 GUI 显示的标签信息
+                  labelInfo.bridgeMouseover = labelData[c] + "_A"; // 更新 GUI 显示的标签信息
                   gui.updateDisplay(); // 更新 GUI 显示
                 });
                 _Div.addEventListener('mouseout', function (e) {
@@ -1000,11 +1022,12 @@
                 _Div.className = "label";
                 _Div.textContent = labelData[c] + "_B";
                 _Div.style.marginTop = "-1em";
+                if (labelData) _Div.label = labelData[c];
 
                 _Div.addEventListener('mouseover', function () {
                   // 滑鼠移到登機門圖示錨點
                   // _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
-                  labelInfo.gateMouseover = labelData[c] + "_B"; // 更新 GUI 显示的标签信息
+                  labelInfo.bridgeMouseover = labelData[c] + "_B"; // 更新 GUI 显示的标签信息
                   gui.updateDisplay(); // 更新 GUI 显示
                 });
                 _Div.addEventListener('mouseout', function (e) {
@@ -1048,26 +1071,11 @@
     }
 
     function onMouseDblClick(event) {
-      if (bimModel_bridge.style.visibility == 'visible') {
-        //回去
-        gui_bridge.domElement.style.display = 'none';
-        gui.domElement.style.display = 'block';
-        bimModel.style.visibility = 'visible';
-        bimModel_bridge.style.visibility = 'hidden';
-        labelInfo.gateDblClick = 'None';
-        resetCameraAndControls();
-        return;
-      }
-      if (labelInfo.gateMouseover) {
-        if (labelInfo.gateDblClick == labelInfo.gateMouseover) {
-          // 第二次DblClick 轉場景
-          gui_bridge.domElement.style.display = 'block';
-          gui.domElement.style.display = 'none';
-          bimModel.style.visibility = 'hidden';
-          bimModel_bridge.style.visibility = 'visible';
-        }
-        labelInfo.gateDblClick = labelInfo.gateMouseover;
-      }
+      var bridge = null;
+      var gate = null;
+      if (labelInfo.gateMouseover && labelInfo.gateMouseover != 'None') labelInfo.gateDblClick = labelInfo.gateMouseover;
+      if (labelInfo.bridgeMouseover && labelInfo.bridgeMouseover != 'None') labelInfo.bridgeDblClick = labelInfo.bridgeMouseover;
+
       // 计算鼠标在场景中的位置 
       mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
       mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
@@ -1079,19 +1087,39 @@
       const intersects = raycaster.intersectObjects(scene.children);
 
       if (intersects.length > 0) {
-        // 如果有物体被选中 
-        var idx = intersects.findIndex(x => x.object.label);
-        if (idx > -1) {
-          labelInfo.gateDblClick = intersects[idx].object.label;
+        intersects.forEach(element => {
+          if (element.object.label) {
+            if (gate == null) gate = intersects[0].object.label;
+            labelInfo.gateDblClick = intersects[0].object.label;
+          }
+          if (element.object.obj_type) {
+            if (bridge == null) bridge = element.object.obj_type;
+            if (element.object.obj_type == "A1" || element.object.obj_type == "A2" || element.object.obj_type == "A3")
+              labelInfo.bridgeDblClick = element.object.label + "_A";
+            if (element.object.obj_type == "B1" || element.object.obj_type == "B2" || element.object.obj_type == "B3")
+              labelInfo.bridgeDblClick = element.object.label + "_B";
+          }
           gui.updateDisplay(); // 更新 GUI 显示
+        });
+        // 如果有物体被选中 
 
-
-        }
+        gui_bridge.domElement.style.display = 'block';
+        gui.domElement.style.display = 'none';
+        bimModel.style.visibility = 'hidden';
+        bimModel_bridge.style.visibility = 'visible';
+        // 使用者在空橋標籤或空橋錨點雙擊滑鼠，BIM Model 切換至空橋細部 
+        enterBridgeId = labelInfo.gateDblClick;
+        ap_didEnterBridgeScene(labelInfo.gateDblClick);
       }
     }
 
     function onMouseClick(event) {
-      if (labelInfo.gateMouseover) labelInfo.gateClick = labelInfo.gateMouseover;
+      var gate = null;
+      var bridge = null;
+      if (labelInfo.gateMouseover && labelInfo.gateMouseover != 'None') labelInfo.gateClick = labelInfo.gateMouseover;
+      if (labelInfo.bridgeMouseover && labelInfo.bridgeMouseover != 'None') labelInfo.bridgeClick = labelInfo.bridgeMouseover;
+      // 如果是2d
+
       // 计算鼠标在场景中的位置 
       mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
       mouse.y = -(event.clientY / container.offsetHeight) * 2 + 1;
@@ -1104,9 +1132,31 @@
 
       if (intersects.length > 0) {
         // 如果有物体被选中 
-        if (intersects[0].object.label) {
-          labelInfo.gateClick = intersects[0].object.label;
+        intersects.forEach(element => {
+          if (element.object.label) {
+            if (gate == null) gate = intersects[0].object.label;
+            labelInfo.gateClick = intersects[0].object.label;
+          }
+          if (element.object.obj_type) {
+            if (bridge == null) bridge = element.object.obj_type;
+            if (element.object.obj_type == "A1" || element.object.obj_type == "A2" || element.object.obj_type == "A3" || element.object.obj_type == "A4")
+              labelInfo.bridgeClick = element.object.label + "_A";
+            if (element.object.obj_type == "B1" || element.object.obj_type == "B2" || element.object.obj_type == "B3" || element.object.obj_type == "B4")
+              labelInfo.bridgeClick = element.object.label + "_B";
+          }
           gui.updateDisplay(); // 更新 GUI 显示
+        });
+        if (gate != null && bridge != null) {
+          if (bridge == "A1") ap_showBridgeDetailInfo(gate + "_A", 0);
+          if (bridge == "A2") ap_showBridgeDetailInfo(gate + "_A", 0);
+          if (bridge == "A3") ap_showBridgeDetailInfo(gate + "_A", 1);
+          if (bridge == "A4") ap_showBridgeDetailInfo(gate + "_A", 2);
+          if (bridge == "B1") ap_showBridgeDetailInfo(gate + "_B", 0);
+          if (bridge == "B2") ap_showBridgeDetailInfo(gate + "_B", 0);
+          if (bridge == "B3") ap_showBridgeDetailInfo(gate + "_B", 1);
+          if (bridge == "B4") ap_showBridgeDetailInfo(gate + "_B", 2);
+        } else if (bridge != null) {
+          ap_showBridgeInfo(bridge)
         }
       }
     }
@@ -1123,9 +1173,28 @@
       const intersects = raycaster.intersectObjects(scene.children);
 
       if (intersects.length > 0) {
-        //  console.log("交点位置：", intersects[0].point);
+        intersects.forEach(element => {
+          if (element.object.label) labelInfo.gateMouseover = element.object.label;
+          if (element.object.obj_type) {
+            if (element.object.obj_type == "A1" || element.object.obj_type == "A2" || element.object.obj_type == "A3")
+              labelInfo.bridgeMouseover = element.object.label + "_A";
+            if (element.object.obj_type == "B1" || element.object.obj_type == "B2" || element.object.obj_type == "B3")
+              labelInfo.bridgeMouseover = element.object.label + "_B";
+          }
+        });
+        gui.updateDisplay(); // 更新 GUI 显示
         // axesHelper.position.copy(intersects[0].point);
       }
+    }
+
+
+    function backOrverAll() {
+      gui_bridge.domElement.style.display = 'none';
+      gui.domElement.style.display = 'block';
+      bimModel.style.visibility = 'visible';
+      bimModel_bridge.style.visibility = 'hidden'; 
+      resetCameraAndControls();
+      ap_didLeaveBridgeScene(enterBridgeId);
     }
 
     function loadAllModels() {
@@ -1240,10 +1309,10 @@
       mouse = new THREE.Vector2();
 
       // 滑鼠事件
-      window.addEventListener('mousedown', onMouseDown, false);
-      window.addEventListener('click', onMouseClick, false);
-      window.addEventListener('dblclick', onMouseDblClick, false);
-      window.addEventListener('mousemove', onMouseMove, false);
+      container.addEventListener('mousedown', onMouseDown, false);
+      container.addEventListener('click', onMouseClick, false);
+      container.addEventListener('dblclick', onMouseDblClick, false);
+      container.addEventListener('mousemove', onMouseMove, false);
 
       var cameraFolder = gui.addFolder('Camera');
       var camPosition = cameraFolder.addFolder('Position');
@@ -1270,6 +1339,9 @@
       camMouse.add(labelInfo, 'gateClick').name('gateClick');
       camMouse.add(labelInfo, 'gateDblClick').name('gateDblClick');
       camMouse.add(labelInfo, 'gateMouseover').name('gateMouseover');
+      camMouse.add(labelInfo, 'bridgeClick').name('bridgeClick');
+      camMouse.add(labelInfo, 'bridgeDblClick').name('bridgeDblClick');
+      camMouse.add(labelInfo, 'bridgeMouseover').name('bridgeMouseover');
       camMouse.add(labelInfo, 'modelClick').name('modelClick');
       var camPlane = gui.addFolder('Plane');
       var modelController = camPlane.add(planeModels, 'selectedModel', allModels).name('Aircraft Models');
@@ -1451,6 +1523,83 @@
     }
 
 
+    function onMouseDown_bridge(event) {
+      // 计算鼠标在场景中的位置 
+      mouse_bridge.x = (event.clientX / container_bridge.offsetWidth) * 2 - 1;
+      mouse_bridge.y = -(event.clientY / container_bridge.offsetHeight) * 2 + 1;
+
+      // 更新raycaster的射线方向
+      raycaster_bridge.setFromCamera(mouse_bridge, camera_bridge);
+
+      // 计算物体和射线的交点
+      const intersects = raycaster_bridge.intersectObjects(scene_bridge.children);
+
+      if (intersects.length > 0) {
+        // 如果有物体被选中 
+        var idx = intersects.findIndex(x => x.object.label);
+        if (idx > -1) {
+          
+        }
+      }
+    }
+
+    function onMouseDblClick_bridge(event) { 
+      // 计算鼠标在场景中的位置 
+      mouse_bridge.x = (event.clientX / container_bridge.offsetWidth) * 2 - 1;
+      mouse_bridge.y = -(event.clientY / container_bridge.offsetHeight) * 2 + 1;
+
+      // 更新raycaster的射线方向
+      raycaster_bridge.setFromCamera(mouse_bridge, camera_bridge);
+
+      // 计算物体和射线的交点
+      const intersects = raycaster_bridge.intersectObjects(scene_bridge.children);
+
+      if (intersects.length > 0) {
+        intersects.forEach(element => {
+          
+        });
+        
+      }
+    }
+
+    function onMouseClick_bridge(event) { 
+      // 如果是2d
+
+      // 计算鼠标在场景中的位置 
+      mouse_bridge.x = (event.clientX / container_bridge.offsetWidth) * 2 - 1;
+      mouse_bridge.y = -(event.clientY / container_bridge.offsetHeight) * 2 + 1;
+
+      // 更新raycaster的射线方向
+      raycaster_bridge.setFromCamera(mouse_bridge, camera_bridge);
+
+      // 计算物体和射线的交点
+      const intersects = raycaster_bridge.intersectObjects(scene_bridge.children);
+
+      if (intersects.length > 0) {
+        // 如果有物体被选中 
+        intersects.forEach(element => {
+        });
+      }
+    }
+
+    function onMouseMove_bridge(event) {
+      // 计算鼠标在场景中的位置 
+      mouse_bridge.x = (event.clientX / container_bridge.offsetWidth) * 2 - 1;
+      mouse_bridge.y = -(event.clientY / container_bridge.offsetHeight) * 2 + 1;
+
+      // 更新raycaster的射线方向
+      raycaster_bridge.setFromCamera(mouse_bridge, camera_bridge);
+
+      // 计算物体和射线的交点
+      const intersects = raycaster_bridge.intersectObjects(scene_bridge.children);
+
+      if (intersects.length > 0) {
+        intersects.forEach(element => { 
+        });  
+      }
+    }
+
+
 
     function init_bridge() {
       // Scene setup
@@ -1504,6 +1653,15 @@
 
       // 呼叫 loadModels 函數來加載和顯示所有模型
       loadModels_bridge(bridgeData);
+
+      document.getElementById('backButton').addEventListener('click',  backOrverAll);
+      raycaster_bridge = new THREE.Raycaster();
+      mouse_bridge = new THREE.Vector2();
+      // 滑鼠事件
+      container_bridge.addEventListener('mousedown', onMouseDown_bridge, false);
+      container_bridge.addEventListener('click', onMouseClick_bridge, false);
+      container_bridge.addEventListener('dblclick', onMouseDblClick_bridge, false);
+      container_bridge.addEventListener('mousemove', onMouseMove_bridge, false);
 
       let sumX = 0, sumY = 0, sumZ = 0;
       let count = 0;
