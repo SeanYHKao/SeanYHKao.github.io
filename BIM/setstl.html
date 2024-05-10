@@ -68,6 +68,14 @@
   <label>SB4 : <input type="number" id="SB4" value="0"></label>
  </div>
 
+
+ <div>
+  <label>C1 : <input type="number" id="C1" value="0"></label>
+  <label>C2 : <input type="number" id="C2" value="0"></label>
+  <label>SC3 : <input type="number" id="SC3" value="0"></label>
+  <label>C4 : <input type="number" id="C4" value="0"></label>
+  <label>SC4 : <input type="number" id="SC4" value="0"></label>
+ </div>
  <textarea id="json">
 
     </textarea><button id="setjson">setjson</button>
@@ -374,6 +382,11 @@ target:controls.target
    document.getElementById('SB3').addEventListener('input', rotateBridge);
    document.getElementById('B4').addEventListener('input', rotateBridge);
    document.getElementById('SB4').addEventListener('input', rotateBridge);
+   document.getElementById('C1').addEventListener('input', rotateBridge);
+   document.getElementById('C2').addEventListener('input', rotateBridge);
+   document.getElementById('SC3').addEventListener('input', rotateBridge);
+   document.getElementById('C4').addEventListener('input', rotateBridge);
+   document.getElementById('SC4').addEventListener('input', rotateBridge);
 
    animate();
   }
@@ -416,6 +429,13 @@ const SB3 = parseFloat(document.getElementById('SB3').value);
 const B4 = parseFloat(document.getElementById('B4').value);
 const SB4 = parseFloat(document.getElementById('SB4').value);
 
+const C1 = parseFloat(document.getElementById('C1').value);
+const C2 = parseFloat(document.getElementById('C2').value);
+const SC3 = parseFloat(document.getElementById('SC3').value);
+const C4 = parseFloat(document.getElementById('C4').value);
+const SC4 = parseFloat(document.getElementById('SC4').value);
+
+
 var idxA1 = tmp.findIndex(x => x.obj_type == 'A1');
 var idxA2 = tmp.findIndex(x => x.obj_type == 'A2');
 var idxA3 = tmp.findIndex(x => x.obj_type == 'A3');
@@ -425,6 +445,11 @@ var idxB1 = tmp.findIndex(x => x.obj_type == 'B1');
 var idxB2 = tmp.findIndex(x => x.obj_type == 'B2');
 var idxB3 = tmp.findIndex(x => x.obj_type == 'B3');
 var idxB4 = tmp.findIndex(x => x.obj_type == 'B4');
+
+var idxC1 = tmp.findIndex(x => x.obj_type == 'C1');
+var idxC2 = tmp.findIndex(x => x.obj_type == 'C2');
+var idxC3 = tmp.findIndex(x => x.obj_type == 'C3');
+var idxC4 = tmp.findIndex(x => x.obj_type == 'C4');
 
 var centerA1 =  tmp[idxA1].center;
 var centerA2 =  tmp[idxA2].center;

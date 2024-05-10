@@ -85,6 +85,11 @@
       font-size: 10px;
       color: white;
     }
+
+    .fire {
+      width: 30px;
+      height: 30px;
+    }
   </style>
 </head>
 
@@ -137,12 +142,18 @@
       rotationB1: 0,
       rotationB2: 0,
       rotationB3: 0,
+      rotationC1: 0,
+      rotationC2: 0,
+      rotationC3: 0,
       rotationAS1: 1,
       rotationAS2: 1,
       rotationAS3: 1,
       rotationBS1: 1,
       rotationBS2: 1,
-      rotationBS3: 1
+      rotationBS3: 1,
+      rotationCS1: 1,
+      rotationCS2: 1,
+      rotationCS3: 1
     };
 
     let camera, scene, renderer, labelRenderer, controls, raycaster, mouse, light, axesHelper;
@@ -172,7 +183,7 @@
     let bridgeAngles2 = {};
     let bridgeAngles3 = {};
 
-    let planeXY = { x: 0, y: 0 };
+    let planeXYA = { x: 0, y: 0, a: 0 };
 
     let intervalId = {};
 
@@ -191,13 +202,13 @@
     let C = { "position": { "x": -1.5989615626517384, "y": 83.61388808536435, "z": -16.485932169549844 }, "rotation": { "_x": -1.5707963267671246, "_y": 0.0000010003774455482065, "_z": 1.5707685651481607, "_order": "XYZ" }, "zoom": 1, "quaternion": { "_x": -0.500006690265619, "_y": 0.4999933096309743, "_z": 0.49999280944919444, "_w": 0.500007190461285 }, "fov": 45, "aspect": 2.015748031496063, "near": 0.1, "far": 5000, "target": { "x": -1.5990452080995163, "y": 3.889352887216332e-15, "z": -16.48593217187198 } };
 
     //空橋1
-    let bridgeData1 = [{ "index": 0, "name": "sphere", "obj_type": "L", "position": { "x": 4, "y": 0.5, "z": 9.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "LA", "position": { "x": 6.2, "y": 0.5, "z": 8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "LB", "position": { "x": 6.2, "y": 0.5, "z": 9.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "AL1", "position": { "x": 6.2, "y": 0.5, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 4, "name": "sphere", "obj_type": "AL2", "position": { "x": 6.2, "y": 0.5, "z": 9 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 5, "name": "sphere", "obj_type": "AL3", "position": { "x": 6.2, "y": 0.5, "z": 10.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 6, "name": "sphere", "obj_type": "BL1", "position": { "x": 7.1, "y": 0.5, "z": 9.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 7, "name": "sphere", "obj_type": "BL2", "position": { "x": 7.1, "y": 0.5, "z": 11 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 8, "name": "sphere", "obj_type": "BL3", "position": { "x": 7.1, "y": 0.5, "z": 12.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 9, "name": "cube.stl", "obj_type": "", "position": { "x": 0, "y": -1, "z": -0.5 }, "scale": { "x": 0.7, "y": 0.5, "z": 2.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#999999", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 10, "name": "cube.stl", "obj_type": "label", "position": { "x": 2, "y": 0, "z": 9 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 11, "name": "cube.stl", "obj_type": "", "position": { "x": 6, "y": 0, "z": 10 }, "scale": { "x": 0.4, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 12, "name": "cube.stl", "obj_type": "B1", "position": { "x": 6.5, "y": 0, "z": 9.5 }, "scale": { "x": 0.1, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 13, "name": "cube.stl", "obj_type": "A1", "position": { "x": 6, "y": 0, "z": 8 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 14, "name": "Group_29.stl", "obj_type": "B4", "position": { "x": 6.7, "y": -0.3, "z": 12.8 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 7, "y": 0, "z": 12.8 } }, { "index": 15, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": 5.8, "y": -0.3, "z": 10.5 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.15, "y": 0, "z": 10.57 } }, { "index": 16, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": 6.2, "y": -1, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.25, "y": 0, "z": 7.3 } }, { "index": 17, "name": "JetwayConnector.stl", "obj_type": "B2", "position": { "x": 7.1, "y": -1, "z": 9.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 7.12, "y": 0, "z": 9.77 } }, { "index": 18, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": 6, "y": -1, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.21, "y": 0, "z": 7.3 } }, { "index": 19, "name": "CLE_JetwayGen.stl", "obj_type": "B3", "position": { "x": 6.9, "y": -1, "z": 9.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.21, "y": 0, "z": 7.3 } }];
+    let bridgeData1 = [{ "index": 0, "name": "sphere", "obj_type": "AL1", "position": { "x": 6.2, "y": 0.5, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "AL2", "position": { "x": 6.2, "y": 0.5, "z": 9 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "AL3", "position": { "x": 6.2, "y": 0.5, "z": 10.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "BL1", "position": { "x": 7.1, "y": 0.5, "z": 8.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 4, "name": "sphere", "obj_type": "BL2", "position": { "x": 7.1, "y": 0.5, "z": 10.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 5, "name": "sphere", "obj_type": "BL3", "position": { "x": 7.1, "y": 0.5, "z": 11.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 6, "name": "sphere", "obj_type": "CL1", "position": { "x": 7.1, "y": 0.5, "z": 9.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 7, "name": "sphere", "obj_type": "CL2", "position": { "x": 7.1, "y": 0.5, "z": 11.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 8, "name": "sphere", "obj_type": "CL3", "position": { "x": 7.1, "y": 0.5, "z": 12.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 9, "name": "cube.stl", "obj_type": "label", "position": { "x": 2, "y": 0, "z": 9 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 10, "name": "cube.stl", "obj_type": "", "position": { "x": 6, "y": 0, "z": 10 }, "scale": { "x": 0.4, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 11, "name": "cube.stl", "obj_type": "A1", "position": { "x": 6, "y": 0, "z": 8 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 12, "name": "cube.stl", "obj_type": "B1", "position": { "x": 6.5, "y": 0, "z": 8.3 }, "scale": { "x": 0.1, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 13, "name": "cube.stl", "obj_type": "C1", "position": { "x": 6.5, "y": 0, "z": 9.5 }, "scale": { "x": 0.1, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 14, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": 5.8, "y": -0.3, "z": 10.5 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.15, "y": 0, "z": 10.57 } }, { "index": 15, "name": "Group_29.stl", "obj_type": "B4", "position": { "x": 6.7, "y": -0.3, "z": 11.6 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 7, "y": 0, "z": 11.6 } }, { "index": 16, "name": "Group_29.stl", "obj_type": "C4", "position": { "x": 6.7, "y": -0.3, "z": 12.8 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 7, "y": 0, "z": 12.8 } }, { "index": 17, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": 6.2, "y": -1, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.25, "y": 0, "z": 7.3 } }, { "index": 18, "name": "JetwayConnector.stl", "obj_type": "B2", "position": { "x": 7.1, "y": -1, "z": 8.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 7.12, "y": 0, "z": 8.5 } }, { "index": 19, "name": "JetwayConnector.stl", "obj_type": "C2", "position": { "x": 7.1, "y": -1, "z": 9.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 7.12, "y": 0, "z": 9.77 } }, { "index": 20, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": 6, "y": -1, "z": 7.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.21, "y": 0, "z": 7.3 } }, { "index": 21, "name": "CLE_JetwayGen.stl", "obj_type": "B3", "position": { "x": 6.9, "y": -1, "z": 8.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.21, "y": 0, "z": 8.6 } }, { "index": 22, "name": "CLE_JetwayGen.stl", "obj_type": "C3", "position": { "x": 6.9, "y": -1, "z": 9.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 6.21, "y": 0, "z": 7.3 } }, { "index": 23, "name": "building.stl", "obj_type": "building", "position": { "x": 4, "y": -1, "z": 0.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#008ddb", "center": null }];
 
     //空橋2
-    let bridgeData2 = [{ "index": 0, "name": "sphere", "obj_type": "L", "position": { "x": -0.5, "y": 0.5, "z": 0.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "LA", "position": { "x": -2.3, "y": 0.5, "z": 1.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "LB", "position": { "x": -2.3, "y": 0.5, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "AL1", "position": { "x": -2.3, "y": 0.5, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 4, "name": "sphere", "obj_type": "AL2", "position": { "x": -2.3, "y": 0.5, "z": 4.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 5, "name": "sphere", "obj_type": "AL3", "position": { "x": -2.3, "y": 0.5, "z": 5.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 6, "name": "sphere", "obj_type": "BL1", "position": { "x": -3.7, "y": 0.5, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 7, "name": "sphere", "obj_type": "BL2", "position": { "x": -3.7, "y": 0.5, "z": 2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 8, "name": "sphere", "obj_type": "BL3", "position": { "x": -3.7, "y": 0.5, "z": 3.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 9, "name": "cube.stl", "obj_type": "", "position": { "x": 0, "y": -1, "z": 0 }, "scale": { "x": 0.7, "y": 0.5, "z": 2.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#999999", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 10, "name": "cube.stl", "obj_type": "label", "position": { "x": 1.8, "y": 0, "z": 1 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 3.141592653589793, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 11, "name": "cube.stl", "obj_type": "", "position": { "x": -2.7, "y": 0, "z": 2 }, "scale": { "x": 0.4, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 12, "name": "cube.stl", "obj_type": "B1", "position": { "x": -3.5, "y": 0, "z": 0.5 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.2 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 13, "name": "cube.stl", "obj_type": "A1", "position": { "x": -2.65, "y": 0, "z": 2.4 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 14, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": -2.4, "y": -1, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.46, "y": 0, "z": 2.68 } }, { "index": 15, "name": "JetwayConnector.stl", "obj_type": "B2", "position": { "x": -3.8, "y": -1, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.83, "y": 0, "z": 0.27 } }, { "index": 16, "name": "Group_29.stl", "obj_type": "B4", "position": { "x": -4.2, "y": -0.3, "z": 3.4 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.77, "y": 0, "z": 3.43 } }, { "index": 17, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": -2.8, "y": -0.3, "z": 5.7 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.36, "y": 0, "z": 5.77 } }, { "index": 18, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": -2.6, "y": -1, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.46, "y": 0, "z": 2.68 } }, { "index": 19, "name": "CLE_JetwayGen.stl", "obj_type": "B3", "position": { "x": -4, "y": -1, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.83, "y": 0, "z": 0.27 } }];
+    let bridgeData2 = [{ "index": 0, "name": "sphere", "obj_type": "AL1", "position": { "x": -2.3, "y": 0.5, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "AL2", "position": { "x": -2.3, "y": 0.5, "z": 4.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "AL3", "position": { "x": -2.3, "y": 0.5, "z": 5.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "BL1", "position": { "x": -3.7, "y": 0.5, "z": 1.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 4, "name": "sphere", "obj_type": "BL2", "position": { "x": -3.7, "y": 0.5, "z": 3.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 5, "name": "sphere", "obj_type": "BL3", "position": { "x": -3.7, "y": 0.5, "z": 4.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 6, "name": "sphere", "obj_type": "CL1", "position": { "x": -3.7, "y": 0.5, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 7, "name": "sphere", "obj_type": "CL2", "position": { "x": -3.7, "y": 0.5, "z": 2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 8, "name": "sphere", "obj_type": "CL3", "position": { "x": -3.7, "y": 0.5, "z": 3.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 9, "name": "cube.stl", "obj_type": "label", "position": { "x": 1.8, "y": 0, "z": 1 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 3.141592653589793, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 10, "name": "cube.stl", "obj_type": "", "position": { "x": -2.7, "y": 0, "z": 2 }, "scale": { "x": 0.4, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 11, "name": "cube.stl", "obj_type": "A1", "position": { "x": -2.65, "y": 0, "z": 2.4 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 12, "name": "cube.stl", "obj_type": "B1", "position": { "x": -3.5, "y": 0, "z": 1.8 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.2 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 13, "name": "cube.stl", "obj_type": "C1", "position": { "x": -3.5, "y": 0, "z": 0.5 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.2 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 14, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": -2.4, "y": -1, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.46, "y": 0, "z": 2.68 } }, { "index": 15, "name": "JetwayConnector.stl", "obj_type": "B2", "position": { "x": -3.8, "y": -1, "z": 1.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.83, "y": 0, "z": 1.64 } }, { "index": 16, "name": "JetwayConnector.stl", "obj_type": "C2", "position": { "x": -3.8, "y": -1, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.83, "y": 0, "z": 0.27 } }, { "index": 17, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": -2.8, "y": -0.3, "z": 5.7 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.36, "y": 0, "z": 5.77 } }, { "index": 18, "name": "Group_29.stl", "obj_type": "B4", "position": { "x": -4.2, "y": -0.3, "z": 4.7 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.77, "y": 0, "z": 4.73 } }, { "index": 19, "name": "Group_29.stl", "obj_type": "C4", "position": { "x": -4.2, "y": -0.3, "z": 3.4 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.77, "y": 0, "z": 3.43 } }, { "index": 20, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": -2.6, "y": -1, "z": 2.7 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -2.46, "y": 0, "z": 2.68 } }, { "index": 21, "name": "CLE_JetwayGen.stl", "obj_type": "B3", "position": { "x": -4, "y": -1, "z": 1.6 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.83, "y": 0, "z": 1.57 } }, { "index": 22, "name": "CLE_JetwayGen.stl", "obj_type": "C3", "position": { "x": -4, "y": -1, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": -3.83, "y": 0, "z": 0.27 } }, { "index": 23, "name": "building.stl", "obj_type": "building", "position": { "x": -1, "y": -1, "z": 12 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 3.141592653589793, "_z": 0, "_order": "XYZ" }, "color": "#008ddb", "center": null }];
 
     //空橋3
-    let bridgeData3 = [{ "index": 0, "name": "sphere", "obj_type": "L", "position": { "x": 0.8, "y": 0.5, "z": 0.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "AL1", "position": { "x": 0.8, "y": 0.5, "z": 3.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "AL1", "position": { "x": 0.8, "y": 0.5, "z": 4.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "AL2", "position": { "x": 0.8, "y": 0.5, "z": 5.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 4, "name": "sphere", "obj_type": "AL3", "position": { "x": 0.8, "y": 0.5, "z": 6.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 5, "name": "cube.stl", "obj_type": "", "position": { "x": 0, "y": -1, "z": 0 }, "scale": { "x": 0.3, "y": 0.4, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#999999", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 6, "name": "cube.stl", "obj_type": "label", "position": { "x": 0.5, "y": 0, "z": 4 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 7, "name": "cube.stl", "obj_type": "A1", "position": { "x": 0.55, "y": 0, "z": 4 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 8, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": 0.4, "y": -0.3, "z": 6.5 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 0.8, "y": 0, "z": 6.5 } }, { "index": 9, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": 0.75, "y": -0.3, "z": 4.4 }, "scale": { "x": 0.5, "y": 0.5, "z": 0.5 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 0.73, "y": 0, "z": 4.4 } }, { "index": 10, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": 0.6, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1, "z": 0.8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }];
+    let bridgeData3 = [{ "index": 0, "name": "sphere", "obj_type": "AL1", "position": { "x": 0.8, "y": 0.5, "z": 4.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "AL2", "position": { "x": 0.8, "y": 0.5, "z": 5.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "AL3", "position": { "x": 0.8, "y": 0.5, "z": 6.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 4, "name": "cube.stl", "obj_type": "label", "position": { "x": 0.5, "y": 0, "z": 4 }, "scale": { "x": 0.8, "y": 0.1, "z": 0.1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#990000", "center": null }, { "index": 5, "name": "cube.stl", "obj_type": "A1", "position": { "x": 0.55, "y": 0, "z": 4 }, "scale": { "x": 0.08, "y": 0.08, "z": 0.08 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 6, "name": "Group_29.stl", "obj_type": "A4", "position": { "x": 0.4, "y": -0.3, "z": 6.5 }, "scale": { "x": 0.3, "y": 0.3, "z": 0.6 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 0.8, "y": 0, "z": 6.5 } }, { "index": 7, "name": "JetwayConnector.stl", "obj_type": "A2", "position": { "x": 0.75, "y": -0.3, "z": 4.4 }, "scale": { "x": 0.5, "y": 0.5, "z": 0.5 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": { "x": 0.73, "y": 0, "z": 4.4 } }, { "index": 8, "name": "CLE_JetwayGen.stl", "obj_type": "A3", "position": { "x": 0.6, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1, "z": 0.8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#eeeeee", "center": null }, { "index": 9, "name": "building.stl", "obj_type": "building", "position": { "x": 5.7, "y": -1, "z": 0.5 }, "scale": { "x": 0.45, "y": 1, "z": 0.45 }, "rotation": { "_x": 0, "_y": -1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#008ddb" }];
 
     //主建築
     let mainBuilding = [{ "index": 0, "name": "cube.stl", "obj_type": "undefined", "position": { "x": -14, "y": -1, "z": -20 }, "scale": { "x": 0.2, "y": 0.5, "z": 8.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#006600", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 1, "name": "cube.stl", "obj_type": "undefined", "position": { "x": 13, "y": -1, "z": -20 }, "scale": { "x": 0.2, "y": 0.5, "z": 8.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#006600", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "cube.stl", "obj_type": "出境1", "position": { "x": -23, "y": 0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 3, "name": "cube.stl", "obj_type": "入境2", "position": { "x": 12, "y": -0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0.4363323129985824, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 21.7, "y": 0, "z": 0 } }, { "index": 4, "name": "cube.stl", "obj_type": "入境1", "position": { "x": -23, "y": -0.5, "z": -1 }, "scale": { "x": 2.2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": -0.4363323129985824, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": -22.5, "y": 0, "z": 0.1 } }, { "index": 5, "name": "cube.stl", "obj_type": "出境2", "position": { "x": 12, "y": 0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 6, "name": "cube.stl", "obj_type": "", "position": { "x": -52, "y": -1.1, "z": -90 }, "scale": { "x": 20, "y": 0.05, "z": 30 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#dddddd", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 7, "name": "cube.stl", "obj_type": "undefined", "position": { "x": -14, "y": 0.5, "z": -20 }, "scale": { "x": 5.5, "y": 0.02, "z": 8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#dddddd", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 8, "name": "cube.stl", "obj_type": "undefined", "position": { "x": -14, "y": 1.5, "z": -20 }, "scale": { "x": 5.5, "y": 0.1, "z": 8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#dddddd", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 9, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": -20, "y": -1, "z": -6 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 10, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": -20, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 11, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": 20, "y": -1, "z": -6 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 12, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": 20, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 13, "name": "top3.stl", "obj_type": "undefined", "position": { "x": 0, "y": 2, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }];
@@ -207,35 +218,6 @@
 
     let _objPlaneCollect = [, , , , , , ,]; //飛機模型
 
-    let plane_move = {
-      from:
-      {
-        A2: 90,
-        A3: 0,
-        AS2: 0,
-        AS3: 0.3,
-        B2: 90,
-        B3: 0,
-        BS2: 0,
-        BS3: 0.3,
-        planeX: 30,
-        planeY: 5,
-      },
-      to: {
-        A2: 128,
-        A3: 46,
-        AS2: 0,
-        AS3: 0.3,
-        B2: 128,
-        B3: 49,
-        BS2: 1.8,
-        BS3: 1,
-        planeX: 10,
-        planeY: 5,
-      }
-    };
-
-
     let gui_bridge = new dat.GUI();
 
     var colors_bridge = {};
@@ -243,11 +225,11 @@
     //camera 設定
     let C_bridgeC = { "position": { "x": -31.138908642283276, "y": 21.124547046100854, "z": 20.02802432713419 }, "rotation": { "_x": -0.6343495415501454, "_y": -1.1304057886682897, "_z": -0.5872580951896136, "_order": "XYZ" }, "zoom": 1, "quaternion": { "_x": -0.10482487807797901, "_y": -0.5633217718122143, "_z": -0.07233320219154937, "_w": 0.8163628079469328 }, "fov": 45, "aspect": 2.015748031496063, "near": 0.1, "far": 5000, "target": { "x": 44.496981100130974, "y": 3.4989089747618552e-15, "z": -8.681694858696433 } };
 
-    let C_bridgeB ={"position":{"x":22.071359802592823,"y":24.78459126863992,"z":41.47852024594192},"rotation":{"_x":-0.3937047515318204,"_y":0.052870469233824054,"_z":0.021948228935150135,"_order":"XYZ"},"zoom":1,"quaternion":{"_x":-0.19521890077614165,"_y":0.028065674655406155,"_z":0.005588814423002102,"_w":0.980342115712284},"fov":45,"aspect":2.1044520547945207,"near":0.1,"far":5000,"target":{"x":18.652295555277366,"y":3.5489485507749723e-15,"z":-18.186988965429887}};
+    let C_bridgeB = { "position": { "x": 22.071359802592823, "y": 24.78459126863992, "z": 41.47852024594192 }, "rotation": { "_x": -0.3937047515318204, "_y": 0.052870469233824054, "_z": 0.021948228935150135, "_order": "XYZ" }, "zoom": 1, "quaternion": { "_x": -0.19521890077614165, "_y": 0.028065674655406155, "_z": 0.005588814423002102, "_w": 0.980342115712284 }, "fov": 45, "aspect": 2.1044520547945207, "near": 0.1, "far": 5000, "target": { "x": 18.652295555277366, "y": 3.5489485507749723e-15, "z": -18.186988965429887 } };
 
-    let C_bridgeA = {"position":{"x":57.616532220088516,"y":25.81896852127743,"z":-1.908670778081924},"rotation":{"_x":-1.5594513113168036,"_y":0.9968965660789258,"_z":1.557287223169511,"_order":"XYZ"},"zoom":1,"quaternion":{"_x":-0.20084950068515345,"_y":0.6757069456808736,"_z":0.19938182868205784,"_w":0.680680900293631},"fov":45,"aspect":2.1044520547945207,"near":0.1,"far":5000,"target":{"x":17.67645964620174,"y":3.3247819950130667e-15,"z":-2.201599943268754}};
+    let C_bridgeA = { "position": { "x": 57.616532220088516, "y": 25.81896852127743, "z": -1.908670778081924 }, "rotation": { "_x": -1.5594513113168036, "_y": 0.9968965660789258, "_z": 1.557287223169511, "_order": "XYZ" }, "zoom": 1, "quaternion": { "_x": -0.20084950068515345, "_y": 0.6757069456808736, "_z": 0.19938182868205784, "_w": 0.680680900293631 }, "fov": 45, "aspect": 2.1044520547945207, "near": 0.1, "far": 5000, "target": { "x": 17.67645964620174, "y": 3.3247819950130667e-15, "z": -2.201599943268754 } };
     //空橋1
-    let bridgeData = [{ "index": 0, "name": "sphere", "obj_type": "A", "position": { "x": -0.8, "y": 11, "z": -0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "B", "position": { "x": 0.1, "y": 4, "z": -1.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "C", "position": { "x": 1.3, "y": 7, "z": 0.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "D", "position": { "x": 7, "y": 12.2, "z": -3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 4, "name": "sphere", "obj_type": "E", "position": { "x": 25.6, "y": 15, "z": -5.1 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 5, "name": "sphere", "obj_type": "F", "position": { "x": 26.1, "y": 6, "z": 0.49 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 6, "name": "sphere", "obj_type": "G", "position": { "x": 26.2, "y": 3, "z": -1.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 7, "name": "sphere", "obj_type": "H", "position": { "x": 34, "y": 10, "z": -2.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 8, "name": "sphere", "obj_type": "I", "position": { "x": 33.5, "y": 10, "z": 1 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 9, "name": "sphere", "obj_type": "J", "position": { "x": 33, "y": 11, "z": -1.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 10, "name": "sphere", "obj_type": "K", "position": { "x": 25.5, "y": 4, "z": 1.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 11, "name": "sphere", "obj_type": "L", "position": { "x": 33.5, "y": 6, "z": -1 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffee", "center": null }, { "index": 12, "name": "sphere", "obj_type": "M", "position": { "x": 3.8, "y": 10, "z": -0.31 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": null }, { "index": 13, "name": "sphere", "obj_type": "N", "position": { "x": 34, "y": 12, "z": -5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffff00", "center": null }, { "index": 14, "name": "sphere", "obj_type": "O", "position": { "x": 34, "y": 12, "z": -3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#00ffff", "center": null }, { "index": 15, "name": "sphere", "obj_type": "P", "position": { "x": 2.1, "y": 7, "z": -0.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 16, "name": "sphere", "obj_type": "Q", "position": { "x": 9.1, "y": 7, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 17, "name": "sphere", "obj_type": "R", "position": { "x": 26, "y": 15, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 18, "name": "sphere", "obj_type": "S", "position": { "x": 20.4, "y": 6, "z": 0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 19, "name": "sphere", "obj_type": "T", "position": { "x": 24, "y": 6, "z": 0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 20, "name": "CLE_JetwayGen.stl", "obj_type": "Jetway", "position": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 10, "y": 10, "z": 10 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 21, "name": "a380.stl", "obj_type": "undefined", "position": { "x": 45, "y": 0, "z": 19 }, "scale": { "x": 10, "y": 10, "z": 10 }, "rotation": { "_x": 0, "_y": 3.141592653589793, "_z": 0, "_order": "XYZ" }, "color": "#0000ff", "center": null }];
+    let bridgeData = [{ "index": 0, "name": "sphere", "obj_type": "A", "position": { "x": -0.8, "y": 11, "z": -0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 1, "name": "sphere", "obj_type": "B", "position": { "x": 0.1, "y": 4, "z": -1.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 2, "name": "sphere", "obj_type": "C", "position": { "x": 1.3, "y": 7, "z": 0.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 3, "name": "sphere", "obj_type": "D", "position": { "x": 7, "y": 12.2, "z": -3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 4, "name": "sphere", "obj_type": "E", "position": { "x": 25.6, "y": 15, "z": -5.1 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 5, "name": "sphere", "obj_type": "F", "position": { "x": 26.1, "y": 6, "z": 0.49 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 6, "name": "sphere", "obj_type": "G", "position": { "x": 26.2, "y": 3, "z": -1.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 7, "name": "sphere", "obj_type": "H", "position": { "x": 34, "y": 10, "z": -2.8 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 8, "name": "sphere", "obj_type": "I", "position": { "x": 33.5, "y": 10, "z": 1 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 9, "name": "sphere", "obj_type": "J", "position": { "x": 33, "y": 11, "z": -1.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 10, "name": "sphere", "obj_type": "K", "position": { "x": 25.5, "y": 4, "z": 1.5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff0000", "center": null }, { "index": 11, "name": "sphere", "obj_type": "L", "position": { "x": 33.5, "y": 6, "z": -1 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffee", "center": null }, { "index": 12, "name": "sphere", "obj_type": "M", "position": { "x": 3.8, "y": 10, "z": -0.31 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": null }, { "index": 13, "name": "sphere", "obj_type": "N", "position": { "x": 34, "y": 12, "z": -5 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffff00", "center": null }, { "index": 14, "name": "sphere", "obj_type": "O", "position": { "x": 34, "y": 12, "z": -3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#00ffff", "center": null }, { "index": 15, "name": "sphere", "obj_type": "P", "position": { "x": 2.1, "y": 7, "z": -0.4 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 16, "name": "sphere", "obj_type": "Q", "position": { "x": 9.1, "y": 7, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 17, "name": "sphere", "obj_type": "R", "position": { "x": 26, "y": 15, "z": 0.3 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 18, "name": "sphere", "obj_type": "S", "position": { "x": 20.4, "y": 6, "z": 0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 19, "name": "sphere", "obj_type": "T", "position": { "x": 24, "y": 6, "z": 0.2 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ff00ee", "center": null }, { "index": 20, "name": "JetwayDetail.stl", "obj_type": "Jetway", "position": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 10, "y": 10, "z": 10 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 21, "name": "a380.stl", "obj_type": "undefined", "position": { "x": 45, "y": 0, "z": 19 }, "scale": { "x": 10, "y": 10, "z": 10 }, "rotation": { "_x": 0, "_y": 3.141592653589793, "_z": 0, "_order": "XYZ" }, "color": "#0000ff", "center": null }];
 
 
     let _objCollect_bridge = [];
@@ -357,60 +339,7 @@
       controlTargetZ.setValue(controls.target.z);
     }
 
-    function play(start, end) {
-      var no = labelInfo.gateClick;
-      if (!start) start = 0;
-      if (!end) end = 100;
-      runplay(no, 0, start, end);
-    }
 
-    function runplay(n, t, start, end, p) {
-      if (t >= end) {
-        if (t >= 100) {
-          clearPlane(n);
-        }
-        return;
-      }
-      const c = {};
-      if (t == 0) {
-        if (p) {
-          setPlane(n, p)
-        }
-        runPlaneXY(n, plane_move.from.planeX, plane_move.from.planeY);
-        runBridge(n, plane_move.from.A2, plane_move.from.A3,
-          plane_move.from.B2, plane_move.from.B3,
-          plane_move.from.AS2, plane_move.from.AS3,
-          plane_move.from.BS2, plane_move.from.BS3);
-        t = start;
-      }
-      if (t < 25) {
-        for (const key in plane_move.from) {
-          c[key] = plane_move.from[key] + (t / 25) * (plane_move.to[key] - plane_move.from[key]);
-        }
-        runPlaneXY(n, c.planeX, c.planeY)
-      }
-      else if (t < 50) {
-        for (const key in plane_move.from) {
-          c[key] = plane_move.from[key] + ((t - 25) / 25) * (plane_move.to[key] - plane_move.from[key]);
-        }
-        runBridge(n, c.A2, c.A3, c.B2, c.B3, c.AS2, c.AS3, c.BS2, c.BS3);
-      }
-      else if (t < 75) {
-        for (const key in plane_move.from) {
-          c[key] = plane_move.to[key] - ((t - 50) / 25) * (plane_move.to[key] - plane_move.from[key]);
-        }
-        runBridge(n, c.A2, c.A3, c.B2, c.B3, c.AS2, c.AS3, c.BS2, c.BS3);
-      }
-      else if (t < 100) {
-        for (const key in plane_move.from) {
-          c[key] = plane_move.to[key] - ((t - 75) / 25) * (plane_move.to[key] - plane_move.from[key]);
-        }
-        runPlaneXY(n, c.planeX, c.planeY)
-      }
-      setTimeout(() => {
-        runplay(n, t + 1, start, end)
-      }, 100);
-    }
 
     //清空空橋
     function clearAllplane() {
@@ -447,12 +376,14 @@
       for (var c = 0; c < 8; c++) {
         rotateBridge(bridgeData1, bridge1[c], c, 'A', 180, 180, 0.2, 0.6, 20, 0, -20, 10);
         rotateBridge(bridgeData1, bridge1[c], c, 'B', 90, 0, 0.2, 0.6, 20, 0, -20, 10);
-        bridgeAngles1[bridge_code1[c]] = { 'A2': 180, 'A3': 180, 'B2': 90, 'B3': 0, 'AS2': 0.2, 'AS3': 0.6, 'BS2': 0.2, 'BS3': 0.6 };
+        rotateBridge(bridgeData1, bridge1[c], c, 'C', 90, 0, 0.2, 0.6, 20, 0, -20, 10);
+        bridgeAngles1[bridge_code1[c]] = { 'A2': 180, 'A3': 180, 'B2': 90, 'B3': 0, 'C2': 90, 'C3': 0, 'AS2': 0.2, 'AS3': 0.6, 'BS2': 0.2, 'BS3': 0.6, 'CS2': 0.2, 'CS3': 0.6 };
       }
       for (var c = 0; c < 8; c++) {
         rotateBridge(bridgeData2, bridge2[c], c, 'A', 0, 0, 0.2, 0.6, -25, 0, -20, 10);
         rotateBridge(bridgeData2, bridge2[c], c, 'B', -90, 0, 0.2, 0.6, -25, 0, -20, 10);
-        bridgeAngles2[bridge_code2[c]] = { 'A2': 0, 'A3': 0, 'B2': -90, 'B3': 0, 'AS2': 0.2, 'AS3': 0.6, 'BS2': 0.2, 'BS3': 0.6 };
+        rotateBridge(bridgeData2, bridge2[c], c, 'C', -90, 0, 0.2, 0.6, -25, 0, -20, 10);
+        bridgeAngles2[bridge_code2[c]] = { 'A2': 0, 'A3': 0, 'B2': -90, 'B3': 0, 'C2': -90, 'C3': 0, 'AS2': 0.2, 'AS3': 0.6, 'BS2': 0.2, 'BS3': 0.6, 'CS2': 0.2, 'CS3': 0.6 };
       }
       for (var c = 0; c < 5; c++) {
         rotateBridge(bridgeData3, bridge3[c], c, 'A', 160, -70, 0.2, 0.6, -12, 5, -23, 0);
@@ -461,7 +392,7 @@
 
     }
 
-    function setBridgeAngle(AB) {
+    function setBridgeAngle(ABC) {
       var no = labelInfo.gateClick;
 
       var i1 = bridge_code1.findIndex(x => x == no);
@@ -472,36 +403,50 @@
         bridgeAngles1[bridge_code1[i1]] = {
           'A2': bridgeAngles.rotationA2, 'A3': bridgeAngles.rotationA3,
           'B2': bridgeAngles.rotationB2, 'B3': bridgeAngles.rotationB3,
+          'C2': bridgeAngles.rotationC2, 'C3': bridgeAngles.rotationC3,
           'AS2': bridgeAngles.rotationAS2, 'AS3': bridgeAngles.rotationAS3,
-          'BS2': bridgeAngles.rotationBS2, 'BS3': bridgeAngles.rotationBS3
+          'BS2': bridgeAngles.rotationBS2, 'BS3': bridgeAngles.rotationBS3,
+          'CS2': bridgeAngles.rotationCS2, 'CS3': bridgeAngles.rotationCS3
         };
-        if (AB == 'A')
-          rotateBridge(bridgeData1, bridge1[i1], i1, AB,
+        if (ABC == 'A')
+          rotateBridge(bridgeData1, bridge1[i1], i1, ABC,
             bridgeAngles.rotationA2, bridgeAngles.rotationA3,
             bridgeAngles.rotationAS2, bridgeAngles.rotationAS3,
             20, 0, -20, 10);
-        if (AB == 'B')
-          rotateBridge(bridgeData1, bridge1[i1], i1, AB,
+        if (ABC == 'B')
+          rotateBridge(bridgeData1, bridge1[i1], i1, ABC,
             bridgeAngles.rotationB2, bridgeAngles.rotationB3,
             bridgeAngles.rotationBS2, bridgeAngles.rotationBS3,
+            20, 0, -20, 10);
+        if (ABC == 'C')
+          rotateBridge(bridgeData1, bridge1[i1], i1, ABC,
+            bridgeAngles.rotationC2, bridgeAngles.rotationC3,
+            bridgeAngles.rotationCS2, bridgeAngles.rotationCS3,
             20, 0, -20, 10);
       }
       if (i2 > -1) {
         bridgeAngles2[bridge_code2[i2]] = {
           'A2': bridgeAngles.rotationA2, 'A3': bridgeAngles.rotationA3,
           'B2': bridgeAngles.rotationB2, 'B3': bridgeAngles.rotationB3,
+          'C2': bridgeAngles.rotationC2, 'C3': bridgeAngles.rotationC3,
           'AS2': bridgeAngles.rotationAS2, 'AS3': bridgeAngles.rotationAS3,
-          'BS2': bridgeAngles.rotationBS2, 'BS3': bridgeAngles.rotationBS3
+          'BS2': bridgeAngles.rotationBS2, 'BS3': bridgeAngles.rotationBS3,
+          'CS2': bridgeAngles.rotationCS2, 'CS3': bridgeAngles.rotationCS3
         };
-        if (AB == 'A')
-          rotateBridge(bridgeData2, bridge2[i2], i2, AB,
+        if (ABC == 'A')
+          rotateBridge(bridgeData2, bridge2[i2], i2, ABC,
             bridgeAngles.rotationA2, bridgeAngles.rotationA3,
             bridgeAngles.rotationAS2, bridgeAngles.rotationAS3,
             -25, 0, -20, 10);
-        if (AB == 'B')
-          rotateBridge(bridgeData2, bridge2[i2], i2, AB,
+        if (ABC == 'B')
+          rotateBridge(bridgeData2, bridge2[i2], i2, ABC,
             bridgeAngles.rotationB2, bridgeAngles.rotationB3,
             bridgeAngles.rotationBS2, bridgeAngles.rotationBS3,
+            -25, 0, -20, 10);
+        if (ABC == 'C')
+          rotateBridge(bridgeData2, bridge2[i2], i2, ABC,
+            bridgeAngles.rotationC2, bridgeAngles.rotationC3,
+            bridgeAngles.rotationCS2, bridgeAngles.rotationCS3,
             -25, 0, -20, 10);
       }
 
@@ -510,7 +455,7 @@
           'A2': bridgeAngles.rotationA2, 'A3': bridgeAngles.rotationA3,
           'AS2': bridgeAngles.rotationAS2, 'AS3': bridgeAngles.rotationAS3,
         };
-        rotateBridge(bridgeData3, bridge3[i3], i3, AB,
+        rotateBridge(bridgeData3, bridge3[i3], i3, ABC,
           bridgeAngles.rotationA2, bridgeAngles.rotationA3,
           bridgeAngles.rotationAS2, bridgeAngles.rotationAS3,
           -12, 5, -23, 0);
@@ -518,7 +463,7 @@
     }
 
 
-    function runBridge(no, A2, A3, B2, B3, AS2, AS3, BS2, BS3) {
+    function runBridge(no, A2, A3, B2, B3, C2, C3, AS2, AS3, BS2, BS3, CS2, CS3) {
 
       var i1 = bridge_code1.findIndex(x => x == no);
       var i2 = bridge_code2.findIndex(x => x == no);
@@ -528,8 +473,10 @@
         bridgeAngles1[bridge_code1[i1]] = {
           'A2': A2, 'A3': A3,
           'B2': B2, 'B3': B3,
+          'C2': C2, 'C3': C3,
           'AS2': AS2, 'AS3': AS3,
-          'BS2': BS2, 'BS3': BS3
+          'BS2': BS2, 'BS3': BS3,
+          'CS2': CS2, 'CS3': CS3
         };
         rotateBridge(bridgeData1, bridge1[i1], i1, 'A',
           A2, A3,
@@ -539,19 +486,29 @@
           B2, B3,
           BS2, BS3,
           20, 0, -20, 10);
+        rotateBridge(bridgeData1, bridge1[i1], i1, 'C',
+          C2, C3,
+          CS2, CS3,
+          20, 0, -20, 10);
       }
       if (i2 > -1) {
         bridgeAngles2[bridge_code2[i2]] = {
           'A2': A2, 'A3': A3,
           'B2': B2, 'B3': B3,
+          'B2': C2, 'B3': C3,
           'AS2': AS2, 'AS3': AS3,
-          'BS2': BS2, 'BS3': BS3
+          'BS2': BS2, 'BS3': BS3,
+          'CS2': CS2, 'CS3': CS3
         };
         rotateBridge(bridgeData2, bridge2[i2], i2, 'A',
           A2 - 180, A3,
           AS2, AS3,
           -25, 0, -20, 10);
         rotateBridge(bridgeData2, bridge2[i2], i2, 'B',
+          B2 - 180, B3,
+          BS2, BS3,
+          -25, 0, -20, 10);
+        rotateBridge(bridgeData2, bridge2[i2], i2, 'C',
           B2 - 180, B3,
           BS2, BS3,
           -25, 0, -20, 10);
@@ -569,28 +526,7 @@
       }
     }
 
-    function setWindData(no, data) {
-      document.getElementById(no + "_wind").innerText = data;
-      document.getElementById(no + "_wind").className = (data == '' ? 'none' : 'label')
-    }
-
-    function setPlaneData(no, data) {
-      document.getElementById(no + "_plane").innerHTML = data;
-      document.getElementById(no + "_plane").className = (data == '' ? 'none' : 'label')
-    }
-
-    function setLabelDataColor(no, data) {
-      document.getElementById(no).style.backgroundColor = data;
-    }
-    function setWindDataColor(no, data) {
-      document.getElementById(no + "_wind").style.backgroundColor = data;
-    }
-
-    function setPlaneDataColor(no, data) {
-      document.getElementById(no + "_plane").style.backgroundColor = data;
-    }
-
-    function runPlaneXY(no, px, py) {
+    function runPlaneXYA(no, px, py, pa) {
       var xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0;
       var i1 = bridge_code1.findIndex(x => x == no);
       var i2 = bridge_code2.findIndex(x => x == no);
@@ -598,44 +534,41 @@
 
       if (i1 > -1) {
         var i = bridge1[i1].findIndex(x => x.obj_type == 'plane');
-        xOffset = 20; xIncrement = 0; zOffset = -20; zIncrement = 10;
-        bridge1[i1][i].position.set(px + xOffset + i1 * xIncrement, -1, py - zOffset - i1 * zIncrement);
+        bridge1[i1][i].rotation.set(bridge1[i1][i].rotation._x, pa / 180 * Math.PI, bridge1[i1][i].rotation._z);
+        bridge1[i1][i].position.set(px, -1, py);
       }
       if (i2 > -1) {
         var i = bridge2[i2].findIndex(x => x.obj_type == 'plane');
-        xOffset = -25; xIncrement = 0; zOffset = -20; zIncrement = 10;
-        bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, 90 / 180 * Math.PI, bridge2[i2][i].rotation._z);
-        bridge2[i2][i].position.set(-px + 2 + xOffset + i2 * xIncrement, -1, py + 1 - zOffset - i2 * zIncrement);
+        bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, pa / 180 * Math.PI, bridge2[i2][i].rotation._z);
+        bridge2[i2][i].position.set(px, -1, py);
       }
       if (i3 > -1) {
         var i = bridge3[i3].findIndex(x => x.obj_type == 'plane');
-        xOffset = -12; xIncrement = 5; zOffset = -23; zIncrement = 0;
-        bridge3[i3][i].rotation.set(bridge3[i3][i].rotation._x, 180 / 180 * Math.PI, bridge3[i3][i].rotation._z);
-        bridge3[i3][i].position.set(py / 2 + xOffset + i3 * xIncrement, -1, px - 2 - zOffset - i3 * zIncrement);
+        bridge3[i3][i].rotation.set(bridge3[i3][i].rotation._x, pa / 180 * Math.PI, bridge3[i3][i].rotation._z);
+        bridge3[i3][i].position.set(px, -1, py);
       }
     }
 
-    function setPlaneXY() {
+    function setPlaneXYA() {
       var no = labelInfo.gateClick;
-      var xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0;
       var i1 = bridge_code1.findIndex(x => x == no);
       var i2 = bridge_code2.findIndex(x => x == no);
       var i3 = bridge_code3.findIndex(x => x == no);
 
       if (i1 > -1) {
         var i = bridge1[i1].findIndex(x => x.obj_type == 'plane');
-        xOffset = 20; xIncrement = 0; zOffset = -20; zIncrement = 10;
-        bridge1[i1][i].position.set(planeXY.x + xOffset + i1 * xIncrement, -1, planeXY.y - zOffset - i1 * zIncrement);
+        bridge1[i1][i].rotation.set(bridge1[i1][i].rotation._x, planeXYA.a / 180 * Math.PI, bridge1[i1][i].rotation._z);
+        bridge1[i1][i].position.set(planeXYA.x, -1, planeXYA.y);
       }
       if (i2 > -1) {
         var i = bridge2[i2].findIndex(x => x.obj_type == 'plane');
-        xOffset = -25; xIncrement = 0; zOffset = -20; zIncrement = 10;
-        bridge2[i2][i].position.set(planeXY.x + xOffset + i2 * xIncrement, -1, planeXY.y - zOffset - i2 * zIncrement);
+        bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, planeXYA.a / 180 * Math.PI, bridge2[i2][i].rotation._z);
+        bridge2[i2][i].position.set(planeXYA.x, -1, planeXYA.y);
       }
       if (i3 > -1) {
         var i = bridge3[i3].findIndex(x => x.obj_type == 'plane');
-        xOffset = -12; xIncrement = 5; zOffset = -23; zIncrement = 0;
-        bridge3[i3][i].position.set(planeXY.y + xOffset + i3 * xIncrement, -1, planeXY.x - zOffset - i3 * zIncrement);
+        bridge3[i3][i].rotation.set(bridge3[i3][i].rotation._x, planeXYA.a / 180 * Math.PI, bridge3[i3][i].rotation._z);
+        bridge3[i3][i].position.set(planeXYA.x, -1, planeXYA.y);
       }
     }
     //設定飛機
@@ -656,25 +589,21 @@
       if (i > -1) {
         if (i1 > -1) {
           addModel(bridge1, bridge_code1, _objPlaneCollect[i], i1,
-            { x: 0, y: 0, z: 0 }, { _x: 0, _y: -90 / 180 * Math.PI, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#6666ff',
+            { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
             20, 0, -20, 10);
           bridge_planeModel1[i1] = m;
-
-          runPlaneXY(no, plane_move.from.planeX, plane_move.from.planeY);
         }
         if (i2 > -1) {
           addModel(bridge2, bridge_code2, _objPlaneCollect[i], i2,
-            { x: 0, y: 0, z: 0 }, { _x: 0, _y: 90 / 180 * Math.PI, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#6666ff',
+            { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
             -25, 0, -20, 10);
           bridge_planeModel2[i2] = m;
-          runPlaneXY(no, plane_move.from.planeX, plane_move.from.planeY);
         }
         if (i3 > -1) {
           addModel(bridge3, bridge_code3, _objPlaneCollect[i], i3,
-            { x: 0, y: 0, z: 0 }, { _x: 0, _y: 180 / 180 * Math.PI, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#6666ff',
+            { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
             50, 0, 80, 70);
           bridge_planeModel3[i3] = m;
-          runPlaneXY(no, plane_move.from.planeX, plane_move.from.planeY);
         }
       }
     }
@@ -872,7 +801,49 @@
 
     }
 
+
+    function setLabelData(id, data) {
+      document.getElementById(id).innerHTML = data;
+    }
+
+    function setLabelDataColor(id, data) {
+      document.getElementById(id).style.backgroundColor = data;
+    }
+
+    function setLabelVisible(id, data) {
+      document.getElementById(id).style.visibility = data ? 'hidden' : 'visible';
+    }
+
+    function setPlaneData(no, data) {
+      document.getElementById(no + "_plane").innerHTML = data;
+    }
+
+    function setPlaneDataColor(no, data) {
+      document.getElementById(no + "_plane").style.backgroundColor = data;
+    }
+
+    function setWindData(no, data) {
+      document.getElementById(no + "_wind").innerText = data;
+    }
+
+    function setWindDataColor(no, data) {
+      document.getElementById(no + "_wind").style.backgroundColor = data;
+    }
+    function clearLabelFlash(id) {
+      document.getElementById(id).style.visibility = 'visible';
+      if (_collect_intervalId[`id_${id}`]) {
+        clearInterval(_collect_intervalId[`id_${id}`]);
+        _collect_intervalId[`id_${id}`] = false;
+      }
+    }
+
+    function setLabelFlash(id) {
+      if (_collect_intervalId[`id_${id}`]) return;
+      document.getElementById(id).style.visibility = document.getElementById(id).style.visibility == 'hidden' ? 'visible' : 'hidden';
+    }
+
     function clearFlash(no, b, i) {
+      setVisible(no, b, i, false, false);
       if (_collect_intervalId[`${no}_${b}_${i}`]) {
         clearInterval(_collect_intervalId[`${no}_${b}_${i}`]);
         _collect_intervalId[`${no}_${b}_${i}`] = false;
@@ -970,7 +941,7 @@
     }
 
     //載入模型
-    function loadModels(promises, _objCollect, labelData, tmpData, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0, reflectivity = 1, emissive = '0x000000', transparent = false, opacity = 1) {
+    function loadModels(promises, _objCollect, labelData, tmpData, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0, reflectivity = 1, emissive = '#000000', transparent = false, opacity = 1) {
 
       for (let c = 0; c < _objCollect.length; c++) {
         tmpData.forEach((item, i) => {
@@ -1061,7 +1032,7 @@
                   _Div2.style.position = 'absolute';
                   _Div2.style.backgroundColor = 'rgba(25,25,25,0.5)';
                   _Div2.style.borderRadius = '3px';
-                  _Div2.className = "label";
+                  _Div2.className = "label wind";
                   _Div2.textContent = "10 / 20";
                   _Div2.style.marginTop = "-1em";
                   if (labelData) _Div2.label = labelData[c];
@@ -1080,7 +1051,7 @@
                   _Div3.style.position = 'absolute';
                   _Div3.style.backgroundColor = 'rgba(25,25,25,0.5)';
                   _Div3.style.borderRadius = '3px';
-                  _Div3.className = "label";
+                  _Div3.className = "label plane";
                   _Div3.innerHTML = "C000  1234<br>抵達時間<br>離開時間";
                   _Div3.style.marginTop = "-1em";
                   if (labelData) _Div3.label = labelData[c];
@@ -1090,6 +1061,18 @@
                   _Label3.position.set(10, 20, 10);
                   stlModel.add(_Label3);
 
+
+                  const _Div4 = document.createElement("div");
+                  _Div4.style.padding = '3px';
+                  _Div4.style.display = 'none';
+                  _Div4.className = "label fire";
+                  _Div4.innerHTML = '<img src=fire.gif class=fire />'
+                  if (labelData) _Div4.label = labelData[c];
+
+
+                  const _Label4 = new CSS2DObject(_Div4);
+                  _Label4.position.set(10, 20, 10);
+                  stlModel.add(_Label4);
                 }
 
                 resolve();
@@ -1118,24 +1101,24 @@
               _objCollect[c].push(bulb);
 
 
-              if (item.obj_type == "AL1" && labelData) {
+              if ((item.obj_type == "AL1" || item.obj_type == "BL1" || item.obj_type == "CL1") && labelData) {
                 const _Div = document.createElement("div");
-                _Div.id = labelData[c];
+                _Div.id = labelData[c] + "_" + item.obj_type.replace("L1", "");
                 _Div.style.padding = '3px';
                 _Div.style.color = '#fff';
                 _Div.style.fontSize = '12px';
                 _Div.style.position = 'absolute';
                 _Div.style.backgroundColor = 'rgba(25,25,25,0.5)';
                 _Div.style.borderRadius = '3px';
-                _Div.className = "label";
-                _Div.textContent = labelData[c] + "_A";
+                _Div.className = "label bridge";
+                _Div.textContent = labelData[c] + "_" + item.obj_type.replace("L1", "");
                 _Div.style.marginTop = "-1em";
                 if (labelData) _Div.label = labelData[c];
 
                 _Div.addEventListener('mouseover', function () {
                   // 滑鼠移到登機門圖示錨點
                   // _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
-                  labelInfo.bridgeMouseover = labelData[c] + "_A"; // 更新 GUI 显示的标签信息
+                  labelInfo.bridgeMouseover = labelData[c] + "_" + item.obj_type.replace("L1", ""); // 更新 GUI 显示的标签信息
                   gui.updateDisplay(); // 更新 GUI 显示
                 });
                 _Div.addEventListener('mouseout', function (e) {
@@ -1147,34 +1130,20 @@
 
 
               }
-              if (item.obj_type == "BL1" && labelData) {
-                const _Div = document.createElement("div");
-                _Div.id = labelData[c];
-                _Div.style.padding = '3px';
-                _Div.style.color = '#fff';
-                _Div.style.fontSize = '12px';
-                _Div.style.position = 'absolute';
-                _Div.style.backgroundColor = 'rgba(25,25,25,0.5)';
-                _Div.style.borderRadius = '3px';
-                _Div.className = "label";
-                _Div.textContent = labelData[c] + "_B";
-                _Div.style.marginTop = "-1em";
-                if (labelData) _Div.label = labelData[c];
 
-                _Div.addEventListener('mouseover', function () {
-                  // 滑鼠移到登機門圖示錨點
-                  // _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
-                  labelInfo.bridgeMouseover = labelData[c] + "_B"; // 更新 GUI 显示的标签信息
-                  gui.updateDisplay(); // 更新 GUI 显示
-                });
-                _Div.addEventListener('mouseout', function (e) {
-                  //_Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
-                });
-                const _Label = new CSS2DObject(_Div);
-                _Label.position.set(0, 0, 0);
-                bulb.add(_Label);
+              if (item.obj_type == "AL1" || item.obj_type == "AL2" || item.obj_type == "AL3" ||
+                item.obj_type == "BL1" || item.obj_type == "BL2" || item.obj_type == "BL3" ||
+                item.obj_type == "CL1" || item.obj_type == "CL2" || item.obj_type == "CL3") {
 
-
+                const _Div1 = document.createElement("div");
+                _Div1.id = labelData[c] + "_" + item.obj_type + "_fire";
+                _Div1.style.padding = '3px';
+                _Div1.className = "label fire";
+                _Div1.innerHTML = '<img src=fire.gif class=fire />'
+                if (labelData) _Div1.label = labelData[c];
+                const _Label1 = new CSS2DObject(_Div1);
+                _Label1.position.set(0, 0, 0);
+                bulb.add(_Label1);
               }
               resolve();
             }
@@ -1235,6 +1204,10 @@
               labelInfo.bridgeDblClick = element.object.label + "_A";
             if (element.object.obj_type == "B1" || element.object.obj_type == "B2" || element.object.obj_type == "B3")
               labelInfo.bridgeDblClick = element.object.label + "_B";
+            if (element.object.obj_type == "C1" || element.object.obj_type == "C2" || element.object.obj_type == "C3")
+              labelInfo.bridgeDblClick = element.object.label + "_C";
+            if (element.object.obj_type == "label")
+              labelInfo.gateDblClick = element.object.label;
           }
           gui.updateDisplay(); // 更新 GUI 显示
         });
@@ -1280,6 +1253,10 @@
               labelInfo.bridgeClick = element.object.label + "_A";
             if (element.object.obj_type == "B1" || element.object.obj_type == "B2" || element.object.obj_type == "B3" || element.object.obj_type == "B4")
               labelInfo.bridgeClick = element.object.label + "_B";
+            if (element.object.obj_type == "C1" || element.object.obj_type == "C2" || element.object.obj_type == "C3" || element.object.obj_type == "C4")
+              labelInfo.bridgeClick = element.object.label + "_C";
+            if (element.object.obj_type == "label")
+              labelInfo.gateClick = element.object.label;
           }
           gui.updateDisplay(); // 更新 GUI 显示
         });
@@ -1309,18 +1286,34 @@
       // 计算物体和射线的交点
       const intersects = raycaster.intersectObjects(scene.children);
 
+      var oldGateMouseover = labelInfo.gateMouseover;
       if (intersects.length > 0) {
         intersects.forEach(element => {
           if (element.object.label) labelInfo.gateMouseover = element.object.label;
           if (element.object.obj_type) {
-            if (element.object.obj_type == "A1" || element.object.obj_type == "A2" || element.object.obj_type == "A3")
+            if (element.object.obj_type == "A1" || element.object.obj_type == "A2" || element.object.obj_type == "A3" || element.object.obj_type == "A4")
               labelInfo.bridgeMouseover = element.object.label + "_A";
-            if (element.object.obj_type == "B1" || element.object.obj_type == "B2" || element.object.obj_type == "B3")
+            if (element.object.obj_type == "B1" || element.object.obj_type == "B2" || element.object.obj_type == "B3" || element.object.obj_type == "B4")
               labelInfo.bridgeMouseover = element.object.label + "_B";
+            if (element.object.obj_type == "C1" || element.object.obj_type == "C2" || element.object.obj_type == "C3" || element.object.obj_type == "C4")
+              labelInfo.bridgeMouseover = element.object.label + "_C";
+            if (element.object.obj_type == "label")
+              labelInfo.gateMouseover = element.object.label;
           }
         });
         gui.updateDisplay(); // 更新 GUI 显示
         // axesHelper.position.copy(intersects[0].point);
+      }
+      if (oldGateMouseover != labelInfo.gateMouseover) {
+        var els = document.getElementsByClassName("plane");
+        for (var i = 0; i < els.length; i++) {
+          if (els[i].label == labelInfo.gateMouseover)
+            els[i].style.display = 'block';
+          else
+            els[i].style.display = 'none';
+        };
+        oldGateMouseover = labelInfo.gateMouseover;
+        brideMouseOVer(oldGateMouseover);
       }
     }
 
@@ -1349,6 +1342,14 @@
       Promise.all(promises).then(() => {
         clearAllplane();
         ap_didLaunchView();
+        var els = document.getElementsByClassName("label plane");
+        for (var i = 0; i < els.length; i++) {
+          els[i].style.visibility = "hidden"
+        };
+        var elsf = document.getElementsByClassName("label fire");
+        for (var i = 0; i < elsf.length; i++) {
+          elsf[i].style.visibility = "hidden"
+        };
         console.log("All models have been loaded:",);
 
       }).catch(error => {
@@ -1486,15 +1487,18 @@
         console.log("Selected Model: " + value);
         setPlane();
       });
-      camPlane.add(planeXY, 'x', 0, 30).name('planeX').onChange(function () {
-        setPlaneXY();
+      camPlane.add(planeXYA, 'x', -50, 50).name('planeX').onChange(function () {
+        setPlaneXYA();
 
       });
-      camPlane.add(planeXY, 'y', -10, 10).name('planeY').onChange(function () {
-        setPlaneXY();
+      camPlane.add(planeXYA, 'y', -100, 100).name('planeY').onChange(function () {
+        setPlaneXYA();
 
       });
-      camPlane.add({ play }, 'play').name('play');
+      camPlane.add(planeXYA, 'a', 0, 360).name('planeY').onChange(function () {
+        setPlaneXYA();
+
+      });
       camPlane.add({ clearAllplane }, 'clearAllplane').name('Clear All Plane');
 
 
@@ -1532,6 +1536,22 @@
 
       });
 
+      bridgeAngle.add(bridgeAngles, 'rotationC2', -360, 360).name('C2').onChange(function (angle) {
+        setBridgeAngle('C');
+
+      });
+      bridgeAngle.add(bridgeAngles, 'rotationC3', -90, 90).name('C3').onChange(function (angle) {
+        setBridgeAngle('C');
+
+      });
+      bridgeAngle.add(bridgeAngles, 'rotationCS2', 0, 2).name('CS2').onChange(function (angle) {
+        setBridgeAngle('C');
+
+      });
+      bridgeAngle.add(bridgeAngles, 'rotationCS3', 0.3, 1).name('CS3').onChange(function (angle) {
+        setBridgeAngle('C');
+
+      });
       var bridge_data_folder = gui.addFolder('bridge_data');
       bridge_data_folder.add({ value: '' }, 'value').name('wind data').onChange(function (value) {
         setWindData(labelInfo.gateClick, value)
@@ -1598,9 +1618,9 @@
         if (item.name.indexOf('.stl') > -1) {
           const loader = new STLLoader();
           loader.load(item.name, function (geometry) {
-            var reflectivity = 0.1, emissive = '0x333333', transparent = false, opacity = 1;
-            if (item.obj_type == 'Jetway') { transparent = true, opacity = 0.9 , emissive = item.color}
-            var material = new THREE.MeshPhongMaterial({ color: item.color, reflectivity: reflectivity, emissive: emissive, transparent: transparent, opacity: opacity });
+            var reflectivity = 0.1, emissive = '#333333', transparent = false, opacity = 1, color = item.color;
+            if (item.obj_type == 'Jetway') { transparent = true, opacity = 0.95, emissive = '#666666', color = '#666666' }
+            var material = new THREE.MeshPhongMaterial({ color: color, reflectivity: reflectivity, emissive: emissive, transparent: transparent, opacity: opacity });
             var stlModel = new THREE.Mesh(geometry, material);
             stlModel.obj_name = item.name;
             if (item.obj_type != '') stlModel.obj_type = item.obj_type;
@@ -1903,6 +1923,14 @@
 
 
     var event_count;
+
+
+    function brideMouseOVer(a) {
+
+      document.getElementById("event").value += event_count + ':brideMouseOVer ' + a + '\n';
+      event_count++;
+    }
+
     function bim_launchView(elementId) {
       event_count = 1;
       document.getElementById("event").value += event_count + ':bim_launchView ' + elementId + '\n';
@@ -1926,10 +1954,12 @@
       event_count++;
       overallData.gates.forEach(element => {
         setPlaneData(element.id, element.flightLegInfo.flightNumber + ' ' + element.flightLegInfo.aircraftType + '<br/>' + element.flightLegInfo.aTime + '<br/>' + element.flightLegInfo.dTime)
+        setLabelData(element.id, element.name); // gates.name：文字顯示在#G1
+        //gates.statusColor：顏色顯示在#G1, #G3
         setLabelDataColor(element.id, element.statusColor);
+        setWindDataColor(element.id, element.statusColor);
         setWindData(element.id, '');
         if (element.windSpeedAvg && element.windSpeedMax) setWindData(element.id, element.windSpeedAvg + '/' + element.windSpeedMax);
-        setWindDataColor(element.id, element.statusColor);
 
         if (!lastStatus[element.id]) lastStatus[element.id] = { aTime: null, status: null };
 
@@ -1945,20 +1975,38 @@
 
         //isHidden 是否隱藏。(true: 隱藏, false: 顯示)
         //isFlash 是否閃爍。(true: 閃爍, false: 不閃爍)
+        //作用於#G1 是否閃爍
         if (element.isFlash)
-          setFlash(element.id);
+          setLabelFlash(element.id);
         else
-          clearFlash(element.id);
-        setVisible(element.id, null, null, element.isHidden);
-        setColor(element.id, null, null, element.statusColor);
-        element.bridges.forEach(b_element => {
+          clearLabelFlash(element.id);
+        //作用於#G1 是否顯示
+        setLabelVisible(element.id, element.isHidden);
 
+
+        element.bridges.forEach(b_element => {
+          setLabelData(b_element.id, b_element.name); // gates.name：文字顯示在#B
           if (b_element.isFlash)
-            setFlash(b_element.id);
+            setLabelFlash(b_element.id);
           else
-            clearFlash(b_element.id);
-          setVisible(element.id, b_element.id, null, b_element.isHidden);
-          setColor(element.id, b_element.id, null, b_element.statusColor);
+            clearLabelFlash(b_element.id);
+          setLabelVisible(b_element.id, b_element.isHidden);
+          //setVisible(element.id, b_element.id, null, b_element.isHidden);
+          //setColor(element.id, b_element.id, null, b_element.statusColor);
+          //：作用於#B2/ #B3/ #B4；若只有一個{}，僅會顯示#B2；如有 3 個{}，會顯示 #B2/ #B3/ #B4
+
+          if (b_element.fireAlarm) {
+            //C16_AL1_fire
+            setLabelVisible(b_element.id + "L1_fire", false);
+          }
+
+          if (b_element.details.length == 1) {
+            setVisible(element.id, b_element.id, 1, true);
+            setVisible(element.id, b_element.id, 2, true);
+          }
+          if (b_element.details.length == 2) {
+            setVisible(element.id, b_element.id, 2, true);
+          }
 
           b_element.details.forEach((bi_element, index) => {
 
@@ -2000,7 +2048,7 @@
     }
 
     let lastBridgeStatus = {}
-    
+
     function bim_setBridgeData(bridgeData) {
 
       document.getElementById("event").value += event_count + ':bim_setBridgeData\n';
