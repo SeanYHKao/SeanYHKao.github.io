@@ -38,6 +38,20 @@
    color: white;
   }
 
+  #bridge_label{
+   position: absolute;
+   top: 10px;
+   left: 10px;
+   background-color: rgba(0, 3, 173, 0.8);
+   padding: 5px 10px;
+   border-radius: 5px;
+   z-index: 2000;
+   width: 200px;
+   font-size: 20px;
+   color: white;
+
+  }
+
   #backButton {
    position: absolute;
    bottom: 10px;
@@ -102,6 +116,7 @@
    瞬間風速達25節,暫停橋复服務。</div>
  </div>
  <div id="bimModel_bridge" style="visibility: hidden; width: 80vw; height: 80vh; position: absolute; top:0; left:0;">
+  <div id="bridge_label"></div> 
   <button id="backButton">返回</button> <button id="viewAButton">前</button> <button id="viewBButton">中</button> <button
    id="viewCButton">後</button>
  </div>
@@ -1218,8 +1233,8 @@
     bimModel.style.visibility = 'hidden';
     bimModel_bridge.style.visibility = 'visible';
     // 使用者在空橋標籤或空橋錨點雙擊滑鼠，BIM Model 切換至空橋細部 
-    enterBridgeId = labelInfo.gateDblClick;
-    ap_didEnterBridgeScene(labelInfo.gateDblClick);
+    enterBridgeId = labelInfo.bridgeDblClick;
+    ap_didEnterBridgeScene(labelInfo.bridgeDblClick);
    }
   }
 
@@ -2147,10 +2162,13 @@
   }
 
   let lastBridgeStatus = {}
+  let currentbridgeId = {}
   
   function ap_didEnterBridgeScene(bridgeId) {
+   currentbridgeId = bridgeId;
    document.getElementById("event").value += event_count + ':ap_didEnterBridgeScene ' + bridgeId + '\n';
    event_count++;
+   document.getElementById("bridge_label").innerText = bridgeId + " 空橋狀況";
    if (!(bridgeId in lastBridgeStatus)) {
     lastBridgeStatus[bridgeId] = {
      "bridgeId": "E01_A",
@@ -2209,6 +2227,7 @@
   function bim_setBridgeData(bridgeData) {
    lastBridgeStatus[bridgeData.bridgeId] = bridgeData;
    document.getElementById("event").value += event_count + ':bim_setBridgeData\n';
+   if(currentbridgeId != bridgeData.bridgeId) return;
    event_count++;
    bridgeData.status.forEach(element => {
     var i = _objCollect_bridge.findIndex(x => x.obj_type == element.position);
