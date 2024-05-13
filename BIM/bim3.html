@@ -142,7 +142,10 @@
 
   //參數區
   let planeModels = {
-   selectedModel: ''
+   selectedModel: '',
+   removePlaneAction: function(){
+    removePlane();
+   }
   };
 
   let allModels = [
@@ -233,7 +236,7 @@
   let mainBuilding = [{ "index": 0, "name": "cube.stl", "obj_type": "undefined", "position": { "x": -14, "y": -1, "z": -20 }, "scale": { "x": 0.2, "y": 0.5, "z": 8.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#006600", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 1, "name": "cube.stl", "obj_type": "undefined", "position": { "x": 13, "y": -1, "z": -20 }, "scale": { "x": 0.2, "y": 0.5, "z": 8.1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#006600", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "cube.stl", "obj_type": "出境1", "position": { "x": -23, "y": 0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 3, "name": "cube.stl", "obj_type": "入境2", "position": { "x": 12, "y": -0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0.4363323129985824, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 21.7, "y": 0, "z": 0 } }, { "index": 4, "name": "cube.stl", "obj_type": "入境1", "position": { "x": -23, "y": -0.5, "z": -1 }, "scale": { "x": 2.2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": -0.4363323129985824, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": -22.5, "y": 0, "z": 0.1 } }, { "index": 5, "name": "cube.stl", "obj_type": "出境2", "position": { "x": 12, "y": 0.5, "z": -1 }, "scale": { "x": 2, "y": 0.2, "z": 0.4 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#880000", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 6, "name": "cube.stl", "obj_type": "", "position": { "x": -52, "y": -1.1, "z": -90 }, "scale": { "x": 20, "y": 0.05, "z": 30 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#dddddd", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 7, "name": "cube.stl", "obj_type": "undefined", "position": { "x": -14, "y": 0.5, "z": -20 }, "scale": { "x": 5.5, "y": 0.02, "z": 8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#dddddd", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 8, "name": "cube.stl", "obj_type": "undefined", "position": { "x": -14, "y": 1.5, "z": -20 }, "scale": { "x": 5.5, "y": 0.1, "z": 8 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#dddddd", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 9, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": -20, "y": -1, "z": -6 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 10, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": -20, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 11, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": 20, "y": -1, "z": -6 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 12, "name": "pillar.stl", "obj_type": "undefined", "position": { "x": 20, "y": -1, "z": 4 }, "scale": { "x": 1, "y": 1.6, "z": 1 }, "rotation": { "_x": 0, "_y": 1.5707963267948966, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 13, "name": "top3.stl", "obj_type": "undefined", "position": { "x": 0, "y": 2, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#888888", "center": { "x": 0, "y": 0, "z": 0 } }];
 
   //飛機模型
-  let planeData = [{ "index": 0, "name": "a380.stl", "obj_type": "A380", "position": { "x": -9, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 1, "name": "a350-900.stl", "obj_type": "A350-900", "position": { "x": -17, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "a330-300.stl", "obj_type": "A330-300", "position": { "x": -25, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 3, "name": "a321neo.stl", "obj_type": "A321neo", "position": { "x": -33, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 4, "name": "787-8.stl", "obj_type": "787-10", "position": { "x": -41, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 5, "name": "777.stl", "obj_type": "777-300ER", "position": { "x": -50, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 6, "name": "747-400.stl", "obj_type": "747-400F", "position": { "x": -59, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 7, "name": "B737.stl", "obj_type": "737-800", "position": { "x": -69, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }];
+  let planeData = [{ "index": 0, "name": "a380.stl", "obj_type": "A380" }, { "index": 1, "name": "a350-900.stl", "obj_type": "A350-900" }, { "index": 2, "name": "a330-300.stl", "obj_type": "A330-300" }, { "index": 3, "name": "a321neo.stl", "obj_type": "A321neo" }, { "index": 4, "name": "787-8.stl", "obj_type": "787-10" }, { "index": 5, "name": "777.stl", "obj_type": "777-300ER" }, { "index": 6, "name": "747-400.stl", "obj_type": "747-400F" }, { "index": 7, "name": "B737.stl", "obj_type": "737-800" }];
 
   let _objPlaneCollect = []; //飛機模型
 
@@ -577,18 +580,30 @@
 
    if (i1 > -1) {
     var i = bridge1[i1].findIndex(x => x.obj_type == 'plane');
-    bridge1[i1][i].rotation.set(bridge1[i1][i].rotation._x, xya.a / 180 * Math.PI, bridge1[i1][i].rotation._z);
+    if (xya.a != -100000) bridge1[i1][i].rotation.set(bridge1[i1][i].rotation._x, xya.a / 180 * Math.PI, bridge1[i1][i].rotation._z);
     bridge1[i1][i].position.set(xya.x, -1, xya.y);
+    if (bridge1[i1][i].transparent) {
+     bridge1[i1][i].transparent = false;
+     bridge1[i1][i].opacity = 1;
+    }
    }
    if (i2 > -1) {
     var i = bridge2[i2].findIndex(x => x.obj_type == 'plane');
-    bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, xya.a / 180 * Math.PI, bridge2[i2][i].rotation._z);
+    if (xya.a != -100000) bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, xya.a / 180 * Math.PI, bridge2[i2][i].rotation._z);
     bridge2[i2][i].position.set(xya.x, -1, xya.y);
+    if (bridge2[i2][i].transparent) {
+     bridge2[i2][i].transparent = false;
+     bridge2[i2][i].opacity = 1;
+    }
    }
    if (i3 > -1) {
     var i = bridge3[i3].findIndex(x => x.obj_type == 'plane');
-    bridge3[i3][i].rotation.set(bridge3[i3][i].rotation._x, xya.a / 180 * Math.PI, bridge3[i3][i].rotation._z);
+    if (xya.a != -100000) bridge3[i3][i].rotation.set(bridge3[i3][i].rotation._x, xya.a / 180 * Math.PI, bridge3[i3][i].rotation._z);
     bridge3[i3][i].position.set(xya.x, -1, xya.y);
+    if (bridge3[i3][i].transparent) {
+     bridge3[i3][i].transparent = false;
+     bridge3[i3][i].opacity = 1;
+    }
    }
   }
   //設定飛機
@@ -607,25 +622,36 @@
  position, rotation, center, scale, color, 
  xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0)*/
    if (i1 > -1) {
-    addModel(bridge1, bridge_code1, _objPlaneCollect[i], i1,
-     { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
-     20, 0, -20, 10);
+    addModel(bridge1, bridge_code1, _objPlaneCollect[i], i1, '#ffffff');
     bridge_planeModel1[i1] = m;
     setPlaneMove(planeMove1, 1, i1);
    }
    if (i2 > -1) {
-    addModel(bridge2, bridge_code2, _objPlaneCollect[i], i2,
-     { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
-     -25, 0, -20, 10);
+    addModel(bridge2, bridge_code2, _objPlaneCollect[i], i2, '#ffffff');
     bridge_planeModel2[i2] = m;
     setPlaneMove(planeMove2, 2, i2);
    }
    if (i3 > -1) {
-    addModel(bridge3, bridge_code3, _objPlaneCollect[i], i3,
-     { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
-     50, 0, 80, 70);
+    addModel(bridge3, bridge_code3, _objPlaneCollect[i], i3, '#ffffff');
     bridge_planeModel3[i3] = m;
     setPlaneMove(planeMove3, 3, i3);
+   }
+  }
+
+  function removePlane(no) {
+   if (!no) no = labelInfo.gateClick;
+   var i1 = bridge_code1.findIndex(x => x == no);
+   var i2 = bridge_code2.findIndex(x => x == no);
+   var i3 = bridge_code3.findIndex(x => x == no);
+
+   if (i1 > -1) {
+    setPlaneMoveout(planeMove1, 1, i1);
+   }
+   if (i2 > -1) {
+    setPlaneMoveout(planeMove2, 2, i2);
+   }
+   if (i3 > -1) {
+    setPlaneMoveout(planeMove3, 3, i3);
    }
   }
 
@@ -660,27 +686,22 @@
     var pointsA = [];
 
     for (var i = 60; i > 27.5 - c * zIncrement; i--) {
-     pointsA.push({ x: 40, y: i, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, 40, i) });
-
-     console.log(40, i)
+     pointsA.push({ x: 40, y: i, a: pointsA.length == 0 ? -100000 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, 40, i) });
     }
 
     for (var i = 0; i <= segments; i++) {
      var theta = startAngle + (endAngle - startAngle) * (i / segments);
      var x = cX + radius * Math.cos(theta);
      var z = cZ + radius * Math.sin(theta); x
-     pointsA.push({ x: x, y: z, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
-     console.log(x, z)
+     pointsA.push({ x: x, y: z, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
     }
 
-    for (var i = 17; i > 5; i -= 0.5) {
+    for (var i = 17; i > 8; i -= 0.5) {
      pointsA.push({
-      x: i + xOffset + c * xIncrement, y: - zOffset - c * zIncrement,
-      a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i + xOffset + c * xIncrement, - zOffset - c * zIncrement)
+      x: i + xOffset + c * xIncrement, y: - zOffset - c * zIncrement, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i + xOffset + c * xIncrement, - zOffset - c * zIncrement)
      });
-     console.log(i + xOffset + c * xIncrement, - zOffset - c * zIncrement)
     }
-    moveArray[c] = { points: pointsA, current: 0 };
+    moveArray[c] = { points: pointsA, current: 0, hide: true };
    }
 
 
@@ -697,29 +718,124 @@
     var pointsA = [];
 
     for (var i = -90; i < 22.5 - c * zIncrement; i++) {
-     pointsA.push({ x: -40, y: i, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, -40, i) });
-
-     console.log(-40, i)
+     pointsA.push({ x: -40, y: i, a: pointsA.length == 0 ? -100000 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, -40, i) });
     }
     for (var i = 0; i <= segments; i++) {
      var theta = startAngle + (endAngle - startAngle) * (i / segments);
      var x = cX + radius * Math.cos(theta);
      var z = cZ + radius * Math.sin(theta);
-     pointsA.push({ x: x, y: z, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
-
-     console.log(x, z)
+     pointsA.push({ x: x, y: z, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
     }
 
-    for (var i = -36; i < -26.5; i += 0.5) {
+    for (var i = -36; i < -28; i += 0.5) {
+     pointsA.push({
+      x: i + c * xIncrement, y: - zOffset - c * zIncrement, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i + c * xIncrement, - zOffset - c * zIncrement)
+    });
+   }
+
+   moveArray[c] = { points: pointsA, current: 0, hide: true };
+  }
+
+
+
+
+  if (d == 3) {
+   // -12, 5, -23, 0
+   var xOffset = -12, xIncrement = 5, zOffset = -23, zIncrement = 0;
+   var cX = -11 + c * xIncrement; // 設置中心點X坐標（正方形的中心點）
+   var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
+   var cZ = 37.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
+   var radius = 2.5;                              // 半圓弧的半徑
+   var startAngle = Math.PI / 2;                  // 起始角度，Math.PI/2 代表90度
+   var endAngle = 0;                   // 終止角度，-Math.PI/2 代表-90度
+   var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
+
+
+   var pointsA = [];
+   for (var i = -55; i < -11 + c * xIncrement; i++) {
+    pointsA.push({ x: i, y: 40, a: pointsA.length == 0 ? -100000 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i, 40) });
+   }
+   for (var i = 0; i <= segments; i++) {
+    var theta = startAngle + (endAngle - startAngle) * (i / segments);
+    var x = cX + radius * Math.cos(theta);
+    var z = cZ + radius * Math.sin(theta);
+    pointsA.push({ x: x, y: z, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
+   }
+
+   for (var i = 35; i > 26; i -= 0.5) {
+    pointsA.push({ x: -8.5 + c * xIncrement, y: i, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, -8.5 + c * xIncrement, i) });
+   }
+
+   moveArray[c] = { points: pointsA, current: 0, hide: true };
+  }
+
+  }
+
+
+  function setPlaneMoveout(moveArray, d, c) {
+   if (d == 1) {
+    var xOffset = 20, xIncrement = 0, zOffset = -25, zIncrement = 10;
+    var cX = 17.5 + xOffset + c * xIncrement; // 設置中心點X坐標（正方形的中心點）
+    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
+    var cZ = 27.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
+    var radius = 2.5;                              // 半圓弧的半徑
+    var startAngle = 0;                  // 起始角度，Math.PI/2 代表90度
+    var endAngle = -Math.PI / 2;                   // 終止角度，-Math.PI/2 代表-90度
+    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
+
+    var pointsA = [];
+
+    for (var i = 8; i < 17; i += 0.5) {
+     pointsA.push({
+      x: i + xOffset + c * xIncrement, y: - zOffset - c * zIncrement,
+      a: pointsA.length == 0 ? -100000 : calcAngle(i + xOffset + c * xIncrement, - zOffset - c * zIncrement, pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y)
+     });
+    }
+    for (var i = segments; i >= 0; i--) {
+     var theta = startAngle + (endAngle - startAngle) * (i / segments);
+     var x = cX + radius * Math.cos(theta);
+     var z = cZ + radius * Math.sin(theta); x
+     pointsA.push({ x: x, y: z, a: calcAngle(x, z, pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y) });
+    }
+
+    for (var i = 27.5 - c * zIncrement; i > -60; i--) {
+     pointsA.push({ x: 40, y: i, a: calcAngle( pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, 40, i) });
+    }
+
+    moveArray[c] = { points: pointsA, current: 0, hide: true };
+   }
+
+
+
+   if (d == 2) {
+    var xOffset = -25, xIncrement = 0, zOffset = -25, zIncrement = 10;
+    var cX = -37.5 - c * xIncrement; // 設置中心點X坐標（正方形的中心點）
+    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
+    var cZ = 22.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
+    var radius = 2.5;                              // 半圓弧的半徑
+    var startAngle = Math.PI;                  // 起始角度，Math.PI/2 代表90度
+    var endAngle = Math.PI / 2;                   // 終止角度，-Math.PI/2 代表-90度
+    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
+    var pointsA = [];
+
+    for (var i = -28; i > -36; i -= 0.5) {
      pointsA.push({
       x: i + c * xIncrement, y: - zOffset - c * zIncrement,
-      a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i + c * xIncrement, - zOffset - c * zIncrement)
+      a: pointsA.length == 0 ? -100000 : calcAngle(i + c * xIncrement, - zOffset - c * zIncrement, pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y)
      });
-
-     console.log(i + c * xIncrement, - zOffset - c * zIncrement)
+    }
+    for (var i = segments; i >= 0; i--) {
+     var theta = startAngle + (endAngle - startAngle) * (i / segments);
+     var x = cX + radius * Math.cos(theta);
+     var z = cZ + radius * Math.sin(theta);
+     pointsA.push({ x: x, y: z, a: calcAngle(x, z, pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y) });
     }
 
-    moveArray[c] = { points: pointsA, current: 0 };
+    for (var i = 22.5 - c * zIncrement; i < 90; i++) {
+     pointsA.push({ x: -40, y: i, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, -40, i) });
+    }
+
+    moveArray[c] = { points: pointsA, current: 0, hide: true };
    }
 
 
@@ -738,31 +854,24 @@
 
 
     var pointsA = [];
-    for (var i = -55; i < -10 + c * xIncrement; i++) {
-     pointsA.push({ x: i, y: 40, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i, 40) });
 
-     console.log(i, 40)
+    for (var i = 26; i < 35; i += 0.5) {
+     pointsA.push({ x: -8.5 + c * xIncrement, y: i, a: pointsA.length == 0 ? -100000 : calcAngle(-8.5 + c * xIncrement, i, pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y) });
     }
-    for (var i = 0; i <= segments; i++) {
+
+    for (var i = segments; i <= 0; i--) {
      var theta = startAngle + (endAngle - startAngle) * (i / segments);
      var x = cX + radius * Math.cos(theta);
      var z = cZ + radius * Math.sin(theta);
-     pointsA.push({ x: x, y: z, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
-
-     console.log(x, z)
+     pointsA.push({ x: x, y: z, a: calcAngle(x, z, pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y) });
     }
-
-    for (var i = 35; i > 25; i -= 0.5) {
-     pointsA.push({ x: -8.5 + c * xIncrement, y: i, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, -8.5 + c * xIncrement, i) });
-
-     console.log(-8.5 + c * xIncrement, i)
+    for (var i = -11 + c * xIncrement; i < 55; i++) {
+     pointsA.push({ x: i, y: 40, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i, 40) });
     }
-
-    moveArray[c] = { points: pointsA, current: 0 };
+    moveArray[c] = { points: pointsA, current: 0, hide: true };
    }
 
   }
-
   //清除飛機
   function clearPlane(no) {
    var i1 = bridge_code1.findIndex(x => x == no);
@@ -878,39 +987,16 @@
   }
 
   //增加模型
-  function addModel(_objCollect, labelData, geometry, c,
-   position, rotation, center, scale, color,
-   xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0) {
+  function addModel(_objCollect, labelData, geometry, c, color) {
    const loader = new STLLoader();
    var material = new THREE.MeshPhongMaterial({ color: color });
-   var stlModel = new THREE.Mesh(geometry, material);
+   var stlModel = new THREE.Mesh(geometry.clone(), material);
    stlModel.obj_name = name;
    stlModel.obj_type = 'plane';
+   stlModel.transparent = true;
+   stlModel.opacity = 0;
    if (labelData) stlModel.label = labelData[c];
    scene.add(stlModel);
-   if (center) {
-    stlModel.rotation.set(
-     rotation._x,
-     rotation._y,
-     rotation._z
-    );
-    var newPos = rotatePoint(position.x + xOffset + c * xIncrement, position.y, position.z - zOffset - c * zIncrement,
-     center.x, center.y, center.z,
-     rotation._x * 180 / Math.PI, rotation._y * 180 / Math.PI, rotation._z * 180 / Math.PI)
-
-    stlModel.position.set(newPos.x, newPos.y, newPos.z);
-   }
-   else {
-    stlModel.rotation.set(
-     rotation._x,
-     rotation._y,
-     rotation._z
-    );
-    stlModel.position.set(position.x + xOffset + c * xIncrement, position.y, position.z - zOffset - c * zIncrement);
-   }
-
-   stlModel.scale.set(scale.x, scale.y, scale.z);
-
    _objCollect[c].push(stlModel);
   }
 
@@ -1096,7 +1182,7 @@
   }
 
   //載入模型
-  function loadPlaneModels(promises) { 
+  function loadPlaneModels(promises) {
    planeData.forEach((item, i) => {
     const promise = new Promise((resolve, reject) => {
      if (item.name.indexOf('.stl') > -1) {
@@ -1670,6 +1756,8 @@
     console.log("Selected Model: " + value);
     setPlane();
    });
+   camPlane.add(planeModels, 'removePlaneAction').name('leave');
+
    camPlane.add(planeXYA, 'x', -50, 50).name('planeX').onChange(function () {
     setPlaneXYA();
 
