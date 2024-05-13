@@ -235,7 +235,7 @@
   //飛機模型
   let planeData = [{ "index": 0, "name": "a380.stl", "obj_type": "A380", "position": { "x": -9, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 1, "name": "a350-900.stl", "obj_type": "A350-900", "position": { "x": -17, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "a330-300.stl", "obj_type": "A330-300", "position": { "x": -25, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 3, "name": "a321neo.stl", "obj_type": "A321neo", "position": { "x": -33, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 4, "name": "787-8.stl", "obj_type": "787-10", "position": { "x": -41, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 5, "name": "777.stl", "obj_type": "777-300ER", "position": { "x": -50, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 6, "name": "747-400.stl", "obj_type": "747-400F", "position": { "x": -59, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 7, "name": "B737.stl", "obj_type": "737-800", "position": { "x": -69, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }];
 
-  let _objPlaneCollect = [, , , , , , , , , ,]; //飛機模型
+  let _objPlaneCollect = []; //飛機模型
 
   let gui_bridge = new dat.GUI();
 
@@ -625,7 +625,7 @@
      { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
      50, 0, 80, 70);
     bridge_planeModel3[i3] = m;
-    setPlaneMove(planeMove3, 3, ii);
+    setPlaneMove(planeMove3, 3, i3);
    }
   }
 
@@ -637,7 +637,7 @@
    const directionVector = new THREE.Vector3().subVectors(point2, point1);
 
    // 獲得方向向量在 x-z 平面上的角度
-   const angle = Math.atan2(directionVector.z, directionVector.x);
+   const angle = Math.atan2(directionVector.x, directionVector.z);
 
    // 將角度從弧度轉換為度
    const angleDegrees = angle * (180 / Math.PI);
@@ -661,6 +661,8 @@
 
     for (var i = 60; i > 27.5 - c * zIncrement; i--) {
      pointsA.push({ x: 40, y: i, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, 40, i) });
+
+     console.log(40, i)
     }
 
     for (var i = 0; i <= segments; i++) {
@@ -668,13 +670,15 @@
      var x = cX + radius * Math.cos(theta);
      var z = cZ + radius * Math.sin(theta); x
      pointsA.push({ x: x, y: z, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
+     console.log(x, z)
     }
 
-    for (var i = 17.5; i > 5; i -= 0.5) {
+    for (var i = 17; i > 5; i -= 0.5) {
      pointsA.push({
       x: i + xOffset + c * xIncrement, y: - zOffset - c * zIncrement,
       a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i + xOffset + c * xIncrement, - zOffset - c * zIncrement)
      });
+     console.log(i + xOffset + c * xIncrement, - zOffset - c * zIncrement)
     }
     moveArray[c] = { points: pointsA, current: 0 };
    }
@@ -694,19 +698,25 @@
 
     for (var i = -90; i < 22.5 - c * zIncrement; i++) {
      pointsA.push({ x: -40, y: i, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, -40, i) });
+
+     console.log(-40, i)
     }
     for (var i = 0; i <= segments; i++) {
      var theta = startAngle + (endAngle - startAngle) * (i / segments);
      var x = cX + radius * Math.cos(theta);
      var z = cZ + radius * Math.sin(theta);
      pointsA.push({ x: x, y: z, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
+
+     console.log(x, z)
     }
 
-    for (var i = -37.5; i < -26.5; i += 0.5) {
+    for (var i = -36; i < -26.5; i += 0.5) {
      pointsA.push({
       x: i + c * xIncrement, y: - zOffset - c * zIncrement,
       a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i + c * xIncrement, - zOffset - c * zIncrement)
      });
+
+     console.log(i + c * xIncrement, - zOffset - c * zIncrement)
     }
 
     moveArray[c] = { points: pointsA, current: 0 };
@@ -730,16 +740,22 @@
     var pointsA = [];
     for (var i = -55; i < -10 + c * xIncrement; i++) {
      pointsA.push({ x: i, y: 40, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i, 40) });
+
+     console.log(i, 40)
     }
     for (var i = 0; i <= segments; i++) {
      var theta = startAngle + (endAngle - startAngle) * (i / segments);
      var x = cX + radius * Math.cos(theta);
      var z = cZ + radius * Math.sin(theta);
      pointsA.push({ x: x, y: z, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
+
+     console.log(x, z)
     }
 
-    for (var i = 36; i > 25; i -= 0.5) {
+    for (var i = 35; i > 25; i -= 0.5) {
      pointsA.push({ x: -8.5 + c * xIncrement, y: i, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, -8.5 + c * xIncrement, i) });
+
+     console.log(-8.5 + c * xIncrement, i)
     }
 
     moveArray[c] = { points: pointsA, current: 0 };
@@ -1080,6 +1096,20 @@
   }
 
   //載入模型
+  function loadPlaneModels(promises) { 
+   planeData.forEach((item, i) => {
+    const promise = new Promise((resolve, reject) => {
+     if (item.name.indexOf('.stl') > -1) {
+      const loader = new STLLoader();
+      loader.load(item.name, function (geometry) {
+       _objPlaneCollect.push(geometry);
+       resolve();
+      })
+     }
+    })
+   });
+  }
+
   function loadModels(promises, _objCollect, labelData, tmpData, xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0, reflectivity = 1, emissive = '#000000', transparent = false, opacity = 1) {
 
    for (let c = 0; c < _objCollect.length; c++) {
@@ -1488,7 +1518,7 @@
    loadModels(promises, bridge2, bridge_code2, bridgeData2, -25, 0, -20, 10);
    loadModels(promises, bridge3, bridge_code3, bridgeData3, -12, 5, -23, 0);
    loadModels(promises, [[]], null, mainBuilding, 0, 0, 0, 0, 0.1, '#333333');
-   loadModels(promises, _objPlaneCollect, null, planeData, -100000); // -100000 不顯示
+   loadPlaneModels(promises);
 
 
    Promise.all(promises).then(() => {
@@ -1770,7 +1800,7 @@
 
      }
     }
-   }, 1000);
+   }, 100);
 
   }
   function clearFlash_bridge(c) {
