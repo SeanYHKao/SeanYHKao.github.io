@@ -143,7 +143,7 @@
   //參數區
   let planeModels = {
    selectedModel: '',
-   removePlaneAction: function(){
+   removePlaneAction: function () {
     removePlane();
    }
   };
@@ -171,7 +171,13 @@
    rotationBS3: 1,
    rotationCS1: 1,
    rotationCS2: 1,
-   rotationCS3: 1
+   rotationCS3: 1,
+   moveBridgeAction:function(){
+    moveBridge()
+   },
+   removeBridgeAction:function(){
+    removeBridge()
+   }
   };
 
   let camera, scene, renderer, labelRenderer, controls, raycaster, mouse, light, axesHelper;
@@ -200,6 +206,10 @@
   let planeMove1 = [{}, {}, {}, {}, {}, {}, {}, {}];
   let planeMove2 = [{}, {}, {}, {}, {}, {}, {}, {}];
   let planeMove3 = [{}, {}, {}, {}, {}];
+
+  let bridgeMove1 = [{}, {}, {}, {}, {}, {}, {}, {}];
+  let bridgeMove2 = [{}, {}, {}, {}, {}, {}, {}, {}];
+  let bridgeMove3 = [{}, {}, {}, {}, {}];
 
   let bridgeAngles1 = {};
   let bridgeAngles2 = {};
@@ -485,6 +495,10 @@
   }
 
 
+
+  function runBridge1(no, obj) {
+   runBridge(no, obj.A2, obj.A3, obj.B2, obj.B3, obj.C2, obj.C3, obj.AS2, obj.AS3, obj.BS2, obj.BS3, obj.CS2, obj.CS3);
+  }
   function runBridge(no, A2, A3, B2, B3, C2, C3, AS2, AS3, BS2, BS3, CS2, CS3) {
 
    var i1 = bridge_code1.findIndex(x => x == no);
@@ -545,29 +559,6 @@
      A2 - 90, A3,
      AS2, AS3,
      -12, 5, -23, 0);
-   }
-  }
-
-  function runPlaneXYA(no, px, py, pa) {
-   var xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0;
-   var i1 = bridge_code1.findIndex(x => x == no);
-   var i2 = bridge_code2.findIndex(x => x == no);
-   var i3 = bridge_code3.findIndex(x => x == no);
-
-   if (i1 > -1) {
-    var i = bridge1[i1].findIndex(x => x.obj_type == 'plane');
-    bridge1[i1][i].rotation.set(bridge1[i1][i].rotation._x, pa / 180 * Math.PI, bridge1[i1][i].rotation._z);
-    bridge1[i1][i].position.set(px, -1, py);
-   }
-   if (i2 > -1) {
-    var i = bridge2[i2].findIndex(x => x.obj_type == 'plane');
-    bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, pa / 180 * Math.PI, bridge2[i2][i].rotation._z);
-    bridge2[i2][i].position.set(px, -1, py);
-   }
-   if (i3 > -1) {
-    var i = bridge3[i3].findIndex(x => x.obj_type == 'plane');
-    bridge3[i3][i].rotation.set(bridge3[i3][i].rotation._x, pa / 180 * Math.PI, bridge3[i3][i].rotation._z);
-    bridge3[i3][i].position.set(px, -1, py);
    }
   }
 
@@ -730,44 +721,44 @@
     for (var i = -36; i < -28; i += 0.5) {
      pointsA.push({
       x: i + c * xIncrement, y: - zOffset - c * zIncrement, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i + c * xIncrement, - zOffset - c * zIncrement)
-    });
+     });
+    }
+
+    moveArray[c] = { points: pointsA, current: 0, hide: true };
    }
 
-   moveArray[c] = { points: pointsA, current: 0, hide: true };
-  }
 
 
 
+   if (d == 3) {
+    // -12, 5, -23, 0
+    var xOffset = -12, xIncrement = 5, zOffset = -23, zIncrement = 0;
+    var cX = -11 + c * xIncrement; // 設置中心點X坐標（正方形的中心點）
+    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
+    var cZ = 37.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
+    var radius = 2.5;                              // 半圓弧的半徑
+    var startAngle = Math.PI / 2;                  // 起始角度，Math.PI/2 代表90度
+    var endAngle = 0;                   // 終止角度，-Math.PI/2 代表-90度
+    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
 
-  if (d == 3) {
-   // -12, 5, -23, 0
-   var xOffset = -12, xIncrement = 5, zOffset = -23, zIncrement = 0;
-   var cX = -11 + c * xIncrement; // 設置中心點X坐標（正方形的中心點）
-   var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
-   var cZ = 37.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
-   var radius = 2.5;                              // 半圓弧的半徑
-   var startAngle = Math.PI / 2;                  // 起始角度，Math.PI/2 代表90度
-   var endAngle = 0;                   // 終止角度，-Math.PI/2 代表-90度
-   var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
 
+    var pointsA = [];
+    for (var i = -55; i < -11 + c * xIncrement; i++) {
+     pointsA.push({ x: i, y: 40, a: pointsA.length == 0 ? -100000 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i, 40) });
+    }
+    for (var i = 0; i <= segments; i++) {
+     var theta = startAngle + (endAngle - startAngle) * (i / segments);
+     var x = cX + radius * Math.cos(theta);
+     var z = cZ + radius * Math.sin(theta);
+     pointsA.push({ x: x, y: z, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
+    }
 
-   var pointsA = [];
-   for (var i = -55; i < -11 + c * xIncrement; i++) {
-    pointsA.push({ x: i, y: 40, a: pointsA.length == 0 ? -100000 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i, 40) });
+    for (var i = 35; i > 26; i -= 0.5) {
+     pointsA.push({ x: -8.5 + c * xIncrement, y: i, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, -8.5 + c * xIncrement, i) });
+    }
+
+    moveArray[c] = { points: pointsA, current: 0, hide: true };
    }
-   for (var i = 0; i <= segments; i++) {
-    var theta = startAngle + (endAngle - startAngle) * (i / segments);
-    var x = cX + radius * Math.cos(theta);
-    var z = cZ + radius * Math.sin(theta);
-    pointsA.push({ x: x, y: z, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
-   }
-
-   for (var i = 35; i > 26; i -= 0.5) {
-    pointsA.push({ x: -8.5 + c * xIncrement, y: i, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, -8.5 + c * xIncrement, i) });
-   }
-
-   moveArray[c] = { points: pointsA, current: 0, hide: true };
-  }
 
   }
 
@@ -799,7 +790,7 @@
     }
 
     for (var i = 27.5 - c * zIncrement; i > -60; i--) {
-     pointsA.push({ x: 40, y: i, a: calcAngle( pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, 40, i) });
+     pointsA.push({ x: 40, y: i, a: calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, 40, i) });
     }
 
     moveArray[c] = { points: pointsA, current: 0, hide: true };
@@ -872,6 +863,86 @@
    }
 
   }
+  let bridge_move = {
+   from:
+   {
+    A2: 90,
+    A3: 0,
+    AS2: 0,
+    AS3: 0.3,
+    B2: 90,
+    B3: 0,
+    BS2: 0,
+    BS3: 0.3
+   },
+   to: {
+    A2: 128,
+    A3: 46,
+    AS2: 0,
+    AS3: 0.3,
+    B2: 128,
+    B3: 49,
+    BS2: 1.8,
+    BS3: 1
+   }
+  }
+  function moveBridge(no) {
+   if (!no) no = labelInfo.gateClick;
+   var i1 = bridge_code1.findIndex(x => x == no);
+   var i2 = bridge_code2.findIndex(x => x == no);
+   var i3 = bridge_code3.findIndex(x => x == no);
+
+   const c = {};
+   var pointsA = [];
+   for (var i = 0; i < 25; i++) {
+    for (const key in bridge_move.from) {
+     c[key] = bridge_move.from[key] + (i / 25) * (bridge_move.to[key] - bridge_move.from[key]);
+    }
+    pointsA.push({
+     A2: c.A2, A3: c.A3, B2: 0, B3: 0, C2: 0, C3: 0,
+     AS2: c.AS2, AS3: c.AS3, BS2: 0, BS3: 0, CS2: 0, CS3: 0
+    })
+   }
+   for (var i = 0; i < 25; i++) {
+    for (const key in bridge_move.from) {
+     c[key] = bridge_move.from[key] + (i / 25) * (bridge_move.to[key] - bridge_move.from[key]);
+    }
+    pointsA.push({
+     A2: bridge_move.to.A2, A3: bridge_move.to.A3, B2: c.B2, B3: c.B3, C2: 0, C3: 0,
+     AS2: bridge_move.to.AS2, AS3: bridge_move.to.AS3, BS2: c.BS2, BS3: c.BS3, CS2: 0, CS3: 0
+    })
+   }
+
+   if (i1 > -1) {
+    bridgeMove1[i1] = { points: pointsA, current: 0, hide: true };
+
+   }
+
+   if (i2 > -1) {
+    bridgeMove2[i2] = { points: pointsA, current: 0, hide: true };
+   }
+
+   if (i3 > -1) {
+    bridgeMove2[i2] = { points: pointsA, current: 0, hide: true };
+   }
+  }
+
+
+  function removeBridge(no) {
+   if (!no) no = labelInfo.gateClick;
+   var i1 = bridge_code1.findIndex(x => x == no);
+   var i2 = bridge_code2.findIndex(x => x == no);
+   var i3 = bridge_code3.findIndex(x => x == no);
+
+   if (i1 > -1) {
+   }
+
+   if (i2 > -1) { }
+
+   if (i3 > -1) { }
+  }
+
+
   //清除飛機
   function clearPlane(no) {
    var i1 = bridge_code1.findIndex(x => x == no);
@@ -1823,6 +1894,10 @@
     setBridgeAngle('C');
 
    });
+   
+   bridgeAngle.add(bridgeAngles, 'moveBridgeAction').name('move');
+   
+   bridgeAngle.add(bridgeAngles, 'removeBridgeAction').name('remove');
    var bridge_data_folder = gui.addFolder('bridge_data');
    bridge_data_folder.add({ value: '' }, 'value').name('wind data').onChange(function (value) {
     setWindData(labelInfo.gateClick, value)
@@ -1873,6 +1948,10 @@
       setPlaneXYA(bridge_code1[i], planeMove1[i].points[planeMove1[i].current]);
       planeMove1[i].current++;
      }
+     if (bridgeMove1[i].current >= 0 && bridgeMove1[i].points && bridgeMove1[i].current < bridgeMove1[i].points.length) {
+      runBridge1(bridge_code1[i], bridgeMove1[i].points[bridgeMove1[i].current]);
+      bridgeMove1[i].current++;
+     }
     }
 
     for (var i = 0; i < 8; i++) {
@@ -1880,12 +1959,19 @@
       setPlaneXYA(bridge_code2[i], planeMove2[i].points[planeMove2[i].current]);
       planeMove2[i].current++;
      }
+     if (bridgeMove2[i].current >= 0 && bridgeMove2[i].points && bridgeMove2[i].current < bridgeMove2[i].points.length) {
+      runBridge1(bridge_code2[i], bridgeMove2[i].points[bridgeMove2[i].current]);
+      bridgeMove2[i].current++;
+     }
     }
     for (var i = 0; i < 5; i++) {
      if (planeMove3[i].current >= 0 && planeMove3[i].points && planeMove3[i].current < planeMove3[i].points.length) {
       setPlaneXYA(bridge_code3[i], planeMove3[i].points[planeMove3[i].current])
       planeMove3[i].current++;
-
+     }
+     if (bridgeMove3[i].current >= 0 && bridgeMove3[i].points && bridgeMove3[i].current < bridgeMove3[i].points.length) {
+      runBridge1(bridge_code2[i], bridgeMove3[i].points[bridgeMove3[i].current]);
+      bridgeMove3[i].current++;
      }
     }
    }, 100);
@@ -2261,13 +2347,13 @@
     if (!lastStatus[element.id]) lastStatus[element.id] = { aTime: null, status: null };
 
     // aTime 值由 null 轉為有值時，播放飛機進場動畫。 (aTime==null && new_aTime!=null)
-    if (lastStatus[element.id].aTime == null && element.flightLegInfo.aTime != null) runplay(element.id, 0, 0, 25, element.flightLegInfo.aircraftType);
+    if (lastStatus[element.id].aTime == null && element.flightLegInfo.aTime != null) setPlane(element.id, element.flightLegInfo.aircraftType);
     //由不為 4(服務)轉為 4(服務)時，播放空橋靠橋動畫。 (status!=4 && new_status==4)
-    if (lastStatus[element.id].status != 4 && element.status == 4) runplay(element.id, 25, 25, 50);
+    if (lastStatus[element.id].status != 4 && element.status == 4) moveBridge(element.id);
     //當 status 值由 4(服務)轉為 2(閒置)或 5(撤橋)時，播放空橋撤橋動畫。(status==4 && (new_status==2 || new_status==5))
-    if (lastStatus[element.id].status == 4 && (element.status == 2 || element.status == 5)) runplay(element.id, 0, 50, 75);
+    if (lastStatus[element.id].status == 4 && (element.status == 2 || element.status == 5)) removeBridge(element.id, 0, 50, 75);
     //當aTime 由有值轉為 null 時，播放飛機離場動畫。(aTime!=null && new_aTime==null
-    if (lastStatus[element.id].aTime != null && element.flightLegInfo.aTime == null) runplay(element.id, 0, 75, 100);
+    if (lastStatus[element.id].aTime != null && element.flightLegInfo.aTime == null) removePlane(element.id);
 
 
     //isHidden 是否隱藏。(true: 隱藏, false: 顯示)
