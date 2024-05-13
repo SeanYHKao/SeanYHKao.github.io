@@ -38,7 +38,7 @@
    color: white;
   }
 
-  #bridge_label{
+  #bridge_label {
    position: absolute;
    top: 10px;
    left: 10px;
@@ -116,7 +116,7 @@
    瞬間風速達25節,暫停橋复服務。</div>
  </div>
  <div id="bimModel_bridge" style="visibility: hidden; width: 80vw; height: 80vh; position: absolute; top:0; left:0;">
-  <div id="bridge_label"></div> 
+  <div id="bridge_label"></div>
   <button id="backButton">返回</button> <button id="viewAButton">前</button> <button id="viewBButton">中</button> <button
    id="viewCButton">後</button>
  </div>
@@ -193,6 +193,10 @@
   let bridge_planeModel2 = ['', '', '', '', '', '', '', ''];
   let bridge_planeModel3 = ['', '', '', '', ''];
 
+  //飛機動畫
+  let planeMove1 = [{}, {}, {}, {}, {}, {}, {}, {}];
+  let planeMove2 = [{}, {}, {}, {}, {}, {}, {}, {}];
+  let planeMove3 = [{}, {}, {}, {}, {}];
 
   let bridgeAngles1 = {};
   let bridgeAngles2 = {};
@@ -231,7 +235,7 @@
   //飛機模型
   let planeData = [{ "index": 0, "name": "a380.stl", "obj_type": "A380", "position": { "x": -9, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 1, "name": "a350-900.stl", "obj_type": "A350-900", "position": { "x": -17, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 2, "name": "a330-300.stl", "obj_type": "A330-300", "position": { "x": -25, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 3, "name": "a321neo.stl", "obj_type": "A321neo", "position": { "x": -33, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 4, "name": "787-8.stl", "obj_type": "787-10", "position": { "x": -41, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 5, "name": "777.stl", "obj_type": "777-300ER", "position": { "x": -50, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 6, "name": "747-400.stl", "obj_type": "747-400F", "position": { "x": -59, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }, { "index": 7, "name": "B737.stl", "obj_type": "737-800", "position": { "x": -69, "y": -1, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }, "rotation": { "_x": 0, "_y": 0, "_z": 0, "_order": "XYZ" }, "color": "#ffffff", "center": { "x": 0, "y": 0, "z": 0 } }];
 
-  let _objPlaneCollect = [, , , , , , ,]; //飛機模型
+  let _objPlaneCollect = [, , , , , , , , , ,]; //飛機模型
 
   let gui_bridge = new dat.GUI();
 
@@ -564,26 +568,27 @@
    }
   }
 
-  function setPlaneXYA() {
-   var no = labelInfo.gateClick;
+  function setPlaneXYA(no, xya) {
+   if (!no) no = labelInfo.gateClick;
+   if (!xya) xya = planeXYA;
    var i1 = bridge_code1.findIndex(x => x == no);
    var i2 = bridge_code2.findIndex(x => x == no);
    var i3 = bridge_code3.findIndex(x => x == no);
 
    if (i1 > -1) {
     var i = bridge1[i1].findIndex(x => x.obj_type == 'plane');
-    bridge1[i1][i].rotation.set(bridge1[i1][i].rotation._x, planeXYA.a / 180 * Math.PI, bridge1[i1][i].rotation._z);
-    bridge1[i1][i].position.set(planeXYA.x, -1, planeXYA.y);
+    bridge1[i1][i].rotation.set(bridge1[i1][i].rotation._x, xya.a / 180 * Math.PI, bridge1[i1][i].rotation._z);
+    bridge1[i1][i].position.set(xya.x, -1, xya.y);
    }
    if (i2 > -1) {
     var i = bridge2[i2].findIndex(x => x.obj_type == 'plane');
-    bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, planeXYA.a / 180 * Math.PI, bridge2[i2][i].rotation._z);
-    bridge2[i2][i].position.set(planeXYA.x, -1, planeXYA.y);
+    bridge2[i2][i].rotation.set(bridge2[i2][i].rotation._x, xya.a / 180 * Math.PI, bridge2[i2][i].rotation._z);
+    bridge2[i2][i].position.set(xya.x, -1, xya.y);
    }
    if (i3 > -1) {
     var i = bridge3[i3].findIndex(x => x.obj_type == 'plane');
-    bridge3[i3][i].rotation.set(bridge3[i3][i].rotation._x, planeXYA.a / 180 * Math.PI, bridge3[i3][i].rotation._z);
-    bridge3[i3][i].position.set(planeXYA.x, -1, planeXYA.y);
+    bridge3[i3][i].rotation.set(bridge3[i3][i].rotation._x, xya.a / 180 * Math.PI, bridge3[i3][i].rotation._z);
+    bridge3[i3][i].position.set(xya.x, -1, xya.y);
    }
   }
   //設定飛機
@@ -601,26 +606,145 @@
  function addModel(_objCollect, labelData, name, c, 
  position, rotation, center, scale, color, 
  xOffset = 0, xIncrement = 0, zOffset = 0, zIncrement = 0)*/
-   if (i > -1) {
-    if (i1 > -1) {
-     addModel(bridge1, bridge_code1, _objPlaneCollect[i], i1,
-      { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
-      20, 0, -20, 10);
-     bridge_planeModel1[i1] = m;
-    }
-    if (i2 > -1) {
-     addModel(bridge2, bridge_code2, _objPlaneCollect[i], i2,
-      { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
-      -25, 0, -20, 10);
-     bridge_planeModel2[i2] = m;
-    }
-    if (i3 > -1) {
-     addModel(bridge3, bridge_code3, _objPlaneCollect[i], i3,
-      { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
-      50, 0, 80, 70);
-     bridge_planeModel3[i3] = m;
-    }
+   if (i1 > -1) {
+    addModel(bridge1, bridge_code1, _objPlaneCollect[i], i1,
+     { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
+     20, 0, -20, 10);
+    bridge_planeModel1[i1] = m;
+    setPlaneMove(planeMove1, 1, i1);
    }
+   if (i2 > -1) {
+    addModel(bridge2, bridge_code2, _objPlaneCollect[i], i2,
+     { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
+     -25, 0, -20, 10);
+    bridge_planeModel2[i2] = m;
+    setPlaneMove(planeMove2, 2, i2);
+   }
+   if (i3 > -1) {
+    addModel(bridge3, bridge_code3, _objPlaneCollect[i], i3,
+     { x: 0, y: 0, z: 0 }, { _x: 0, _y: 0, _z: 0 }, null, { x: 1, y: 1, z: 1 }, '#ffffff',
+     50, 0, 80, 70);
+    bridge_planeModel3[i3] = m;
+    setPlaneMove(planeMove3, 3, ii);
+   }
+  }
+
+  function calcAngle(x1, z1, x2, z2) {
+   const point1 = new THREE.Vector3(x1, 1, z1);
+   const point2 = new THREE.Vector3(x2, 1, z2);
+
+   // 計算 point1 到 point2 的向量
+   const directionVector = new THREE.Vector3().subVectors(point2, point1);
+
+   // 獲得方向向量在 x-z 平面上的角度
+   const angle = Math.atan2(directionVector.z, directionVector.x);
+
+   // 將角度從弧度轉換為度
+   const angleDegrees = angle * (180 / Math.PI);
+
+   // 獲得方向向量在 x-z 平面上的角度
+   return angleDegrees;
+  }
+
+  function setPlaneMove(moveArray, d, c) {
+   if (d == 1) {
+    var xOffset = 20, xIncrement = 0, zOffset = -25, zIncrement = 10;
+    var cX = 17.5 + xOffset + c * xIncrement; // 設置中心點X坐標（正方形的中心點）
+    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
+    var cZ = 27.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
+    var radius = 2.5;                              // 半圓弧的半徑
+    var startAngle = 0;                  // 起始角度，Math.PI/2 代表90度
+    var endAngle = -Math.PI / 2;                   // 終止角度，-Math.PI/2 代表-90度
+    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
+
+    var pointsA = [];
+
+    for (var i = 60; i > 27.5 - c * zIncrement; i--) {
+     pointsA.push({ x: 40, y: i, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, 40, i) });
+    }
+
+    for (var i = 0; i <= segments; i++) {
+     var theta = startAngle + (endAngle - startAngle) * (i / segments);
+     var x = cX + radius * Math.cos(theta);
+     var z = cZ + radius * Math.sin(theta); x
+     pointsA.push({ x: x, y: z, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
+    }
+
+    for (var i = 17.5; i > 5; i -= 0.5) {
+     pointsA.push({
+      x: i + xOffset + c * xIncrement, y: - zOffset - c * zIncrement,
+      a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i + xOffset + c * xIncrement, - zOffset - c * zIncrement)
+     });
+    }
+    moveArray[c] = { points: pointsA, current: 0 };
+   }
+
+
+
+   if (d == 2) {
+    var xOffset = -25, xIncrement = 0, zOffset = -25, zIncrement = 10;
+    var cX = -37.5 - c * xIncrement; // 設置中心點X坐標（正方形的中心點）
+    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
+    var cZ = 22.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
+    var radius = 2.5;                              // 半圓弧的半徑
+    var startAngle = Math.PI;                  // 起始角度，Math.PI/2 代表90度
+    var endAngle = Math.PI / 2;                   // 終止角度，-Math.PI/2 代表-90度
+    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
+    var pointsA = [];
+
+    for (var i = -90; i < 22.5 - c * zIncrement; i++) {
+     pointsA.push({ x: -40, y: i, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, -40, i) });
+    }
+    for (var i = 0; i <= segments; i++) {
+     var theta = startAngle + (endAngle - startAngle) * (i / segments);
+     var x = cX + radius * Math.cos(theta);
+     var z = cZ + radius * Math.sin(theta);
+     pointsA.push({ x: x, y: z, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
+    }
+
+    for (var i = -37.5; i < -26.5; i += 0.5) {
+     pointsA.push({
+      x: i + c * xIncrement, y: - zOffset - c * zIncrement,
+      a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i + c * xIncrement, - zOffset - c * zIncrement)
+     });
+    }
+
+    moveArray[c] = { points: pointsA, current: 0 };
+   }
+
+
+
+
+   if (d == 3) {
+    // -12, 5, -23, 0
+    var xOffset = -12, xIncrement = 5, zOffset = -23, zIncrement = 0;
+    var cX = -11 + c * xIncrement; // 設置中心點X坐標（正方形的中心點）
+    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
+    var cZ = 37.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
+    var radius = 2.5;                              // 半圓弧的半徑
+    var startAngle = Math.PI / 2;                  // 起始角度，Math.PI/2 代表90度
+    var endAngle = 0;                   // 終止角度，-Math.PI/2 代表-90度
+    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
+
+
+    var pointsA = [];
+    for (var i = -55; i < -10 + c * xIncrement; i++) {
+     pointsA.push({ x: i, y: 40, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, i, 40) });
+    }
+    for (var i = 0; i <= segments; i++) {
+     var theta = startAngle + (endAngle - startAngle) * (i / segments);
+     var x = cX + radius * Math.cos(theta);
+     var z = cZ + radius * Math.sin(theta);
+     pointsA.push({ x: x, y: z, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, x, z) });
+    }
+
+    for (var i = 36; i > 25; i -= 0.5) {
+     pointsA.push({ x: -8.5 + c * xIncrement, y: i, a: pointsA.length == 0 ? 0 : calcAngle(pointsA[pointsA.length - 1].x, pointsA[pointsA.length - 1].y, -8.5 + c * xIncrement, i) });
+    }
+
+    moveArray[c] = { points: pointsA, current: 0 };
+   }
+
   }
 
   //清除飛機
@@ -1273,6 +1397,19 @@
       if (element.object.obj_type == "label")
        labelInfo.gateClick = element.object.label;
      }
+     planeModels.selectedModel = '';
+     var i1 = bridge_code1.findIndex(x => x == labelInfo.gateClick);
+     var i2 = bridge_code2.findIndex(x => x == labelInfo.gateClick);
+     var i3 = bridge_code3.findIndex(x => x == labelInfo.gateClick);
+     if (i1 > -1) {
+      planeModels.selectedModel = bridge_planeModel1[i1];
+     }
+     else if (i2 > -1) {
+      planeModels.selectedModel = bridge_planeModel2[i2];
+     }
+     else if (i3 > -1) {
+      planeModels.selectedModel = bridge_planeModel3[i3];
+     }
      gui.updateDisplay(); // 更新 GUI 显示
     });
     if (gate != null && bridge != null) {
@@ -1435,114 +1572,6 @@
 
    // 呼叫 loadModels 函數來加載和顯示所有模型
    loadAllModels();
-
-
-   var material = new THREE.LineBasicMaterial({ color: 0xffffff });
-   var material1 = new THREE.LineBasicMaterial({ color: 0xffff00 });
-
-   for (var c = 0; c < 8; c++) {// 半圓弧的參數
-    var xOffset = 20, xIncrement = 0, zOffset = -25, zIncrement = 10;
-    var cX = 17.5 + xOffset + c * xIncrement; // 設置中心點X坐標（正方形的中心點）
-    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
-    var cZ = 27.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
-    var radius = 2.5;                              // 半圓弧的半徑
-    var startAngle = 0;                  // 起始角度，Math.PI/2 代表90度
-    var endAngle = -Math.PI / 2;                   // 終止角度，-Math.PI/2 代表-90度
-    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
-
-    var pointsA = [];
-
-    for (var i = 60; i > 27.5 - c * zIncrement; i--) {
-     pointsA.push(new THREE.Vector3(40, 1, i));
-    }
-
-    for (var i = 0; i <= segments; i++) {
-     var theta = startAngle + (endAngle - startAngle) * (i / segments);
-     var x = cX + radius * Math.cos(theta);
-     var z = cZ + radius * Math.sin(theta); x
-     pointsA.push(new THREE.Vector3(x, cY, z));
-    }
-
-    for (var i = 17.5; i > 5; i -= 0.5) {
-     pointsA.push(new THREE.Vector3(i + xOffset + c * xIncrement, 1, - zOffset - c * zIncrement));
-    }
-    var geometryA = new THREE.BufferGeometry().setFromPoints(pointsA);
-    var lineA = new THREE.Line(geometryA, material1);
-    scene.add(lineA);
-   }
-
-
-   for (var c = 0; c < 8; c++) {// 半圓弧的參數
-    var xOffset = -25, xIncrement = 0, zOffset = -25, zIncrement = 10;
-    var cX = -37.5 - c * xIncrement; // 設置中心點X坐標（正方形的中心點）
-    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
-    var cZ = 22.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
-    var radius = 2.5;                              // 半圓弧的半徑
-    var startAngle = Math.PI;                  // 起始角度，Math.PI/2 代表90度
-    var endAngle = Math.PI / 2;                   // 終止角度，-Math.PI/2 代表-90度
-    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
-    var pointsA = [];
-
-    for (var i = -90; i < 22.5 - c * zIncrement; i++) {
-     pointsA.push(new THREE.Vector3(-40, 1, i));
-     console.log('l', c, -40, 1, i)
-    }
-    for (var i = 0; i <= segments; i++) {
-     var theta = startAngle + (endAngle - startAngle) * (i / segments);
-     var x = cX + radius * Math.cos(theta);
-     var z = cZ + radius * Math.sin(theta);
-     pointsA.push(new THREE.Vector3(x, cY, z));
-    }
-
-    for (var i = -37.5; i < -26.5; i += 0.5) {
-     pointsA.push(new THREE.Vector3(i + c * xIncrement, 1, - zOffset - c * zIncrement));
-    }
-
-    // 創建幾何體並將點陣列設置進去
-    var geometryA = new THREE.BufferGeometry().setFromPoints(pointsA);
-
-    // 創建線條
-    var lineA = new THREE.Line(geometryA, material1);
-
-    // 將線條添加到場景中（假設你已經有一個名為scene的THREE.Scene對象）
-    scene.add(lineA);
-   }
-
-
-
-   for (var c = 0; c < 5; c++) {
-    // -12, 5, -23, 0
-    var xOffset = -12, xIncrement = 5, zOffset = -23, zIncrement = 0;
-    var cX = -11 + c * xIncrement; // 設置中心點X坐標（正方形的中心點）
-    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
-    var cZ = 37.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
-    var radius = 2.5;                              // 半圓弧的半徑
-    var startAngle = Math.PI / 2;                  // 起始角度，Math.PI/2 代表90度
-    var endAngle = 0;                   // 終止角度，-Math.PI/2 代表-90度
-    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
-
-
-    var pointsA = [];
-    for (var i = -55; i < -10 + c * xIncrement; i++)
-     pointsA.push(new THREE.Vector3(i, 1, 40));
-    for (var i = 0; i <= segments; i++) {
-     var theta = startAngle + (endAngle - startAngle) * (i / segments);
-     var x = cX + radius * Math.cos(theta);
-     var z = cZ + radius * Math.sin(theta);
-     pointsA.push(new THREE.Vector3(x, cY, z));
-     console.log('a', x, cY, z)
-    }
-
-    for (var i = 36; i > 25; i -= 0.5) {
-     pointsA.push(new THREE.Vector3(-8.5 + c * xIncrement, 1, i));
-     console.log('l', -8.5 + c * xIncrement, 1, i)
-    }
-
-
-    var geometryA = new THREE.BufferGeometry().setFromPoints(pointsA);
-    var lineA = new THREE.Line(geometryA, material1);
-    scene.add(lineA);
-   }
 
 
    let sumX = 0, sumY = 0, sumZ = 0;
@@ -1717,6 +1746,32 @@
    document.getElementById('setBridgeData').addEventListener('click', setBridgeData);
 
    animate();
+
+
+   setInterval(() => {
+
+    for (var i = 0; i < 8; i++) {
+     if (planeMove1[i].current >= 0 && planeMove1[i].points && planeMove1[i].current < planeMove1[i].points.length) {
+      setPlaneXYA(bridge_code1[i], planeMove1[i].points[planeMove1[i].current]);
+      planeMove1[i].current++;
+     }
+    }
+
+    for (var i = 0; i < 8; i++) {
+     if (planeMove2[i].current >= 0 && planeMove2[i].points && planeMove2[i].current < planeMove2[i].points.length) {
+      setPlaneXYA(bridge_code2[i], planeMove2[i].points[planeMove2[i].current]);
+      planeMove2[i].current++;
+     }
+    }
+    for (var i = 0; i < 5; i++) {
+     if (planeMove3[i].current >= 0 && planeMove3[i].points && planeMove3[i].current < planeMove3[i].points.length) {
+      setPlaneXYA(bridge_code3[i], planeMove3[i].points[planeMove3[i].current])
+      planeMove3[i].current++;
+
+     }
+    }
+   }, 1000);
+
   }
   function clearFlash_bridge(c) {
    if (_collect_intervalId_bridge[c]) {
@@ -2163,7 +2218,7 @@
 
   let lastBridgeStatus = {}
   let currentbridgeId = {}
-  
+
   function ap_didEnterBridgeScene(bridgeId) {
    currentbridgeId = bridgeId;
    document.getElementById("event").value += event_count + ':ap_didEnterBridgeScene ' + bridgeId + '\n';
@@ -2227,7 +2282,7 @@
   function bim_setBridgeData(bridgeData) {
    lastBridgeStatus[bridgeData.bridgeId] = bridgeData;
    document.getElementById("event").value += event_count + ':bim_setBridgeData\n';
-   if(currentbridgeId != bridgeData.bridgeId) return;
+   if (currentbridgeId != bridgeData.bridgeId) return;
    event_count++;
    bridgeData.status.forEach(element => {
     var i = _objCollect_bridge.findIndex(x => x.obj_type == element.position);

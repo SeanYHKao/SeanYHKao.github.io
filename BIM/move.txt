@@ -1,0 +1,109 @@
+
+
+   var material = new THREE.LineBasicMaterial({ color: 0xffffff });
+   var material1 = new THREE.LineBasicMaterial({ color: 0xffff00 });
+
+   for (var c = 0; c < 8; c++) {// 半圓弧的參數
+    var xOffset = 20, xIncrement = 0, zOffset = -25, zIncrement = 10;
+    var cX = 17.5 + xOffset + c * xIncrement; // 設置中心點X坐標（正方形的中心點）
+    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
+    var cZ = 27.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
+    var radius = 2.5;                              // 半圓弧的半徑
+    var startAngle = 0;                  // 起始角度，Math.PI/2 代表90度
+    var endAngle = -Math.PI / 2;                   // 終止角度，-Math.PI/2 代表-90度
+    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
+
+    var pointsA = [];
+
+    for (var i = 60; i > 27.5 - c * zIncrement; i--) {
+     pointsA.push(new THREE.Vector3(40, 1, i));
+    }
+
+    for (var i = 0; i <= segments; i++) {
+     var theta = startAngle + (endAngle - startAngle) * (i / segments);
+     var x = cX + radius * Math.cos(theta);
+     var z = cZ + radius * Math.sin(theta); x
+     pointsA.push(new THREE.Vector3(x, cY, z));
+    }
+
+    for (var i = 17.5; i > 5; i -= 0.5) {
+     pointsA.push(new THREE.Vector3(i + xOffset + c * xIncrement, 1, - zOffset - c * zIncrement));
+    }
+    var geometryA = new THREE.BufferGeometry().setFromPoints(pointsA);
+    var lineA = new THREE.Line(geometryA, material1);
+    scene.add(lineA);
+   }
+
+
+   for (var c = 0; c < 8; c++) {// 半圓弧的參數
+    var xOffset = -25, xIncrement = 0, zOffset = -25, zIncrement = 10;
+    var cX = -37.5 - c * xIncrement; // 設置中心點X坐標（正方形的中心點）
+    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
+    var cZ = 22.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
+    var radius = 2.5;                              // 半圓弧的半徑
+    var startAngle = Math.PI;                  // 起始角度，Math.PI/2 代表90度
+    var endAngle = Math.PI / 2;                   // 終止角度，-Math.PI/2 代表-90度
+    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
+    var pointsA = [];
+
+    for (var i = -90; i < 22.5 - c * zIncrement; i++) {
+     pointsA.push(new THREE.Vector3(-40, 1, i));
+     console.log('l', c, -40, 1, i)
+    }
+    for (var i = 0; i <= segments; i++) {
+     var theta = startAngle + (endAngle - startAngle) * (i / segments);
+     var x = cX + radius * Math.cos(theta);
+     var z = cZ + radius * Math.sin(theta);
+     pointsA.push(new THREE.Vector3(x, cY, z));
+    }
+
+    for (var i = -37.5; i < -26.5; i += 0.5) {
+     pointsA.push(new THREE.Vector3(i + c * xIncrement, 1, - zOffset - c * zIncrement));
+    }
+
+    // 創建幾何體並將點陣列設置進去
+    var geometryA = new THREE.BufferGeometry().setFromPoints(pointsA);
+
+    // 創建線條
+    var lineA = new THREE.Line(geometryA, material1);
+
+    // 將線條添加到場景中（假設你已經有一個名為scene的THREE.Scene對象）
+    scene.add(lineA);
+   }
+
+
+
+   for (var c = 0; c < 5; c++) {
+    // -12, 5, -23, 0
+    var xOffset = -12, xIncrement = 5, zOffset = -23, zIncrement = 0;
+    var cX = -11 + c * xIncrement; // 設置中心點X坐標（正方形的中心點）
+    var cY = 1;                               // 半圓弧在Y軸上的高度，與正方形相同
+    var cZ = 37.5 - c * zIncrement;             // 設置中心點Z坐標（正方形底邊的中點）
+    var radius = 2.5;                              // 半圓弧的半徑
+    var startAngle = Math.PI / 2;                  // 起始角度，Math.PI/2 代表90度
+    var endAngle = 0;                   // 終止角度，-Math.PI/2 代表-90度
+    var segments = 32;                             // 半圓弧的分段數，增加此數值可使弧更平滑
+
+
+    var pointsA = [];
+    for (var i = -55; i < -10 + c * xIncrement; i++)
+     pointsA.push(new THREE.Vector3(i, 1, 40));
+    for (var i = 0; i <= segments; i++) {
+     var theta = startAngle + (endAngle - startAngle) * (i / segments);
+     var x = cX + radius * Math.cos(theta);
+     var z = cZ + radius * Math.sin(theta);
+     pointsA.push(new THREE.Vector3(x, cY, z));
+     console.log('a', x, cY, z)
+    }
+
+    for (var i = 36; i > 25; i -= 0.5) {
+     pointsA.push(new THREE.Vector3(-8.5 + c * xIncrement, 1, i));
+     console.log('l', -8.5 + c * xIncrement, 1, i)
+    }
+
+
+    var geometryA = new THREE.BufferGeometry().setFromPoints(pointsA);
+    var lineA = new THREE.Line(geometryA, material1);
+    scene.add(lineA);
+   }
+
