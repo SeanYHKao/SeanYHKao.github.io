@@ -1137,7 +1137,7 @@
   //增加模型
   function addModel(_objCollect, labelData, geometry, c, color) {
    const loader = new STLLoader();
-   var material = new THREE.MeshToonMaterial({ color: color });  //new THREE.MeshBasicMaterial({ color: color });
+   var material = new THREE.MeshPhongMaterial({ color: color });  //new THREE.MeshBasicMaterial({ color: color });
    var stlModel = new THREE.Mesh(geometry.clone(), material);
    stlModel.obj_name = name;
    stlModel.obj_type = 'plane';
