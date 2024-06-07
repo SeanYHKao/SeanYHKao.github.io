@@ -120,6 +120,64 @@
 
 
 
+// 创建带有文字的画布
+function createTextTexture(text) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 512;
+    canvas.height = 512;
+    context.fillStyle = 'white';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'black';
+    context.font = '72px Arial';
+    
+            context.fillText(text, 256, 256);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(4, 4); // 调整重复次数，根据需要调整
+    return texture;
+}
+
+ // 手动生成简单的UV坐标
+ function generateUVs(geometry) {
+        const position = geometry.attributes.position;
+        const uvArray = new Float32Array(position.count * 2);
+        const boundingBox = geometry.boundingBox;
+        const size = new THREE.Vector3();
+        boundingBox.getSize(size);
+        
+        for (let i = 0; i < position.count; i++) {
+            const x = position.getX(i);
+            const y = position.getY(i);
+            const z = position.getZ(i);
+
+            // 使用x和z坐标来生成uv（可以根据需要调整）
+            uvArray[i * 2] = (x - boundingBox.min.x) / size.x;
+            uvArray[i * 2 + 1] = (z - boundingBox.min.z) / size.z;
+        }
+        
+        geometry.setAttribute('uv', new THREE.BufferAttribute(uvArray, 2));
+    }
+    // 使用映射UV坐标的方法
+    function mapUV(geometry, boundingBox, stretchFactor) {
+        const uvAttribute = new Float32Array(geometry.attributes.position.count * 2);
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+            const x = geometry.attributes.position.getX(i);
+            const y = geometry.attributes.position.getY(i);
+            const z = geometry.attributes.position.getZ(i);
+
+            const u = (x - boundingBox.min.x) / boundingBox.getSize(new THREE.Vector3()).x * stretchFactor;
+            const v = (y - boundingBox.min.y) / boundingBox.getSize(new THREE.Vector3()).y * stretchFactor;
+            
+            uvAttribute[i * 2] = u;
+            uvAttribute[i * 2 + 1] = v;
+        }
+        geometry.setAttribute('uv', new THREE.BufferAttribute(uvAttribute, 2));
+    }
+
+
   function init() {
    // Scene setup
    scene = new THREE.Scene();
@@ -199,7 +257,25 @@ target:controls.target
       if (tmp[i].name.indexOf('.stl') > -1) {
        const loader = new STLLoader();
        loader.load(tmp[i].name, function (geometry) {
-        var material = new THREE.MeshPhongMaterial({ color: tmp[i].color });
+   const texture = createTextTexture('Your Text Here');
+    // 设置纹理重复和包裹
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(10, 10);  // 调整重复次数
+
+    geometry.computeBoundingBox();
+    geometry.computeVertexNormals();
+
+    // 生成简单的UV坐标（仅供示例，可能需要根据实际模型调整）
+    const uvAttribute = new Float32Array(geometry.attributes.position.count * 2);
+    for (let i = 0; i < geometry.attributes.position.count; i++) {
+        uvAttribute[i * 2] = (geometry.attributes.position.getX(i) - geometry.boundingBox.min.x) / geometry.boundingBox.getSize(new THREE.Vector3()).x;
+        uvAttribute[i * 2 + 1] = (geometry.attributes.position.getY(i) - geometry.boundingBox.min.y) / geometry.boundingBox.getSize(new THREE.Vector3()).y;
+    }
+    geometry.setAttribute('uv', new THREE.BufferAttribute(uvAttribute, 2));
+
+
+        var material = new THREE.MeshPhongMaterial({  map: texture});
         var stlModel = new THREE.Mesh(geometry, material);
         scene.add(stlModel);
 
@@ -316,10 +392,21 @@ target:controls.target
       console.error('Unsupported file type.');
       return;
      }
+     const texture = createTextTexture('Your Text Here');
+    // 设置纹理重复和包裹
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(10, 10);  // 调整重复次数
 
      // 解析文件内容并创建模型
      const geometry = loader.parse(e.target.result);
-     let material = new THREE.MeshPhongMaterial({ color: 0x555555, specular: 0x111111, shininess: 200 });
+    geometry.computeBoundingBox();
+    geometry.computeVertexNormals();
+
+     generateUVs(geometry);
+
+
+     let material = new THREE.MeshPhongMaterial({ color: 0x555555, specular: 0x111111, shininess: 200 ,map: texture});
      let mesh;
 
      if (extension === 'stl') {
