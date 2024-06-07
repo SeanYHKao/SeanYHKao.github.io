@@ -11,11 +11,10 @@
    position: absolute;
    top: 10px;
    right: 10px;
-   z-index: 1000;
+   z-index: 1;
   }
 
   .label {
-   z-index: 1000 !important;
    display: block;
    /* 确保层级足够高 */
   }
@@ -32,7 +31,7 @@
    background-color: rgba(83, 33, 33, 0.8);
    padding: 5px 10px;
    border-radius: 5px;
-   z-index: 2000;
+   z-index: 2;
    width: 200px;
    font-size: 10px;
    color: white;
@@ -45,7 +44,7 @@
    background-color: rgba(0, 3, 173, 0.8);
    padding: 5px 10px;
    border-radius: 5px;
-   z-index: 2000;
+   z-index: 2;
    width: 200px;
    font-size: 20px;
    color: white;
@@ -59,7 +58,7 @@
    background-color: rgba(83, 33, 33);
    padding: 5px 10px;
    border-radius: 5px;
-   z-index: 2000;
+   z-index: 2;
    font-size: 10px;
    color: white;
   }
@@ -71,7 +70,7 @@
    background-color: rgba(83, 33, 33);
    padding: 5px 10px;
    border-radius: 5px;
-   z-index: 2000;
+   z-index: 2;
    font-size: 10px;
    color: white;
   }
@@ -83,7 +82,7 @@
    background-color: rgba(83, 33, 33);
    padding: 5px 10px;
    border-radius: 5px;
-   z-index: 2000;
+   z-index: 2;
    font-size: 10px;
    color: white;
   }
@@ -95,7 +94,7 @@
    background-color: rgba(83, 33, 33);
    padding: 5px 10px;
    border-radius: 5px;
-   z-index: 2000;
+   z-index: 2;
    font-size: 10px;
    color: white;
   }
@@ -1927,10 +1926,12 @@
          _Div.textContent = labelData[c];
          _Div.style.marginTop = "-1em";
          if (labelData) _Div.label = labelData[c];
+         _Div.obj_type = item.obj_type;
 
          _Div.addEventListener('mouseover', function () {
           // 滑鼠移到登機門圖示錨點
           // _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
+          labelInfo.bridgeMouseover = "None";
           labelInfo.gateMouseover = labelData[c]; // 更新 GUI 显示的标签信息
           gui.updateDisplay(); // 更新 GUI 显示
          });
@@ -1940,11 +1941,10 @@
           //_Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
          });
 
+         _Div.style.pointerEvents = 'auto';
          _Div.addEventListener('click', function (e) {
-          //因為被擋住 所以無法click  靠 labelInfo.gateMouseover
-          //var _b = labelData[c];
-          //ap_showBridgeInfo(_b);
-         });
+          // 所以無法click 
+         }, false);
 
          const _Label = new CSS2DObject(_Div);
          _Label.position.set(-3, 20, 10);
@@ -2041,18 +2041,24 @@
         _Div.className = "label bridge";
         _Div.textContent = labelData[c] + "_" + item.obj_type.replace("L1", "");
         _Div.style.marginTop = "-1em";
-        if (labelData) _Div.label = labelData[c];
-
+        _Div.label = labelData[c] + "_" + item.obj_type.replace("L1", "");
+        _Div.style.pointerEvents = 'auto';
         _Div.addEventListener('mouseover', function () {
          // 滑鼠移到登機門圖示錨點
          // _Div.style.background = 'lightblue'; // 鼠标悬停时改变背景颜色
+
+         labelInfo.gateMouseover = "None";
          labelInfo.bridgeMouseover = labelData[c] + "_" + item.obj_type.replace("L1", ""); // 更新 GUI 显示的标签信息
+
          gui.updateDisplay(); // 更新 GUI 显示
         });
         _Div.addEventListener('mouseout', function (e) {
          //_Div.style.background = 'rgba(25,25,25,0.5)'; // 鼠标离开时恢复背景颜色
         });
 
+        _Div.addEventListener('click', function (e) {
+         // 所以無法click 
+        }, false);
 
         const _Label = new CSS2DObject(_Div);
         _Label.position.set(-1, 0, 0);
@@ -2111,8 +2117,31 @@
    if (loading) return;
    var bridge = null;
    var gate = null;
-   if (labelInfo.gateMouseover && labelInfo.gateMouseover != 'None') labelInfo.gateDblClick = labelInfo.gateMouseover;
-   if (labelInfo.bridgeMouseover && labelInfo.bridgeMouseover != 'None') labelInfo.bridgeDblClick = labelInfo.bridgeMouseover;
+
+
+   var mouseX = event.clientX;
+   var mouseY = event.clientY;
+   var _2dObjs = document.getElementsByClassName('label'); // 假设你的 CSS2DObject 的 div 有 'label' 这个类
+   Array.from(_2dObjs).forEach(_2dObj => {
+    var rect = _2dObj.getBoundingClientRect(); // 获取元素的屏幕坐标边界
+
+    if (mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom) {
+     console.log('Clicked on label:', _2dObj);
+     if (_2dObj.label == "label" || _2dObj.obj_type == "label") return;
+     if (_2dObj.label == "building" || _2dObj.obj_type == "building") return;
+
+     if (_2dObj.label && _2dObj.label.indexOf("_") == -1 && gate == null) {
+      gate = _2dObj.label;
+      labelInfo.gateDblClick = _2dObj.label;
+     }
+     if (_2dObj.label && _2dObj.label.indexOf("_") > -1 && bridge == null) {
+      bridge = _2dObj.label;
+      labelInfo.bridgeDblClick = _2dObj.label;
+     }
+     // 在这里执行你的逻辑
+    }
+   });
+
 
    // 计算鼠标在场景中的位置 
    mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
@@ -2126,25 +2155,29 @@
 
    if (intersects.length > 0) {
     intersects.forEach(element => {
-     if (element.object.label) {
-      if (gate == null) gate = intersects[0].object.label;
-      labelInfo.gateDblClick = intersects[0].object.label;
+     if (element.object.label && element.object.obj_type == "label" && gate == null) {
+      gate = element.object.label;
+      labelInfo.gateDblClick = element.object.label;
      }
-     if (element.object.obj_type) {
-      if (bridge == null) bridge = element.object.obj_type;
-      if (element.object.obj_type == "A1" || element.object.obj_type == "A2" || element.object.obj_type == "A3")
+     if (element.object.obj_type && element.object.obj_type != "building" && bridge == null) {
+      if (element.object.obj_type == "A1" || element.object.obj_type == "A2" || element.object.obj_type == "A3") {
        labelInfo.bridgeDblClick = element.object.label + "_A";
-      if (element.object.obj_type == "B1" || element.object.obj_type == "B2" || element.object.obj_type == "B3")
+       bridge = labelInfo.bridgeDblClick;
+      }
+      if (element.object.obj_type == "B1" || element.object.obj_type == "B2" || element.object.obj_type == "B3") {
        labelInfo.bridgeDblClick = element.object.label + "_B";
-      if (element.object.obj_type == "C1" || element.object.obj_type == "C2" || element.object.obj_type == "C3")
+       bridge = labelInfo.bridgeDblClick;
+      }
+      if (element.object.obj_type == "C1" || element.object.obj_type == "C2" || element.object.obj_type == "C3") {
        labelInfo.bridgeDblClick = element.object.label + "_C";
-      if (element.object.obj_type == "label")
-       labelInfo.gateDblClick = element.object.label;
+       bridge = labelInfo.bridgeDblClick;
+      }
      }
      gui.updateDisplay(); // 更新 GUI 显示
     });
-    // 如果有物体被选中 
-
+   }
+   // 如果有物体被选中 
+   if (bridge != null) {
     gui_bridge.domElement.style.display = 'block';
     gui.domElement.style.display = 'none';
     bimModel.style.visibility = 'hidden';
@@ -2156,19 +2189,32 @@
     ap_didEnterBridgeScene(labelInfo.bridgeDblClick);
    }
   }
-    var clicked = {};
+  var clicked = {};
 
   function onMouseClick(event) {
    if (loading) return;
-   // 被擋住 不能click 所以只能靠  labelInfo.gateMouseover
-   if (labelInfo.gateMouseover && labelInfo.gateClick != labelInfo.gateMouseover) {
-    labelInfo.gateClick = labelInfo.gateMouseover;
-    if (!clicked[labelInfo.gateClick])  { clicked[labelInfo.gateClick] = 'Y'; ap_showBridgeInfo(labelInfo.gateClick); }
-   }
-   if (labelInfo.bridgeMouseover && labelInfo.bridgeClick != labelInfo.bridgeMouseover) {
-    labelInfo.bridgeClick = labelInfo.bridgeMouseover;
-    if (!clicked[labelInfo.bridgeClick])  {clicked[labelInfo.bridgeClick] = 'Y'; ap_showBridgeInfo(labelInfo.bridgeClick); }
-   }
+   var gate = null;
+   var bridge = null;
+
+   var mouseX = event.clientX;
+   var mouseY = event.clientY;
+   var _2dObjs = document.getElementById("bimModel").getElementsByClassName('label'); // 假设你的 CSS2DObject 的 div 有 'label' 这个类
+   Array.from(_2dObjs).forEach(_2dObj => {
+    var rect = _2dObj.getBoundingClientRect(); // 获取元素的屏幕坐标边界
+
+    if (mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom) {
+     if (_2dObj.label && _2dObj.label.indexOf("_") == -1 && gate == null) {
+      gate = _2dObj.label;
+      labelInfo.gateClick = _2dObj.label;
+     }
+     if (_2dObj.label && _2dObj.label.indexOf("_") > -1 && bridge == null) {
+      gate = _2dObj.label;
+      labelInfo.bridgeClick = _2dObj.label;
+     }
+     // 在这里执行你的逻辑
+    }
+   });
+
    // 如果是2d
 
    // 计算鼠标在场景中的位置 
@@ -2184,72 +2230,87 @@
    if (intersects.length > 0) {
     // 如果有物体被选中 
 
+
     intersects.forEach(element => {
-
-     var gate = null;
-     var bridge = null;
-
-     if (element.object.label) {
-      if (gate == null) gate = intersects[0].object.label;
-      labelInfo.gateClick = intersects[0].object.label;
+     if (element.object.label && element.object.obj_type == "label" && gate == null) {
+      gate = element.object.label;
+      labelInfo.gateClick = element.object.label;
      }
-     if (element.object.obj_type) {
-      if (bridge == null) bridge = element.object.obj_type;
-      if (element.object.obj_type == "A1" || element.object.obj_type == "A2" || element.object.obj_type == "A3" || element.object.obj_type == "A4")
+     if (element.object.obj_type && element.object.obj_type != "building" && bridge == null) {
+      if (element.object.obj_type == "A1" || element.object.obj_type == "A2" || element.object.obj_type == "A3" || element.object.obj_type == "A4" ||
+       element.object.obj_type == "AL1" || element.object.obj_type == "AL2" || element.object.obj_type == "AL3" || element.object.obj_type == "AL4") {
        labelInfo.bridgeClick = element.object.label + "_A";
-      if (element.object.obj_type == "B1" || element.object.obj_type == "B2" || element.object.obj_type == "B3" || element.object.obj_type == "B4")
-       labelInfo.bridgeClick = element.object.label + "_B";
-      if (element.object.obj_type == "C1" || element.object.obj_type == "C2" || element.object.obj_type == "C3" || element.object.obj_type == "C4")
-       labelInfo.bridgeClick = element.object.label + "_C";
-      if (element.object.obj_type == "label")
+       bridge = element.object.obj_type;
+       gate = element.object.label;
        labelInfo.gateClick = element.object.label;
+      }
+      if (element.object.obj_type == "B1" || element.object.obj_type == "B2" || element.object.obj_type == "B3" || element.object.obj_type == "B4" ||
+       element.object.obj_type == "BL1" || element.object.obj_type == "BL2" || element.object.obj_type == "BL3" || element.object.obj_type == "BL4") {
+       labelInfo.bridgeClick = element.object.label + "_B";
+       bridge = element.object.obj_type;
+       gate = element.object.label;
+       labelInfo.gateClick = element.object.label;
+      }
+      if (element.object.obj_type == "C1" || element.object.obj_type == "C2" || element.object.obj_type == "C3" || element.object.obj_type == "C4" ||
+       element.object.obj_type == "CL1" || element.object.obj_type == "CL2" || element.object.obj_type == "CL3" || element.object.obj_type == "CL4") {
+       labelInfo.bridgeClick = element.object.label + "_C";
+       bridge = element.object.obj_type;
+       gate = element.object.label;
+       labelInfo.gateClick = element.object.label;
+      }
      }
 
-     if (gate != null && bridge != null) {
-      if ((bridge == "A1" || bridge == "AL1") && !clicked[gate + "_A_0"]) { clicked[gate + "_A_0"] = 'Y'; ap_showBridgeDetailInfo(gate + "_A", 0); }
-      else if ((bridge == "A2" || bridge == "AL2") && !clicked[gate + "_A_0"]) { clicked[gate + "_A_0"] = 'Y'; ap_showBridgeDetailInfo(gate + "_A", 0); }
-      else if ((bridge == "A3" || bridge == "AL3") && !clicked[gate + "_A_1"]) { clicked[gate + "_A_1"] = 'Y'; ap_showBridgeDetailInfo(gate + "_A", 1); }
-      else if ((bridge == "A4" || bridge == "AL4") && !clicked[gate + "_A_2"]) { clicked[gate + "_A_2"] = 'Y'; ap_showBridgeDetailInfo(gate + "_A", 2); }
-      else if ((bridge == "B1" || bridge == "BL1") && !clicked[gate + "_B_0"]) { clicked[gate + "_B_0"] = 'Y'; ap_showBridgeDetailInfo(gate + "_B", 0); }
-      else if ((bridge == "B2" || bridge == "BL2") && !clicked[gate + "_B_0"]) { clicked[gate + "_B_0"] = 'Y'; ap_showBridgeDetailInfo(gate + "_B", 0); }
-      else if ((bridge == "B3" || bridge == "BL3") && !clicked[gate + "_B_1"]) { clicked[gate + "_B_1"] = 'Y'; ap_showBridgeDetailInfo(gate + "_B", 1); }
-      else if ((bridge == "B4" || bridge == "BL4") && !clicked[gate + "_B_2"]) { clicked[gate + "_B_2"] = 'Y'; ap_showBridgeDetailInfo(gate + "_B", 2); }
-      else if ((bridge == "C1" || bridge == "CL1") && !clicked[gate + "_C_0"]) { clicked[gate + "_C_0"] = 'Y'; ap_showBridgeDetailInfo(gate + "_C", 0); }
-      else if ((bridge == "C2" || bridge == "CL2") && !clicked[gate + "_C_0"]) { clicked[gate + "_C_0"] = 'Y'; ap_showBridgeDetailInfo(gate + "_C", 0); }
-      else if ((bridge == "C3" || bridge == "CL3") && !clicked[gate + "_C_1"]) { clicked[gate + "_C_1"] = 'Y'; ap_showBridgeDetailInfo(gate + "_C", 1); }
-      else if ((bridge == "C4" || bridge == "CL4") && !clicked[gate + "_C_1"]) { clicked[gate + "_C_1"] = 'Y'; ap_showBridgeDetailInfo(gate + "_C", 2); }
-      else if (!clicked[gate])  { clicked[generateUVs] = 'Y'; ap_showBridgeInfo(gate); }
-     }
     });
 
-    planeModels.selectedModel = '';
-    var i1 = bridge_code1.findIndex(x => x == labelInfo.gateClick);
-    var i2 = bridge_code2.findIndex(x => x == labelInfo.gateClick);
-    var i3 = bridge_code3.findIndex(x => x == labelInfo.gateClick);
-    if (i1 > -1) {
-     planeModels.selectedModel = bridge_planeModel1[i1];
-     planeXYA.x = plane_currentXYA1[i1].x;
-     planeXYA.y = plane_currentXYA1[i1].y;
-     planeXYA.a = plane_currentXYA1[i1].a;
-    }
-    else if (i2 > -1) {
-     planeModels.selectedModel = bridge_planeModel2[i2];
-     planeXYA.x = plane_currentXYA2[i2].x;
-     planeXYA.y = plane_currentXYA2[i2].y;
-     planeXYA.a = plane_currentXYA2[i2].a;
-    }
-    else if (i3 > -1) {
-     planeModels.selectedModel = bridge_planeModel3[i3];
-     planeXYA.x = plane_currentXYA3[i3].x;
-     planeXYA.y = plane_currentXYA3[i3].y;
-     planeXYA.a = plane_currentXYA3[i3].a;
-    }
-    gui.updateDisplay(); // 更新 GUI 显示
    }
+   if (gate != null && bridge == null) {
+    if (!clicked[gate]) { clicked[gate] = 'Y'; ap_showBridgeInfo(gate); }
+   }
+   else if (gate != null && bridge != null) {
+    if ((bridge == "A1" || bridge == "AL1") && !clicked[gate + "_A_0"]) { clicked[gate + "_A_0"] = 'Y'; ap_showBridgeDetailInfo(gate + "_A", 0); }
+    else if ((bridge == "A2" || bridge == "AL1") && !clicked[gate + "_A_1"]) { clicked[gate + "_A_1"] = 'Y'; ap_showBridgeDetailInfo(gate + "_A", 1); }
+    else if ((bridge == "A3" || bridge == "AL2") && !clicked[gate + "_A_1"]) { clicked[gate + "_A_1"] = 'Y'; ap_showBridgeDetailInfo(gate + "_A", 1); }
+    else if ((bridge == "A4" || bridge == "AL3") && !clicked[gate + "_A_2"]) { clicked[gate + "_A_2"] = 'Y'; ap_showBridgeDetailInfo(gate + "_A", 2); }
+    else if ((bridge == "B1" || bridge == "BL1") && !clicked[gate + "_B_0"]) { clicked[gate + "_B_0"] = 'Y'; ap_showBridgeDetailInfo(gate + "_B", 0); }
+    else if ((bridge == "B2" || bridge == "BL1") && !clicked[gate + "_B_1"]) { clicked[gate + "_B_1"] = 'Y'; ap_showBridgeDetailInfo(gate + "_B", 1); }
+    else if ((bridge == "B3" || bridge == "BL2") && !clicked[gate + "_B_1"]) { clicked[gate + "_B_1"] = 'Y'; ap_showBridgeDetailInfo(gate + "_B", 1); }
+    else if ((bridge == "B4" || bridge == "BL3") && !clicked[gate + "_B_2"]) { clicked[gate + "_B_2"] = 'Y'; ap_showBridgeDetailInfo(gate + "_B", 2); }
+    else if ((bridge == "C1" || bridge == "CL1") && !clicked[gate + "_C_0"]) { clicked[gate + "_C_0"] = 'Y'; ap_showBridgeDetailInfo(gate + "_C", 0); }
+    else if ((bridge == "C2" || bridge == "CL1") && !clicked[gate + "_C_1"]) { clicked[gate + "_C_1"] = 'Y'; ap_showBridgeDetailInfo(gate + "_C", 1); }
+    else if ((bridge == "C3" || bridge == "CL2") && !clicked[gate + "_C_1"]) { clicked[gate + "_C_1"] = 'Y'; ap_showBridgeDetailInfo(gate + "_C", 1); }
+    else if ((bridge == "C4" || bridge == "CL3") && !clicked[gate + "_C_1"]) { clicked[gate + "_C_1"] = 'Y'; ap_showBridgeDetailInfo(gate + "_C", 2); }
+
+   }
+
+   planeModels.selectedModel = '';
+   var i1 = bridge_code1.findIndex(x => x == labelInfo.gateClick);
+   var i2 = bridge_code2.findIndex(x => x == labelInfo.gateClick);
+   var i3 = bridge_code3.findIndex(x => x == labelInfo.gateClick);
+   if (i1 > -1) {
+    planeModels.selectedModel = bridge_planeModel1[i1];
+    planeXYA.x = plane_currentXYA1[i1].x;
+    planeXYA.y = plane_currentXYA1[i1].y;
+    planeXYA.a = plane_currentXYA1[i1].a;
+   }
+   else if (i2 > -1) {
+    planeModels.selectedModel = bridge_planeModel2[i2];
+    planeXYA.x = plane_currentXYA2[i2].x;
+    planeXYA.y = plane_currentXYA2[i2].y;
+    planeXYA.a = plane_currentXYA2[i2].a;
+   }
+   else if (i3 > -1) {
+    planeModels.selectedModel = bridge_planeModel3[i3];
+    planeXYA.x = plane_currentXYA3[i3].x;
+    planeXYA.y = plane_currentXYA3[i3].y;
+    planeXYA.a = plane_currentXYA3[i3].a;
+   }
+   gui.updateDisplay(); // 更新 GUI 显示
   }
 
   function onMouseMove(event) {
    clicked = {};
+   labelInfo.bridgeClick = "None";
+   labelInfo.gateClick = "None";
    if (loading) return;
    // 计算鼠标在场景中的位置 
    mouse.x = (event.clientX / container.offsetWidth) * 2 - 1;
@@ -2720,6 +2781,7 @@
      _Div.className = "label";
      _Div.textContent = item.obj_type;
      _Div.style.marginTop = '2px';
+     if (item.obj_type != '') _Div.obj_type = item.obj_type;
 
      _Div.addEventListener('mouseover', function () {
       console.log('mouseover', item.obj_type);
@@ -2728,6 +2790,7 @@
      _Div.addEventListener('mouseout', function () {
       console.log('mouseout', item.obj_type);
      });
+     _Div.style.pointerEvents = 'auto';
      _Div.addEventListener('click', function () {
       console.log('click', item.obj_type);
      });
@@ -2786,6 +2849,19 @@
   function onMouseClick_bridge(event) {
    if (loading) return;
    // 如果是2d
+
+
+   var mouseX = event.clientX;
+   var mouseY = event.clientY;
+   var _2dObjs = document.getElementById("bimModel_bridge").getElementsByClassName('label'); // 假设你的 CSS2DObject 的 div 有 'label' 这个类
+   Array.from(_2dObjs).forEach(_2dObj => {
+    var rect = _2dObj.getBoundingClientRect(); // 获取元素的屏幕坐标边界
+
+    if (mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom) {
+     if (/^[A-Z]$/.test(_2dObj.obj_type)) ap_showBridgePositionInfo(enterBridgeId, _2dObj.obj_type);
+     // 在这里执行你的逻辑
+    }
+   });
 
    // 计算鼠标在场景中的位置 
    mouse_bridge.x = (event.clientX / container_bridge.offsetWidth) * 2 - 1;
