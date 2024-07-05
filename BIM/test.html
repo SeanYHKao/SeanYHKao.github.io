@@ -1,0 +1,535 @@
+<div class="container-fluid" v-if="res.user">
+ <form id="call_form">
+  <div class="row">
+   <div class="col-12 p-2 bg-danger text-white">
+    <p><i class="fas fa-taxi"></i> {{ res.langs[res.user.lan].call.hi}}</p>
+   </div>
+  </div>
+  <div class="row ">
+   <div class="col-12">
+    <div id="map" style="height: 200px;"><img src="https://paiche.tw/images/loading.gif" /></div>
+   </div>
+  </div>
+  <div> {{ res.langs[res.user.lan].call.youcan }}</div>
+  <div v-if="res.totalDistance && res.totalDuration ">
+   {{ res.langs[res.user.lan].call.estimate}}
+   {{ (res.totalDistance / 1000).toFixed(2) }}
+   {{ res.langs[res.user.lan].call.km}} ，
+   {{ Math.ceil(res.totalDuration / 60) }}
+   {{ res.langs[res.user.lan].call.min}} ，
+   {{ res.langs[res.user.lan].call.charge }}
+   {{ res.totalFee }}
+
+
+  </div>
+  <div class="col-md-12 ">
+   <div class="form-group row p-2">
+    <div class="form-check">
+     <input class="form-check-input" type="radio" name="rideType" id="rideNow" value="now" @click="res.call.now=true"
+      checked>
+     <label class="form-check-label" for="rideNow">
+      <i class="fas fa-car"></i> {{ res.langs[res.user.lan].call.RideNow}}
+     </label>
+    </div>
+    <div class="form-check  ml-1">
+     <input class="form-check-input" type="radio" name="rideType" id="scheduleRide" value="schedule"
+      @click="res.call.now=false">
+     <label class="form-check-label" for="scheduleRide">
+      <i class="fas fa-clock"></i> {{ res.langs[res.user.lan].call.ScheduleRide}}
+     </label>
+    </div>
+   </div>
+  </div>
+  <div class="col-md-12 " v-show="!res.call.now">
+   <div class="form-group row pl-2">
+    <label for="sdate">{{ res.langs[res.user.lan].call.booking}}</label>
+    <div class="input-group">
+     <input type="date" class="form-control col-5 mb-2" v-model="res.call.selectedDate" required id="scheduleDate">
+     <input type="time" class="form-control col-5 ml-1" v-model="res.call.selectedTime" required id="scheduleTime">
+    </div>
+   </div>
+  </div>
+  <div class="col-sm-12">
+   <div class="form-group">
+    <label>{{ res.langs[res.user.lan].call.serviceType }}</label>
+    <select class="form-control custom-input" required v-model="res.call.serviceType" @change="
+
+this.res.marker1.setPosition(  { lat: this.res.point.latitude, lng: this.res.point.longitude } );
+if(this.res.call.serviceType == 'airportPickup' ) this.res.marker1.setPosition( this.res.airport[ 'TPE_Terminal1']);
+else if(this.res.call.serviceType == 'airportDropoff' ) this.res.marker2.setPosition( this.res.airport[ 'TPE_Terminal1']);
+else  this.res.marker2.setPosition(  { lat: this.res.point.latitude, lng: this.res.point.longitude }  );
+this.jQuery('#map_route_changed').click();
+
+" :placeholder=" res.langs[res.user.lan].call.serviceType ">
+     <option value=""></option>
+     <option value="taxi">{{ res.langs[res.user.lan].call.options.serviceType.taxi }}</option>
+     <option value="airportDropoff">{{ res.langs[res.user.lan].call.options.serviceType.airportDropoff}}</option>
+     <option value="airportPickup">{{ res.langs[res.user.lan].call.options.serviceType.airportPickup}}</option>
+     <option value="driver">{{ res.langs[res.user.lan].call.options.serviceType.driver }}</option>
+    </select>
+   </div>
+  </div>
+  <div class="col-md-12"
+   v-show="res.call.serviceType=='driver'||res.call.serviceType=='taxi'||res.call.serviceType=='airportDropoff'">
+   <label for="start-location"><i class="fas fa-map-marker-alt"></i>{{ res.langs[res.user.lan].call.pickUp}}:</label>
+   <input type="text" id="start-location" class="form-control" required v-model="res.call.startAddress"
+    :placeholder="res.langs[res.user.lan].call.pickupPlaceholder" @keydown.enter.prevent="return false;" @change=" fetch(
+           'https://paiche.tw/api/paiche/search?address=' + encodeURIComponent(res.call.startAddress) + '&language=zh-TW', (feeds , v, w) => {
+             console.log(feeds);
+             if (Array.isArray(feeds.results) && feeds.results.length > 0) {
+v.res.call.endAddress='';
+v.res.call.endGPS=null;
+                v.res.marker1.setPosition(  feeds.results[0].geometry.location);
+       v.jQuery('#map_route_changed').click();
+             } 
+           } );">
+  </div>
+
+
+  <div class="col-sm-12" v-show="res.call.serviceType=='airportPickup'">
+   <div class="form-group">
+    <label>{{ res.langs[res.user.lan].airports.selectDeparture }}</label>
+    <div class="input-group">
+     <select class="form-control custom-input" required v-model="res.call.startAddress" @change="
+this.res.marker1.setPosition( this.res.airport[res.call.startAddress]);
+this.jQuery('#map_route_changed').click();
+">
+      <option value="TPE_Terminal1">{{ res.langs[res.user.lan].airports.TPE_Terminal1 }}</option>
+      <option value="TPE_Terminal2">{{ res.langs[res.user.lan].airports.TPE_Terminal2 }}</option>
+      <option value="TSA">{{ res.langs[res.user.lan].airports.TSA }}</option>
+      <option value="KHH_International">{{ res.langs[res.user.lan].airports.KHH_International }}</option>
+      <option value="KHH_Domestic">{{ res.langs[res.user.lan].airports.KHH_Domestic }}</option>
+      <option value="RMQ">{{ res.langs[res.user.lan].airports.RMQ }}</option>
+      <option value="CYI">{{ res.langs[res.user.lan].airports.CYI }}</option>
+      <option value="HUN">{{ res.langs[res.user.lan].airports.HUN }}</option>
+      <option value="KNH">{{ res.langs[res.user.lan].airports.KNH }}</option>
+      <option value="MZG">{{ res.langs[res.user.lan].airports.MZG }}</option>
+      <option value="TTT">{{ res.langs[res.user.lan].airports.TTT }}</option>
+     </select>
+    </div>
+   </div>
+  </div>
+
+  <input class="form-control custom-input" style="display:none" v-model="res.call.startGPS">
+  <div class="col-md-12"
+   v-show="res.call.serviceType=='driver'||res.call.serviceType=='taxi'||res.call.serviceType=='airportPickup'">
+   <label for="destination-input"><i class="fas fa-map-marked-alt"></i> {{ res.langs[res.user.lan].call.dropOff}}
+    :</label>
+   <input type="text" id="destination-input" class="form-control" required v-model="res.call.endAddress"
+    :placeholder="res.langs[res.user.lan].call.dropoffPlaceholder" @keydown.enter.prevent="return false;" @change=" fetch(
+           'https://paiche.tw/api/paiche/search?address=' + encodeURIComponent(res.call.endAddress) + '&language=zh-TW', (feeds , v, w) => {
+             console.log(feeds);
+             if (Array.isArray(feeds.results) && feeds.results.length > 0) {
+                v.res.marker2.setPosition(  feeds.results[0].geometry.location);
+       v.jQuery('#map_route_changed').click();
+             } 
+           } );">
+  </div>
+
+  <div class="col-sm-12" v-show="res.call.serviceType=='airportDropoff'">
+   <div class="form-group">
+    <label>{{ res.langs[res.user.lan].airports.selectDeparture }}</label>
+    <div class="input-group">
+     <select class="form-control custom-input" required v-model="res.call.endAddress" @change="
+this.res.marker2.setPosition( this.res.airport[res.call.endAddress]);
+this.jQuery('#map_route_changed').click();
+">
+      <option value="TPE_Terminal1">{{ res.langs[res.user.lan].airports.TPE_Terminal1 }}</option>
+      <option value="TPE_Terminal2">{{ res.langs[res.user.lan].airports.TPE_Terminal2 }}</option>
+      <option value="TSA">{{ res.langs[res.user.lan].airports.TSA }}</option>
+      <option value="KHH_International">{{ res.langs[res.user.lan].airports.KHH_International }}</option>
+      <option value="KHH_Domestic">{{ res.langs[res.user.lan].airports.KHH_Domestic }}</option>
+      <option value="RMQ">{{ res.langs[res.user.lan].airports.RMQ }}</option>
+      <option value="CYI">{{ res.langs[res.user.lan].airports.CYI }}</option>
+      <option value="HUN">{{ res.langs[res.user.lan].airports.HUN }}</option>
+      <option value="KNH">{{ res.langs[res.user.lan].airports.KNH }}</option>
+      <option value="MZG">{{ res.langs[res.user.lan].airports.MZG }}</option>
+      <option value="TTT">{{ res.langs[res.user.lan].airports.TTT }}</option>
+     </select>
+    </div>
+   </div>
+  </div>
+
+  <input class="form-control custom-input" style="display:none" v-model="res.call.endGPS">
+
+  <div class="col-md-12" v-if="false">
+   <div class="form-group">
+    <button class="btn btn-danger " onclick="addStop()"><i class="fas fa-plus-square"></i> Add Stop</button>
+    <div id="additional-stops" class="mt-2"></div>
+   </div>
+  </div>
+
+  <div class="col-sm-12" v-show="res.call.serviceType=='airportPickup'||res.call.serviceType=='airportDropoff'">
+   <div class="form-group">
+    <label>{{ res.langs[res.user.lan].call.flight }}</label>
+    <input type="text" class="form-control custom-input" required
+     :placeholder=" res.langs[res.user.lan].call.flightPlaceholder " v-model="res.call.flight">
+   </div>
+  </div>
+
+  <div class="col-md-12">
+   <label class="mr-2"><i class="fas fa-users"></i> {{ res.langs[res.user.lan].call.passengers}} :</label>
+   <input type="number" class="form-control mr-4" v-model="res.call.passengerCount"
+    :placeholder="res.langs[res.user.lan].call.passengerPlaceholder">
+  </div>
+  <div class="col-md-12">
+   <label class="mr-2"><i class="fas fa-suitcase"></i> Luggage:</label>
+   <input type="number" class="form-control mr-4" v-model="res.call.luggageCount"
+    :placeholder="res.langs[res.user.lan].call.luggagePlaceholder">
+  </div>
+  <div class="col-sm-12">
+   <div class="form-group">
+    <label>{{ res.langs[res.user.lan].call.childSeat }}</label>
+    <select class="form-control custom-input" v-model="res.call.childSeat">
+     <option value="0">0</option>
+     <option value="1">1</option>
+     <option value="2">2</option>
+    </select>
+   </div>
+  </div>
+  <div class="col-md-12">
+   <div class="form-check">
+    <input class="form-check-input" type="checkbox" id="petsAllowed" v-model="res.call.pet">
+    <label class="form-check-label" for="petsAllowed">
+     <i class="fas fa-paw"></i> {{res.langs[res.user.lan].call.pet}}
+    </label>
+   </div>
+  </div>
+
+  <div class="row mt-3">
+   <div class="col-12">
+    <button class="btn btn-primary btn-block" @click.prevent="
+  this.res.call.estimate_distance=  ( this.res.totalDistance / 1000).toFixed(2); 
+  this.res.call.estimate_duration=    (this.res.totalDuration / 60).toFixed(2); 
+
+  
+        if(this.validForm('call_form')) this.post('https://paiche.tw/api/paiche/addorder', 
+        this.res.call,  (d)=>{$router.push('/order/'+d.newid);} )
+        ">
+     {{ res.langs[res.user.lan].call.confirm }} </button>
+   </div>
+  </div>
+ </form>
+</div>
+<button id="map_route_changed" @click.prevent="
+var v = this;
+if(this.res.call.serviceType != 'airportPickup' )
+{
+ v.fetch(
+ 'https://paiche.tw/api/paiche/search?address=' + encodeURIComponent(v.res.marker1.position) + '&language=zh-TW', (feeds , v, w) => {
+   if (Array.isArray(feeds.results) && feeds.results.length > 0) {
+
+       v.res.call.startAddress= feeds.results[0].formatted_address;
+       v.res.call.startGPS = feeds.results[0].geometry.location.lat+','+feeds.results[0].geometry.location.lng;
+   console.log('startAddress ' + v.res.call.startAddress)
+   } 
+ });
+}
+
+if(this.res.call.serviceType != 'airportDropoff' ) 
+{
+ v.fetch(
+ 'https://paiche.tw/api/paiche/search?address=' + encodeURIComponent(v.res.marker2.position) + '&language=zh-TW', (feeds1 , v, w) => {
+   if (Array.isArray(feeds1.results) && feeds1.results.length > 0) {
+       v.res.call.endAddress= feeds1.results[0].formatted_address;
+       v.res.call.endGPS = feeds1.results[0].geometry.location.lat+','+feeds1.results[0].geometry.location.lng;
+   console.log('endAddress' + v.res.call.endAddress)
+   } 
+ });
+}
+
+v.res.directionsService .route({
+       origin: v.res.marker1.position, 
+       destination: v.res.marker2.position, 
+       optimizeWaypoints: true,
+       travelMode: 'DRIVING'
+     }, function(response, status) {
+       if (status === 'OK') {
+console.log(response)
+         v.res.directionsRenderer.setDirections(response);
+if(response.routes&&response.routes.length>0)
+{
+try
+{
+ var route = response.routes[0];
+var dis=0;
+var dur = 0;
+     for (var i = 0; i < route.legs.length; i++) {
+         dis += route.legs[i].distance.value;
+       dur += route.legs[i].duration.value;
+     }
+
+
+       v.res.totalDistance = dis;
+       v.res.totalDuration = dur;
+
+
+ v.fetch('https://paiche.tw/api/paiche/amount?distance=' +  ( v.res.totalDistance / 1000).toFixed(2) + '&serviceType=' + v.res.call.serviceType , (feeds2 , v, w) => {
+    v.res.totalFee = feeds2;
+ });
+
+}
+catch(e)
+{
+console.log(e);
+}
+  }
+
+       }
+     });
+
+
+   v.w.setTimeout(() => {
+ if (v.res.map.getZoom() > 17) v.res.map.setZoom(17); 
+v.res.map.setCenter(v.res.marker1.position);
+
+     }, 1000);
+
+" style="display:none">ok</button>
+
+<button id="dataload_click" @click.prevent=" 
+
+this.res.settings=JSON.parse(this.res.settings.json); 
+console.log(this.res.settings.json);
+this.res.settings.forEach(setting => {
+ var feeDetails = {};
+ setting.fees.forEach(fee => {
+   // 去除括号和其内容
+   var label = fee.label.replace(/（.*）/, '');
+   feeDetails[label] = fee.value;
+ });
+console.log(setting.name);
+console.log(feeDetails);
+if(setting.name == '叫車') this.res.fees['taxi'] = feeDetails;
+else if(setting.name == '代駕') this.res.fees['driver'] = feeDetails;
+else
+{
+ this.res.fees['airportDropoff'] = feeDetails;
+ this.res.fees['airportPickup'] = feeDetails;
+}
+
+});
+
+
+this.v.$forceUpdate(); 
+" style="display:none"></button>
+
+<input type="hidden" :id="res.randomID">
+
+
+<button id="load_click" @click.prevent="
+
+var v = this.v;
+
+if ('cordova' in this.w && 'device' in this.w) {
+
+ v.w.FirebasePlugin.getToken(function (fcmToken) {
+  _fcmToken = fcmToken;
+ }, function (error) { });
+ v.w.bkgps.startLocationService(function (result) {
+ }, function (err) {
+ });
+
+ this.res._device = {
+  type: this.w.cordova.platformId,
+  cordova: this.w.device.cordova,
+  model: this.w.device.model,
+  platform: this.w.device.platform,
+  uuid: this.w.device.uuid,
+  version: this.w.device.version,
+  manufacturer: this.w.device.manufacturer,
+  isVirtual: this.w.device.isVirtual,
+  serial: this.w.device.serial,
+  DeviceName: this.w.cordova.plugins && this.w.cordova.plugins.deviceName ? this.w.cordova.plugins.deviceName.name : '',
+  fcmToken: _fcmToken ? _fcmToken : null
+ };
+
+
+ v.res.randomID = 'randomID_' + Math.random().toString(36).substr(2, 9);
+
+
+ v.res.intervalID = v.w.setInterval(() => {
+  const randomIDInput = v.w.document.getElementById(v.res.randomID);
+  if (!randomIDInput) {
+   v.w.clearInterval(v.res.intervalID);
+   v.res.intervalID = null;
+   return;
+  }
+
+  v.w.navigator.geolocation.getCurrentPosition(position => {
+   const latitude = position.coords.latitude;
+   const longitude = position.coords.longitude;
+   console.log('Latitude:', latitude, 'Longitude:', longitude);
+   v.h.post('https://paiche.tw/api/paiche/location', {
+    latitude: latitude,
+    longitude: longitude,
+    deviceId: _device.uuid,
+    fcmToken: _fcmToken
+   });
+  }, error => {
+   console.error('Error getting current position:', error);
+  });
+ }, 10000); // 10秒间隔
+}
+
+
+this.res.fees = {};
+
+this.res.user = getStorage('user');
+this.res.call = { now: true, serviceType: '' };
+
+this.res.point = { latitude: 25.0385345, longitude: 121.5052941 };
+
+this.res.airport = {
+ 'TPE_Terminal1': {
+  'lat': 25.0777,
+  'lng': 121.2328
+ },
+ 'TPE_Terminal2': {
+  'lat': 25.0777,
+  'lng': 121.2328
+ },
+ 'TSA': {
+  'lat': 25.0694,
+  'lng': 121.5525
+ },
+ 'KHH_International': {
+  'lat': 22.5771,
+  'lng': 120.3503
+ },
+ 'KHH_Domestic': {
+  'lat': 22.5771,
+  'lng': 120.3503
+ },
+ 'RMQ': {
+  'lat': 24.2647,
+  'lng': 120.6206
+ },
+ 'CYI': {
+  'lat': 23.4618,
+  'lng': 120.3928
+ },
+ 'HUN': {
+  'lat': 24.0231,
+  'lng': 121.6179
+ },
+ 'KNH': {
+  'lat': 24.4279,
+  'lng': 118.3592
+ },
+ 'MZG': {
+  'lat': 23.5687,
+  'lng': 119.6283
+ },
+ 'TTT': {
+  'lat': 22.7540,
+  'lng': 121.1016
+ }
+};
+
+
+new v.w.Promise((resolve, reject) => {
+ if ('bkgps' in v.w) {
+  v.w.bkgps.getLastLocation(resolve, reject);
+ } else if ('navigator' in v.w) {
+  if (v.w.navigator.geolocation) {
+   v.w.navigator.geolocation.getCurrentPosition(resolve, reject);
+  } else {
+   reject(new Error('Geolocation is not supported by this browser.'));
+  }
+ } else {
+  reject(new Error('Neither bkgps nor navigator is available.'));
+ }
+}).then(result => {
+ v.w.alert(result);
+ if (result.coords) {
+  const lat = result.coords.latitude;
+  const lng = result.coords.longitude;
+  _position = 'Latitude: ' + lat + ', Longitude: ' + lng;
+ } else {
+  _position = result; // Assuming result is already a formatted string when using bkgps
+ }
+
+ if (typeof _position != 'undefined' && typeof _position == 'string') {
+  // 移除空格，增加可读性
+  coordinateStr = _position.replace(/\s+/g, '');
+
+  // 分割字符串获取纬度和经度
+  const parts = coordinateStr.split(',');
+
+  // 解析纬度
+  const latPart = parts[0].split(':');
+  const lat = parseFloat(latPart[1]);
+
+  // 解析经度
+  const lonPart = parts[1].split(':');
+  const lng = parseFloat(lonPart[1]);
+  v.res.point = { latitude: lat, longitude: lng };
+  v.res.address = encodeURIComponent(this.res.point.latitude + ',' + this.res.point.longitude)
+ }
+
+ v.w.setTimeout(() => {
+  v.$forceUpdate();
+  v.res.map = new v.w.google.maps.Map(v.w.document.getElementById('map'), {
+   center: { lat: v.res.point.latitude, lng: v.res.point.longitude },
+   zoom: 15, gestureHandling: 'greedy',
+   zoomControl: true,
+   mapTypeControl: false,
+   scaleControl: true,
+   streetViewControl: false,
+   rotateControl: true,
+   fullscreenControl: false,
+   language: 'zh-tw'
+  });
+
+  v.res.directionsService = new v.w.google.maps.DirectionsService();
+  v.res.directionsRenderer = new v.w.google.maps.DirectionsRenderer({
+   suppressMarkers: true, map: v.res.map, polylineOptions: {
+    strokeColor: '#03a91d',  // 路線顏色為紅色
+    strokeOpacity: 1,      // 路線透明度為 0.8
+    strokeWeight: 6          // 路線寬度為 6 像素
+   }
+  });
+
+  v.res.marker1 = new v.w.google.maps.Marker({
+   map: v.res.map, draggable: true, position: { lat: v.res.point.latitude, lng: v.res.point.longitude }, icon: {
+    path: 'M12,2C8.134,2,5,5.134,5,9c0,5,7,13,7,13s7-8,7-13C19,5.134,15.866,2,12,2z M12,11.5c-1.381,0-2.5-1.119-2.5-2.5S10.619,6.5,12,6.5s2.5,1.119,2.5,2.5S13.381,11.5,12,11.5z',
+    fillColor: '#4CAF50',
+    fillOpacity: 1,
+    strokeWeight: 0,
+    rotation: 0,
+    scale: 2,
+    anchor: new v.w.google.maps.Point(12, 24)
+   }
+  })
+  v.res.marker2 = new v.w.google.maps.Marker({
+   map: v.res.map, draggable: true, position: { lat: v.res.point.latitude, lng: v.res.point.longitude }, icon: {
+    path: 'M12,2C8.134,2,5,5.134,5,9c0,5,7,13,7,13s7-8,7-13C19,5.134,15.866,2,12,2z M9,9l2,2l4,-4',
+    fillColor: '#F44336',
+    fillOpacity: 1,
+    strokeColor: '#FFFFFF',
+    strokeWeight: 3,
+    rotation: 0,
+    scale: 2,
+    anchor: new v.w.google.maps.Point(12, 24)
+   }
+  })
+
+  v.res.marker1.addListener('dragend', function (event) {
+   v.jQuery('#map_route_changed').click();
+  });
+  v.res.marker2.addListener('dragend', function (event) {
+   v.jQuery('#map_route_changed').click();
+  });
+
+
+ }, 1500);
+
+
+
+
+})
+ .catch(error => {
+ });
+
+" style="display:none">ok</button>
