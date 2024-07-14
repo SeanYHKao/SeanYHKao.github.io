@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Three.js Airport Jet Bridge</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+  <script type="module">
+    import * as THREE from './three.js';
+    import { OrbitControls } from './OrbitControls.js';
+
+    import { OBJLoader } from './OBJLoader.js';
+    import { STLLoader } from './STLLoader.js';
+    import { CSS2DRenderer, CSS2DObject } from './CSS2DRenderer.js';
+
+    // Scene setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Initialize OrbitControls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = false;
+    controls.maxPolarAngle = Math.PI / 2;
+
+    // Create ground
+    const groundGeometry = new THREE.PlaneGeometry(100, 100);
+    const groundMaterial = new THREE.MeshStandardMaterial({color: 0x008000});
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2; // Rotate the plane to be horizontal
+    scene.add(ground);
+
+    // Add sunlight
+    const sunlight = new THREE.DirectionalLight(0xffffff, 1);
+    sunlight.position.set(10, 10, 10);
+    sunlight.castShadow = true;
+    scene.add(sunlight);
+
+    // Ambient light
+    const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
+    scene.add(ambientLight);
+
+    // Bridge structure
+    const bridgeGeometry = new THREE.BoxGeometry(10, 2, 2);
+    const bridgeMaterial = new THREE.MeshStandardMaterial({color: 0x808080});
+    const bridge = new THREE.Mesh(bridgeGeometry, bridgeMaterial);
+    bridge.position.set(0, 2, 0);
+    scene.add(bridge);
+
+    // Moving system
+    const movingSystemGeometry = new THREE.CylinderGeometry(1, 1, 2, 32);
+    const movingSystemMaterial = new THREE.MeshStandardMaterial({color: 0x808080});
+    const movingSystem = new THREE.Mesh(movingSystemGeometry, movingSystemMaterial);
+    movingSystem.position.set(-6, 1, 0);
+    movingSystem.rotation.z = Math.PI / 2;
+    scene.add(movingSystem);
+
+    // Passenger walkway
+    const walkwayTopGeometry = new THREE.BoxGeometry(10, 0.2, 2);
+    const walkwayTop = new THREE.Mesh(bridgeGeometry, bridgeMaterial);
+    walkwayTop.position.set(0, 4.1, 0);
+    scene.add(walkwayTop);
+
+    const walkwaySideGeometry = new THREE.BoxGeometry(10, 2, 0.1);
+    const walkwaySideMaterial = new THREE.MeshStandardMaterial({color: 0x0000FF, transparent: true, opacity: 0.5});
+    const walkwaySide1 = new THREE.Mesh(walkwaySideGeometry, walkwaySideMaterial);
+    walkwaySide1.position.set(0, 3, -1);
+    scene.add(walkwaySide1);
+
+    const walkwaySide2 = walkwaySide1.clone();
+    walkwaySide2.position.set(0, 3, 1);
+    scene.add(walkwaySide2);
+
+    const walkwayBottom = walkwayTop.clone();
+    walkwayBottom.position.set(0, 1.9, 0);
+    scene.add(walkwayBottom);
+
+    // Stairs
+    const stairGeometry = new THREE.BoxGeometry(1, 2, 5);
+    const stairMaterial = new THREE.MeshStandardMaterial({color: 0x808080});
+    const stairs = new THREE.Mesh(stairGeometry, stairMaterial);
+    stairs.position.set(6, 1, -1);
+    scene.add(stairs);
+
+    // Support columns
+    const supportGeometry = new THREE.CylinderGeometry(0.1, 0.1, 6, 32);
+    const supportMaterial = new THREE.MeshStandardMaterial({color: 0x808080});
+
+    const support1 = new THREE.Mesh(supportGeometry, supportMaterial);
+    support1.position.set(-4, -1, 0);
+    scene.add(support1);
+
+    const support2 = support1.clone();
+    support2.position.set(4, -1, 0);
+    scene.add(support2);
+
+    // Camera position
+    camera.position.z = 15;
+
+    // Render loop
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+        renderer.render(scene, camera);
+    }
+
+    animate();
+</script>
+</body>
+</html>

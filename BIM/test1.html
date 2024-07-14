@@ -1,2 +1,224 @@
-<script>
-</script>
+<div class="order-meal" v-if="res.shopinfos">
+ <div class="meal-top">
+  <img :src="`/data/upload/${res.shopinfos.bgpic}`" class="bg">
+  <div class="meal-top-box flexbox">
+   <div class="img-box">
+    <div class="img-box-1">
+     <img :src="`/data/upload/${res.shopinfos.pic}`" class="img">
+    </div>
+   </div>
+   <div class="con-box flexright">
+    <div class="title" id="shopinfoName">{{res.shopinfos.name}} <div>{{res.shopinfos.publish}}</div>
+     <div class="paytype">
+      <div v-show="res.shopinfos.cash=='Y'" class="cash-icon"></div>
+      <div v-show="res.shopinfos.credit_card=='Y'" class="credit-card-icon"></div>
+      <div v-show="res.shopinfos.linepay=='Y'" class="linepay-icon"></div>
+      <div v-show="res.shopinfos.jko=='Y'" class="jko-icon"></div>
+     </div>
+    </div>
+
+    <div class="road">
+     <div class="position-icon"></div>{{res.shopinfos.address }}
+    </div>
+    <div class="flex-row-afc">
+     <div class="time-icon"></div>
+     <div>
+      <div v-for="(day, index) in ['周日', '周一', '周二', '周三', '周四', '周五', '周六']" :key="index"
+       v-show=" index == ( new Date().getDay() )">
+       {{ day }} {{ res.shopinfos['w' + index + '_time1'] }} {{ res.shopinfos['w' + index + '_time2'] }} {{
+       res.shopinfos['w' + index + '_time3'] }}
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="tab-navs flexbox">
+   <div class="flexright" :class="{ current: !res.mode || res.mode === 'menu' }"><a @click="res.mode='menu'">點菜</a>
+   </div>
+   <div class="flexright" :class="{ current: res.mode === 'evalute' }"><a @click="res.mode='evalute'">評價</a></div>
+   <div class="flexright" :class="{ current: res.mode === 'shop' }"><a @click="res.mode='shop'">商家</a></div>
+  </div>
+
+  <div class="meal-view" v-if="!res.mode || res.mode=='menu'">
+   <div class=" main">
+    <div class="flexleft menutype sticky">
+     <div class="meal-tab-nav">
+      <ul>
+       <li v-for="(menu, index) in res.menulist" :key="index" :data-scrollIntoView="index"
+        :class="({true:'current'})[(!res.current && index == 0) || index==res.current]"
+        @click="jQuery('.anchor_current').removeClass('anchor_current');jQuery(this).addClass('anchor_current');jQuery('#'+index)[0].scrollIntoView()">
+        {{menu.name}}
+       </li>
+      </ul>
+     </div>
+    </div>
+    <div class="flexright meallist">
+     <div class="meal-content">
+      <div class="meal-content-list anchor" v-for="(menu, index) in res.menulist" :key="index" :id="index">
+       <div class="title">{{menu.name}}</div>
+       <div class="con">
+        <div class="flexbox con-list" v-for="m in menu.menu">
+         <div class="flexleft">
+          <div class="pics-box">
+           <img :src="`/data/upload/${m.pic}`" class="pics" v-show="m.pic!=''">
+           <img src="/images/default.png" class="pics" v-show="m.pic==''">
+          </div>
+         </div>
+         <div class="flexright">
+          <p class="title">{{m.text}}</p>
+          <div class="flexbox mm">
+           <div class="flexright price red">
+            $ {{m.priceYuan}}
+           </div>
+           <div class="flexleft">
+            <div class="standard" v-show="m.type==1"
+             @click="$router.push('/restaurant_food/' + res.shopinfos.restaurantId+ '/' + m.id )">
+             選規格
+             <span class="nums" v-show="m.count">{{m.count}}</span>
+            </div>
+            <div class="flexbox addnum" v-show="m.type==2">
+             <div class="in reduce"
+              @click="if(!(m.id in res.shoplist.cart)) res.shoplist.cart[m.id] = {food_Id:m.id,price:m.priceYuan ,  count:0, product: m, spec:'', allPrice:0}; res.shoplist.cart[m.id].count--; res.shoplist.cart[m.id].allPrice = res.shoplist.cart[m.id].product.priceYuan * res.shoplist.cart[m.id].count; saveStorage('shoplist', res.shoplist)"
+              v-show="m.id in res.shoplist.cart && res.shoplist.cart[m.id].count > 0">-</div>
+             <div class="num" v-if="m.id in res.shoplist.cart && res.shoplist.cart[m.id].count > 0">
+              {{res.shoplist.cart[m.id].count}}</div>
+             <div class="in adnum"
+              @click="if(!(m.id in res.shoplist.cart)) res.shoplist.cart[m.id] = {food_Id:m.id,price:m.priceYuan , count:0, product: m, spec:'', allPrice:0}; res.shoplist.cart[m.id].count++; res.shoplist.cart[m.id].allPrice = res.shoplist.cart[m.id].product.priceYuan * res.shoplist.cart[m.id].count; saveStorage('shoplist', res.shoplist)">
+              +</div>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+
+       </div>
+      </div>
+
+     </div>
+    </div>
+   </div>
+
+   <div class="meal-bottom"
+    v-if="res.shoplist.cart && sumOfObj(res.shoplist.cart, (a)=>'allPrice' in a ? a['allPrice'] : 0) > 0">
+    <div class="price">
+     <img src="/data/upload/checkout.png" class="bar">
+     共{{sumOfObj(res.shoplist.cart, (a)=> a["count"] ) }} 項 {{sumOfObj(res.shoplist.cart, (a)=>
+     a["allPrice"]).toFixed(0)}}元
+    </div>
+    <button class="checkout" @click.prevent="
+if (!this.res.shopinfos.isOpen) {
+        this.v.w.alert('商家未開始營業');
+       // 阻止导航
+          this.v.w.event.preventDefault();
+return false;
+     } else {
+       // 允许导航
+       this.$router.push('/shoppingcart');
+     }
+">
+     <span>下一步</span>
+    </button>
+   </div>
+  </div>
+
+
+  <div class="meal-view" v-if="res.mode=='evalute'">
+   <div class="info_header">
+    <div class="info_title">{{res.shopinfos.name}}</div>
+    <div class="info_address">
+     <div class="position-icon"></div>{{res.shopinfos.address }}
+    </div>
+   </div>
+   <div class="level ">
+    <div class="level-star"><img src="/data/upload/startbg.png">
+     <div :style="{ width: (res.shopinfos.star / 5 * 100).toFixed(0) + '%' }"></div>
+    </div>
+
+    <div>{{res.shopinfos.star}} ({{res.shopinfos.evaluate }}) 評論</div>
+   </div>
+   <section class="inner">
+    <div class="frame-parent">
+     <div class="frame-group">
+      <div class="frame-div" v-for="(item, index) in res.evalutelist" :key="index">
+       <div class="wrapper">
+        <div class="avatar"><img :src="'/data/avatar/' + item.photo" /></div>
+        <h5>{{ item.username}}</h5>
+        <div class="level ">
+         <div class="level-star"><img src="/data/upload/startbg.png">
+          <div :style="{ width: (item.score/ 5 * 100).toFixed(0) + '%' }"></div>
+         </div>
+        </div>
+        <div class="date">{{ item.posttime}}</div>
+       </div>
+       <div class="content-wrapper">
+        <div class="content">
+         <p class="paragraph">{{ item.evaluate}}</p>
+        </div>
+       </div>
+       <div class="frame-inner"></div>
+      </div>
+     </div>
+    </div>
+    <div class="line"></div>
+   </section>
+  </div>
+  <div class="meal-view" v-if="res.mode=='shop'">
+   <section class="route_restaurant_info">
+    <div class="info_header">
+     <div class="info_title">{{res.shopinfos.name}}</div>
+     <div class="info_address">
+      <div class="position-icon"></div>{{res.shopinfos.address }}
+     </div>
+    </div>
+    <div class="level ">
+     <div class="level-star"><img src="/data/upload/startbg.png">
+      <div :style="{ width: (res.shopinfos.star / 5 * 100).toFixed(0) + '%' }"></div>
+     </div>
+
+     <div>{{res.shopinfos.star}} ({{res.shopinfos.evaluate }}) 評論</div>
+    </div>
+    <div class="info_hours">
+     <div class="time-icon"></div>
+     <div>
+      <div v-for="(day, index) in ['周日', '周一', '周二', '周三', '周四', '周五', '周六']" :key="index"
+       v-show="res.shopinfos['w' + index]=='Y'">
+       {{ day }} {{ res.shopinfos['w' + index + '_time1'] }} {{ res.shopinfos['w' + index + '_time2'] }} {{
+       res.shopinfos['w' + index + '_time3'] }}
+      </div>
+     </div>
+     <div class="open-icon"><img v-show="res.shopinfos.isOpen" src="/data/upload/opening.png"
+       style="margin:5px;     height: 25px;"><img v-show="!res.shopinfos.isOpen" src="/data/upload/closing.png"
+       style="margin:5px;     height: 25px;"></div>
+    </div>
+    <div class="info_information">
+     <div class="info_phone">
+      <div class="info_label">電話</div>
+      <div class="info_value">{{ res.shopinfos.phone}}</div>
+     </div>
+     <div class="info_email">
+      <div class="info_label">郵箱</div>
+      <div class="info_value"> {{ res.shopinfos.email }}</div>
+     </div>
+     <div class="info_cuisines">
+      <div class="info_label">類別</div>
+      <div class="info_value">{{ res.shopinfos.typeName}}</div>
+     </div>
+     <div class="info_cost">
+      <div class="info_label">均價</div>
+      <div class="info_value">{{ res.shopinfos.price_range}}</div>
+     </div>
+    </div>
+    <div class="info_payment-header">本店可使用以下支付：</div>
+    <div class="info_payment-options">
+     <div v-show="res.shopinfos.cash=='Y'" class="cash-icon"></div>
+     <div v-show="res.shopinfos.credit_card=='Y'" class="credit-card-icon"></div>
+     <div v-show="res.shopinfos.linepay=='Y'" class="linepay-icon"></div>
+     <div v-show="res.shopinfos.jko=='Y'" class="jko-icon"></div>
+    </div>
+   </section>
+  </div>
+ </div>
+</div><button id="load_click" style="display:none"
+ @click="res.shoplist = getStorage('shoplist'); if (!res.shoplist) res.shoplist = {memdata:getStorage('memdata'), shop:{}, cart:{} }; saveStorage('menu', 'restaurant') ;"></button>
+<button id="dataload_click" style="display:none"
+ @click="res.shoplist.shop = res.shopinfos; saveStorage('shoplist', res.shoplist); "></button>

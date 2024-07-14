@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airport Jetbridge Model - With Ground and Sunlight</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <script type="module">
+        import * as THREE from './three.js';
+        import { OrbitControls } from './OrbitControls.js';
+        import { OBJLoader } from './OBJLoader.js';
+        import { STLLoader } from './STLLoader.js';
+        import { CSS2DRenderer, CSS2DObject } from './CSS2DRenderer.js';
+
+        // 设置场景、相机和渲染器
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x87CEEB); // 设置天空蓝色背景
+        renderer.shadowMap.enabled = true; // 启用阴影
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 使用柔和阴影
+        document.body.appendChild(renderer.domElement);
+
+        // 添加并配置轨道控制
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.screenSpacePanning = false;
+        controls.minDistance = 10;
+        controls.maxDistance = 100;
+        controls.maxPolarAngle = Math.PI / 2;
+
+        // 设置材质
+        const grayMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+        const blueMaterial = new THREE.MeshPhongMaterial({ color: 0x4444ff, transparent: true, opacity: 0.5 });
+
+        // 创建地面
+        const groundGeometry = new THREE.PlaneGeometry(100, 100);
+        const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x999999 });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.1;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // 创建桥体结构（灰色长方体）
+        const bridgeBody = new THREE.Mesh(new THREE.BoxGeometry(10, 3, 2), grayMaterial);
+        bridgeBody.position.set(0, 1, 0);
+        bridgeBody.castShadow = true;
+        bridgeBody.receiveShadow = true;
+
+        // 创建移动系统（灰色圆柱体）
+        const movingSystem = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 4, 32), grayMaterial);
+        movingSystem.position.set(5, 4, 0);
+        movingSystem.castShadow = true;
+        movingSystem.receiveShadow = true;
+
+        // 创建旋转组，以便桥体结构能够水平旋转
+        const rotatingGroup = new THREE.Group();
+        rotatingGroup.position.set(5, 4, 0); // 设置旋转组的位置为移动系统的位置
+        rotatingGroup.add(bridgeBody); // 将桥体结构添加到旋转组
+
+        const centralSupportPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 8, 32), grayMaterial);
+        centralSupportPillar.position.set(5, 0, 0); // 位置与移动系统相同，但 y 坐标为 0
+        centralSupportPillar.castShadow = true;
+        centralSupportPillar.receiveShadow = true;
+        scene.add(centralSupportPillar);
+
+        // 调整桥体结构位置以保持连接点
+        bridgeBody.position.set(5, 0, 0);
+
+        // 创建新支撑柱
+        const createSupportPillar = (x, z) => {
+            const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 5, 32), grayMaterial);
+            pillar.position.set(x, -2.5, z);
+            pillar.castShadow = true;
+            pillar.receiveShadow = true;
+            rotatingGroup.add(pillar); // 将支撑柱添加到旋转组
+        };
+
+        createSupportPillar(7.5, 1);
+        createSupportPillar(7.5, -1);
+
+        // 将旋转组添加到场景中
+        scene.add(rotatingGroup);
+
+        // 将移动系统添加到场景中
+        scene.add(movingSystem);
+
+        // 创建乘客通道
+        const passengerTunnel = new THREE.Group();
+
+        const topTunnel = new THREE.Mesh(new THREE.BoxGeometry(15, 0.5, 3), grayMaterial);
+        topTunnel.position.y = 2.25;
+        topTunnel.castShadow = true;
+        topTunnel.receiveShadow = true;
+        passengerTunnel.add(topTunnel);
+        const topTunnel1 = new THREE.Mesh(new THREE.BoxGeometry(5, 0.6, 3), grayMaterial);
+        topTunnel1.position.y = 2.35;
+        topTunnel1.position.x = -0;
+        topTunnel1.castShadow = true;
+        topTunnel1.receiveShadow = true;
+        passengerTunnel.add(topTunnel1);
+        const topTunnel2 = new THREE.Mesh(new THREE.BoxGeometry(5, 0.7, 3), grayMaterial);
+        topTunnel2.position.y = 2.45;
+        topTunnel2.position.x = -5;
+        topTunnel2.castShadow = true;
+        topTunnel2.receiveShadow = true;
+        passengerTunnel.add(topTunnel2);
+
+        const sideTunnel1 = new THREE.Mesh(new THREE.BoxGeometry(15, 2, 0.1), blueMaterial);
+        sideTunnel1.position.set(0, 1, 1.5);
+        sideTunnel1.castShadow = true;
+        passengerTunnel.add(sideTunnel1);
+
+        const sideTunnel2 = sideTunnel1.clone();
+        sideTunnel2.position.z = -1.5;
+        passengerTunnel.add(sideTunnel2);
+
+        const bottomTunnel = new THREE.Mesh(new THREE.BoxGeometry(15, 0.5, 3), grayMaterial);
+        bottomTunnel.position.y = -0.25;
+        bottomTunnel.castShadow = true;
+        bottomTunnel.receiveShadow = true;
+        passengerTunnel.add(bottomTunnel);
+        const bottomTunnel1 = new THREE.Mesh(new THREE.BoxGeometry(7, 1, 2), grayMaterial);
+        bottomTunnel1.position.y = -1;
+        bottomTunnel1.position.x = -2;
+        bottomTunnel1.castShadow = true;
+        bottomTunnel1.receiveShadow = true;
+        passengerTunnel.add(bottomTunnel1);
+        const bottomTunnel2 = new THREE.Mesh(new THREE.BoxGeometry(3, 1, 2), grayMaterial);
+        bottomTunnel2.position.y = -1;
+        bottomTunnel2.position.x = 5;
+        bottomTunnel2.castShadow = true;
+        bottomTunnel2.receiveShadow = true;
+        passengerTunnel.add(bottomTunnel2);
+
+
+        passengerTunnel.position.set(12.5, 3, 0);
+        scene.add(passengerTunnel);
+
+
+        // 修改楼梯部分
+        const stairs = new THREE.Group();
+        const stairWidth = 1;
+        const stairHeight = 0.066;
+        const stairDepth = 0.5;
+        const stairCount = 10;
+        const stairRise = 0.3;
+        const stairRun = 0.5;
+
+        for (let i = 0; i < stairCount; i++) {
+            const step = new THREE.Mesh(new THREE.BoxGeometry(stairWidth, stairHeight, stairDepth), grayMaterial);
+            step.position.set(-2, i * stairRise, i * -stairRun);
+            step.castShadow = true;
+            step.receiveShadow = true;
+            stairs.add(step);
+        }
+
+        // 创建楼梯扶手
+        const createHandrail = (side) => {
+            const handrailRadius = 0.05;
+            const handrailHeight = stairCount * stairRise;
+            const handrailLength = stairCount * stairRun;
+
+            const handrailGeometry = new THREE.CylinderGeometry(
+                handrailRadius,
+                handrailRadius,
+                Math.sqrt(handrailHeight * handrailHeight + handrailLength * handrailLength),
+                32
+            );
+            const handrail = new THREE.Mesh(handrailGeometry, grayMaterial);
+
+            // 设置扶手位置和旋转
+            handrail.position.set(side * (stairWidth / 2 + handrailRadius) - 2, handrailHeight / 2 + 1, -handrailLength / 2);
+            handrail.rotation.x = Math.atan2(handrailHeight, handrailLength) - Math.PI / 2;
+
+            handrail.castShadow = true;
+            handrail.receiveShadow = true;
+            return handrail;
+        };
+
+        // 添加左右两侧的扶手
+        stairs.add(createHandrail(-1)); // 左侧扶手
+        stairs.add(createHandrail(1));  // 右侧扶手
+
+        stairs.position.set(15, 0, 4);
+        stairs.rotation.y = -Math.PI / 2;
+        scene.add(stairs);
+
+
+        // 创建楼梯连接部分（两侧的扁长方体）
+        const createStairConnector = (side) => {
+            const connectorWidth = 0.2; // 连接部分的宽度
+            const connectorHeight = Math.sqrt(Math.pow(stairCount * stairRise, 2) + Math.pow(stairCount * stairRun, 2)); // 连接部分的长度
+            const connectorDepth = stairDepth; // 连接部分的深度与楼梯深度相同
+
+            const connectorGeometry = new THREE.BoxGeometry(connectorWidth, connectorHeight, connectorDepth);
+            const connector = new THREE.Mesh(connectorGeometry, grayMaterial);
+
+            // 设置连接部分的位置和旋转
+            connector.position.set(
+                side * (stairWidth / 2 + connectorWidth / 2) - 2,
+                (stairCount * stairRise) / 2,
+                -(stairCount * stairRun) / 2
+            );
+            connector.rotation.x = Math.atan2(stairCount * stairRise, stairCount * stairRun) - Math.PI / 2;
+
+            connector.castShadow = true;
+            connector.receiveShadow = true;
+            return connector;
+        };
+
+        // 添加左右两侧的楼梯连接部分
+        stairs.add(createStairConnector(-1)); // 左侧连接部分
+        stairs.add(createStairConnector(1));  // 右侧连接部分
+
+
+        // 创建楼梯支撑柱
+        const createStairSupportPillar = (side, isTop) => {
+            const pillarRadius = 0.05;
+            const pillarHeight = isTop ? stairCount * stairRise : stairCount * stairRise + 2; // 上方支撑柱高度与楼梯齐平，下方支撑柱高度与扶手相同
+
+            const pillarGeometry = new THREE.CylinderGeometry(pillarRadius, pillarRadius, pillarHeight, 32);
+            const pillar = new THREE.Mesh(pillarGeometry, grayMaterial);
+
+            // 设置支撑柱位置
+            pillar.position.set(
+                side * (stairWidth / 2 + pillarRadius) - 2,
+                isTop ? pillarHeight / 50 : pillarHeight / 2 - 1, // 调整上方支撑柱的 y 坐标
+                isTop ? 0 : -(stairCount * stairRun)
+            );
+
+            pillar.castShadow = true;
+            pillar.receiveShadow = true;
+            return pillar;
+        };
+
+        // 添加四个支撑柱
+        stairs.add(createStairSupportPillar(-1, true));  // 左上
+        stairs.add(createStairSupportPillar(1, true));   // 右上
+        stairs.add(createStairSupportPillar(-1, false)); // 左下
+        stairs.add(createStairSupportPillar(1, false));  // 右下
+
+        // 保留原始支撑柱
+        const createOriginalSupportPillar = (x, z) => {
+            const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 5, 32), grayMaterial);
+            pillar.position.set(x, 2.5, z);
+            pillar.castShadow = true;
+            pillar.receiveShadow = true;
+            scene.add(pillar);
+        };
+
+        createOriginalSupportPillar(10, 1);
+        createOriginalSupportPillar(10, -1);
+        createOriginalSupportPillar(20, 1);
+        createOriginalSupportPillar(20, -1);
+
+        // 添加环境光
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        scene.add(ambientLight);
+
+        // 添加直射光（模拟阳光）
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+        sunLight.position.set(50, 50, 30);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 1;
+        sunLight.shadow.camera.far = 200;
+        sunLight.shadow.camera.left = -50;
+        sunLight.shadow.camera.right = 50;
+        sunLight.shadow.camera.top = 50;
+        sunLight.shadow.camera.bottom = -50;
+        scene.add(sunLight);
+
+        // 设置相机位置
+        camera.position.set(30, 20, 30);
+        camera.lookAt(0, 0, 0);
+
+        // 渲染循环
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 响应窗口大小变化
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // 水平旋转桥体结构 -45 度
+        rotatingGroup.rotation.y = Math.PI / 2 + Math.PI / 4;
+
+    </script>
+</body>
+
+</html>
