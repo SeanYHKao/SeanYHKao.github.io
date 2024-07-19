@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+ <meta charset="UTF-8">
+ <title>Control STL Model</title>
+</head>
+
+<body>
+ <input type="file" id="stlUploader" accept=".stl,.obj">
+ <input type="number" id="stlIndex">
+ <input id="stlName">
+ <input id="stlObjType">
+ <div>
+  <label>Position X: <input type="number" id="positionX" value="0"></label>
+  <label>Position Y: <input type="number" id="positionY" value="0"></label>
+  <label>Position Z: <input type="number" id="positionZ" value="0"></label>
+ </div>
+ <div>
+  <label>Center X: <input type="number" id="CenterX" value="0"></label>
+  <label>Center Y: <input type="number" id="CenterY" value="0"></label>
+  <label>Center Z: <input type="number" id="CenterZ" value="0"></label>
+ </div>
+ <div>
+  <label>Scale X: <input type="number" id="scaleX" value="1" step="0.1"></label>
+  <label>Scale Y: <input type="number" id="scaleY" value="1" step="0.1"></label>
+  <label>Scale Z: <input type="number" id="scaleZ" value="1" step="0.1"></label>
+ </div>
+ <div>
+  <label>Rotation X (degrees): <input type="number" id="rotationX" value="0"></label>
+  <label>Rotation Y (degrees): <input type="number" id="rotationY" value="0"></label>
+  <label>Rotation Z (degrees): <input type="number" id="rotationZ" value="0"></label>
+ </div>
+
+ <div>
+  <label>color: <input id="color"></label>
+ </div>
+
+
+ <div>
+  <label>Position X: <input type="number" id="AllpositionX" value="0"></label>
+  <label>Position Y: <input type="number" id="AllpositionY" value="0"></label>
+  <label>Position Z: <input type="number" id="AllpositionZ" value="0"></label>
+ </div>
+
+
+ <div>
+  <label>P1x : <input type="number" id="P1x" value="0"></label>
+  <label>P1y : <input type="number" id="P1y" value="0"></label>
+  <label>P1z : <input type="number" id="P1z" value="0"></label>
+ </div>
+
+
+ <div>
+  <label>A1 : <input type="number" id="A1" value="0"></label>
+  <label>A2 : <input type="number" id="A2" value="0"></label>
+  <label>SA3 : <input type="number" id="SA3" value="0"></label>
+  <label>A4 : <input type="number" id="A4" value="0"></label>
+  <label>SA4 : <input type="number" id="SA4" value="0"></label>
+ </div>
+
+
+ <div>
+  <label>B1 : <input type="number" id="B1" value="0"></label>
+  <label>B2 : <input type="number" id="B2" value="0"></label>
+  <label>SB3 : <input type="number" id="SB3" value="0"></label>
+  <label>B4 : <input type="number" id="B4" value="0"></label>
+  <label>SB4 : <input type="number" id="SB4" value="0"></label>
+ </div>
+
+
+ <div>
+  <label>C1 : <input type="number" id="C1" value="0"></label>
+  <label>C2 : <input type="number" id="C2" value="0"></label>
+  <label>SC3 : <input type="number" id="SC3" value="0"></label>
+  <label>C4 : <input type="number" id="C4" value="0"></label>
+  <label>SC4 : <input type="number" id="SC4" value="0"></label>
+ </div>
+ <textarea id="json">
+
+    </textarea><button id="setjson">setjson</button>
+ <textarea id="camera">
+
+    </textarea><button id="setcamera">setcamera</button>
+
+ <div id="bimModel" style="width: 800px; height: 600px; position: relative;"></div>
+ <script type="module">
+  var container = document.getElementById('bimModel');
+  import * as THREE from './three.js';
+  import { OrbitControls } from './OrbitControls.js';
+
+  import { OBJLoader } from './OBJLoader.js';
+  import { STLLoader } from './STLLoader.js';
+  import { CSS2DRenderer, CSS2DObject } from './CSS2DRenderer.js';
+
+
+  let camera, scene, renderer, labelRenderer, controls, axesHelper, plane;
+  let stlModels = [];
+  let stlName = [];
+  let stlCenter = [];
+  let stlPosition = [];
+  let stlObjType = [];
+
+  function rotatePoint(px, py, pz, cx, cy, cz, rx, ry, rz) {
+    // 将角度从度转换为弧度
+    rx = rx * Math.PI / 180;
+    ry = ry * Math.PI / 180;
+    rz = rz * Math.PI / 180;
+
+    let pointVector = new THREE.Vector3(px, py, pz);
+    let centerVector = new THREE.Vector3(cx, cy, cz);
+
+    let offsetVector = pointVector.clone().sub(centerVector);
+    let quaternion = new THREE.Quaternion();
+    quaternion.setFromEuler(new THREE.Euler(rx, ry, rz));
+    offsetVector.applyQuaternion(quaternion);
+    pointVector = centerVector.clone().add(offsetVector);
+    return pointVector;
+}
+
+
+
+// 创建带有文字的画布
+function createTextTexture(text) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 512;
+    canvas.height = 512;
+    context.fillStyle = 'white';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'black';
+    context.font = '72px Arial';
+    
+            context.fillText(text, 256, 256);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(4, 4); // 调整重复次数，根据需要调整
+    return texture;
+}
+
+ // 手动生成简单的UV坐标
+ function generateUVs(geometry) {
+        const position = geometry.attributes.position;
+        const uvArray = new Float32Array(position.count * 2);
+        const boundingBox = geometry.boundingBox;
+        const size = new THREE.Vector3();
+        boundingBox.getSize(size);
+        
+        for (let i = 0; i < position.count; i++) {
+            const x = position.getX(i);
+            const y = position.getY(i);
+            const z = position.getZ(i);
+
+            // 使用x和z坐标来生成uv（可以根据需要调整）
+            uvArray[i * 2] = (x - boundingBox.min.x) / size.x;
+            uvArray[i * 2 + 1] = (z - boundingBox.min.z) / size.z;
+        }
+        
+        geometry.setAttribute('uv', new THREE.BufferAttribute(uvArray, 2));
+    }
+    // 使用映射UV坐标的方法
+    function mapUV(geometry, boundingBox, stretchFactor) {
+        const uvAttribute = new Float32Array(geometry.attributes.position.count * 2);
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+            const x = geometry.attributes.position.getX(i);
+            const y = geometry.attributes.position.getY(i);
+            const z = geometry.attributes.position.getZ(i);
+
+            const u = (x - boundingBox.min.x) / boundingBox.getSize(new THREE.Vector3()).x * stretchFactor;
+            const v = (y - boundingBox.min.y) / boundingBox.getSize(new THREE.Vector3()).y * stretchFactor;
+            
+            uvAttribute[i * 2] = u;
+            uvAttribute[i * 2 + 1] = v;
+        }
+        geometry.setAttribute('uv', new THREE.BufferAttribute(uvAttribute, 2));
+    }
+
+
+  function init() {
+   // Scene setup
+   scene = new THREE.Scene();
+   // 添加天空背景
+   scene.background = new THREE.Color('skyblue');
+
+   // 添加地面
+   var planeGeometry = new THREE.PlaneGeometry(10000, 10000);
+   var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xaaaaaa });
+    plane = new THREE.Mesh(planeGeometry, planeMaterial);
+   plane.rotation.x = -Math.PI / 2; // 将平面旋转为水平
+   plane.position.y = -1; // 调整地面位置
+   scene.add(plane);
+
+     axesHelper = new THREE.AxesHelper(5);
+   scene.add(axesHelper);
+
+   camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+   camera.position.z = 100;
+   renderer = new THREE.WebGLRenderer();
+   renderer.setSize(container.offsetWidth, container.offsetHeight);
+   container.appendChild(renderer.domElement);
+
+ 
+   
+
+
+
+
+
+
+
+
+        // 设置材质
+        const grayMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+        const blueMaterial = new THREE.MeshPhongMaterial({ color: 0x4444ff, transparent: true, opacity: 0.5 });
+
+        // 创建地面
+        const groundGeometry = new THREE.PlaneGeometry(100, 100);
+        const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x999999 });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.1;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // 创建桥体结构（灰色长方体）
+        const bridgeBody = new THREE.Mesh(new THREE.BoxGeometry(10, 3, 2), grayMaterial);
+        bridgeBody.position.set(0, 1, 0);
+        bridgeBody.castShadow = true;
+        bridgeBody.receiveShadow = true;
+
+        // 创建移动系统（灰色圆柱体）
+        const movingSystem = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 4, 32), grayMaterial);
+        movingSystem.position.set(5, 4, 0);
+        movingSystem.castShadow = true;
+        movingSystem.receiveShadow = true;
+
+        // 创建旋转组，以便桥体结构能够水平旋转
+        const rotatingGroup = new THREE.Group();
+        rotatingGroup.position.set(5, 4, 0); // 设置旋转组的位置为移动系统的位置
+        rotatingGroup.add(bridgeBody); // 将桥体结构添加到旋转组
+
+        const centralSupportPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 8, 32), grayMaterial);
+        centralSupportPillar.position.set(5, 0, 0); // 位置与移动系统相同，但 y 坐标为 0
+        centralSupportPillar.castShadow = true;
+        centralSupportPillar.receiveShadow = true;
+        scene.add(centralSupportPillar);
+
+        // 调整桥体结构位置以保持连接点
+        bridgeBody.position.set(5, 0, 0);
+
+        // 创建新支撑柱
+        const createSupportPillar = (x, z) => {
+            const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 5, 32), grayMaterial);
+            pillar.position.set(x, -2.5, z);
+            pillar.castShadow = true;
+            pillar.receiveShadow = true;
+            rotatingGroup.add(pillar); // 将支撑柱添加到旋转组
+        };
+
+        createSupportPillar(7.5, 1);
+        createSupportPillar(7.5, -1);
+
+        // 将旋转组添加到场景中
+        scene.add(rotatingGroup);
+
+        // 将移动系统添加到场景中
+        scene.add(movingSystem);
+
+        // 创建乘客通道
+        const passengerTunnel = new THREE.Group();
+
+        const topTunnel = new THREE.Mesh(new THREE.BoxGeometry(15, 0.5, 3), grayMaterial);
+        topTunnel.position.y = 2.25;
+        topTunnel.castShadow = true;
+        topTunnel.receiveShadow = true;
+        passengerTunnel.add(topTunnel);
+        const topTunnel1 = new THREE.Mesh(new THREE.BoxGeometry(5, 0.6, 3), grayMaterial);
+        topTunnel1.position.y = 2.35;
+        topTunnel1.position.x = -0;
+        topTunnel1.castShadow = true;
+        topTunnel1.receiveShadow = true;
+        passengerTunnel.add(topTunnel1);
+        const topTunnel2 = new THREE.Mesh(new THREE.BoxGeometry(5, 0.7, 3), grayMaterial);
+        topTunnel2.position.y = 2.45;
+        topTunnel2.position.x = -5;
+        topTunnel2.castShadow = true;
+        topTunnel2.receiveShadow = true;
+        passengerTunnel.add(topTunnel2);
+
+        const sideTunnel1 = new THREE.Mesh(new THREE.BoxGeometry(15, 2, 0.1), blueMaterial);
+        sideTunnel1.position.set(0, 1, 1.5);
+        sideTunnel1.castShadow = true;
+        passengerTunnel.add(sideTunnel1);
+
+        const sideTunnel2 = sideTunnel1.clone();
+        sideTunnel2.position.z = -1.5;
+        passengerTunnel.add(sideTunnel2);
+
+        const bottomTunnel = new THREE.Mesh(new THREE.BoxGeometry(15, 0.5, 3), grayMaterial);
+        bottomTunnel.position.y = -0.25;
+        bottomTunnel.castShadow = true;
+        bottomTunnel.receiveShadow = true;
+        passengerTunnel.add(bottomTunnel);
+        const bottomTunnel1 = new THREE.Mesh(new THREE.BoxGeometry(7, 1, 2), grayMaterial);
+        bottomTunnel1.position.y = -1;
+        bottomTunnel1.position.x = -2;
+        bottomTunnel1.castShadow = true;
+        bottomTunnel1.receiveShadow = true;
+        passengerTunnel.add(bottomTunnel1);
+        const bottomTunnel2 = new THREE.Mesh(new THREE.BoxGeometry(3, 1, 2), grayMaterial);
+        bottomTunnel2.position.y = -1;
+        bottomTunnel2.position.x = 5;
+        bottomTunnel2.castShadow = true;
+        bottomTunnel2.receiveShadow = true;
+        passengerTunnel.add(bottomTunnel2);
+
+
+        passengerTunnel.position.set(12.5, 3, 0);
+        scene.add(passengerTunnel);
+
+
+        // 修改楼梯部分
+        const stairs = new THREE.Group();
+        const stairWidth = 1;
+        const stairHeight = 0.066;
+        const stairDepth = 0.5;
+        const stairCount = 10;
+        const stairRise = 0.3;
+        const stairRun = 0.5;
+
+        for (let i = 0; i < stairCount; i++) {
+            const step = new THREE.Mesh(new THREE.BoxGeometry(stairWidth, stairHeight, stairDepth), grayMaterial);
+            step.position.set(-2, i * stairRise, i * -stairRun);
+            step.castShadow = true;
+            step.receiveShadow = true;
+            stairs.add(step);
+        }
+
+        // 创建楼梯扶手
+        const createHandrail = (side) => {
+            const handrailRadius = 0.05;
+            const handrailHeight = stairCount * stairRise;
+            const handrailLength = stairCount * stairRun;
+
+            const handrailGeometry = new THREE.CylinderGeometry(
+                handrailRadius,
+                handrailRadius,
+                Math.sqrt(handrailHeight * handrailHeight + handrailLength * handrailLength),
+                32
+            );
+            const handrail = new THREE.Mesh(handrailGeometry, grayMaterial);
+
+            // 设置扶手位置和旋转
+            handrail.position.set(side * (stairWidth / 2 + handrailRadius) - 2, handrailHeight / 2 + 1, -handrailLength / 2);
+            handrail.rotation.x = Math.atan2(handrailHeight, handrailLength) - Math.PI / 2;
+
+            handrail.castShadow = true;
+            handrail.receiveShadow = true;
+            return handrail;
+        };
+
+        // 添加左右两侧的扶手
+        stairs.add(createHandrail(-1)); // 左侧扶手
+        stairs.add(createHandrail(1));  // 右侧扶手
+
+        stairs.position.set(15, 0, 4);
+        stairs.rotation.y = -Math.PI / 2;
+        scene.add(stairs);
+
+
+        // 创建楼梯连接部分（两侧的扁长方体）
+        const createStairConnector = (side) => {
+            const connectorWidth = 0.2; // 连接部分的宽度
+            const connectorHeight = Math.sqrt(Math.pow(stairCount * stairRise, 2) + Math.pow(stairCount * stairRun, 2)); // 连接部分的长度
+            const connectorDepth = stairDepth; // 连接部分的深度与楼梯深度相同
+
+            const connectorGeometry = new THREE.BoxGeometry(connectorWidth, connectorHeight, connectorDepth);
+            const connector = new THREE.Mesh(connectorGeometry, grayMaterial);
+
+            // 设置连接部分的位置和旋转
+            connector.position.set(
+                side * (stairWidth / 2 + connectorWidth / 2) - 2,
+                (stairCount * stairRise) / 2,
+                -(stairCount * stairRun) / 2
+            );
+            connector.rotation.x = Math.atan2(stairCount * stairRise, stairCount * stairRun) - Math.PI / 2;
+
+            connector.castShadow = true;
+            connector.receiveShadow = true;
+            return connector;
+        };
+
+        // 添加左右两侧的楼梯连接部分
+        stairs.add(createStairConnector(-1)); // 左侧连接部分
+        stairs.add(createStairConnector(1));  // 右侧连接部分
+
+
+        // 创建楼梯支撑柱
+        const createStairSupportPillar = (side, isTop) => {
+            const pillarRadius = 0.05;
+            const pillarHeight = isTop ? stairCount * stairRise : stairCount * stairRise + 2; // 上方支撑柱高度与楼梯齐平，下方支撑柱高度与扶手相同
+
+            const pillarGeometry = new THREE.CylinderGeometry(pillarRadius, pillarRadius, pillarHeight, 32);
+            const pillar = new THREE.Mesh(pillarGeometry, grayMaterial);
+
+            // 设置支撑柱位置
+            pillar.position.set(
+                side * (stairWidth / 2 + pillarRadius) - 2,
+                isTop ? pillarHeight / 50 : pillarHeight / 2 - 1, // 调整上方支撑柱的 y 坐标
+                isTop ? 0 : -(stairCount * stairRun)
+            );
+
+            pillar.castShadow = true;
+            pillar.receiveShadow = true;
+            return pillar;
+        };
+
+        // 添加四个支撑柱
+        stairs.add(createStairSupportPillar(-1, true));  // 左上
+        stairs.add(createStairSupportPillar(1, true));   // 右上
+        stairs.add(createStairSupportPillar(-1, false)); // 左下
+        stairs.add(createStairSupportPillar(1, false));  // 右下
+
+        // 保留原始支撑柱
+        const createOriginalSupportPillar = (x, z) => {
+            const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 3, 5), grayMaterial);
+            pillar.position.set(x, 4, z);
+            pillar.castShadow = true;
+            pillar.receiveShadow = true;
+            scene.add(pillar);
+        };
+
+        createOriginalSupportPillar(10, 1.4);
+        createOriginalSupportPillar(10, -1.4);
+        createOriginalSupportPillar(15, 1.4);
+        createOriginalSupportPillar(15, -1.4);
+        createOriginalSupportPillar(20, 1.4);
+        createOriginalSupportPillar(20, -1.4);
+        // 創建第一個垂直柱子
+        const pillar1 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 6.5, 3), grayMaterial);
+        pillar1.position.set(19, 3.5, 1.3);
+        pillar1.castShadow = true;
+        pillar1.receiveShadow = true;
+        scene.add(pillar1);
+
+        // 創建第二個垂直柱子
+        const pillar2 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 6.5, 3), grayMaterial);
+        pillar2.position.set(19, 3.5, -1.3);
+        pillar2.castShadow = true;
+        pillar2.receiveShadow = true;
+        scene.add(pillar2);
+
+        // 創建水平柱子
+        const horizontalPillar = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 2.6), grayMaterial);
+        horizontalPillar.position.set(19, 0.5, 0); // 設置水平柱子的中心位置在兩個垂直柱子的底部之間
+        horizontalPillar.castShadow = true;
+        horizontalPillar.receiveShadow = true;
+        scene.add(horizontalPillar);
+
+        // 創建第一個輪子
+        const wheel1 = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.2, 12), grayMaterial);
+        wheel1.position.set(19, 0.3, 1.3); // 設置輪子的位置
+        wheel1.rotation.x = Math.PI / 2; // 旋轉輪子使其變成扁的
+        wheel1.castShadow = true;
+        wheel1.receiveShadow = true;
+        scene.add(wheel1);
+
+        // 創建第二個輪子
+        const wheel2 = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.2, 12), grayMaterial);
+        wheel2.position.set(19, 0.3, -1.3); // 設置輪子的位置
+        wheel2.rotation.x = Math.PI / 2; // 旋轉輪子使其變成扁的
+        wheel2.castShadow = true;
+        wheel2.receiveShadow = true;
+        scene.add(wheel2);
+
+        // 水平旋转桥体结构 -45 度
+        rotatingGroup.rotation.y = Math.PI / 2 + Math.PI / 4;
+
+
+
+
+
+
+
+
+
+   labelRenderer = new CSS2DRenderer();
+   labelRenderer.setSize(container.offsetWidth, container.offsetHeight);
+   labelRenderer.domElement.style.position = "absolute";
+   labelRenderer.domElement.style.top = "0px";
+   container.appendChild(labelRenderer.domElement);
+   // Lighting
+   const light = new THREE.DirectionalLight(0xffffff, 1);
+   light.position.set(1, 1, 1).normalize();
+   scene.add(light);
+
+   // 实例化OrbitControls
+   controls = new OrbitControls(camera, labelRenderer.domElement);
+   controls.enableDamping = true; // 可选，为了更平滑的交互效果
+   controls.dampingFactor = 0.25;
+   controls.screenSpacePanning = false;
+   controls.addEventListener('change', () => {
+    document.getElementById('camera').value = JSON.stringify({
+     position: camera.position,
+     rotation: camera.rotation,
+     zoom: camera.zoom,
+     quaternion: camera.quaternion,
+     fov: camera.fov,
+     aspect: camera.aspect,
+     near: camera.near,
+     far: camera.far,
+target:controls.target
+    })
+   });
+
+   document.getElementById('setcamera').addEventListener('click', function (event) {
+    var cameraSettings = JSON.parse(document.getElementById('camera').value);
+
+    // 假设camera是你已经创建并想要更新的Three.js PerspectiveCamera实例
+    // 更新相机位置
+    camera.position.set(cameraSettings.position.x, cameraSettings.position.y, cameraSettings.position.z);
+
+    // 更新相机旋转
+    camera.rotation.set(cameraSettings.rotation._x, cameraSettings.rotation._y, cameraSettings.rotation._z);
+
+    // 更新相机其他属性
+    camera.fov = cameraSettings.fov;
+    camera.aspect = cameraSettings.aspect;
+    camera.near = cameraSettings.near;
+    camera.far = cameraSettings.far;
+
+    // 在更新相机属性后，调用updateProjectionMatrix()以确保变更生效
+    camera.updateProjectionMatrix();
+   });
+   // Handle STL upload
+   document.getElementById('setjson').addEventListener('click', function (event) {
+    var tmp = JSON.parse(document.getElementById('json').value);
+    for (var i = 0; i < tmp.length; i++) {
+     (function (i) {
+      if (tmp[i].name.indexOf('.stl') > -1) {
+       const loader = new STLLoader();
+       loader.load(tmp[i].name, function (geometry) {
+   const texture = createTextTexture('Your Text Here');
+    // 设置纹理重复和包裹
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(10, 10);  // 调整重复次数
+
+    geometry.computeBoundingBox();
+    geometry.computeVertexNormals();
+
+    // 生成简单的UV坐标（仅供示例，可能需要根据实际模型调整）
+    const uvAttribute = new Float32Array(geometry.attributes.position.count * 2);
+    for (let i = 0; i < geometry.attributes.position.count; i++) {
+        uvAttribute[i * 2] = (geometry.attributes.position.getX(i) - geometry.boundingBox.min.x) / geometry.boundingBox.getSize(new THREE.Vector3()).x;
+        uvAttribute[i * 2 + 1] = (geometry.attributes.position.getY(i) - geometry.boundingBox.min.y) / geometry.boundingBox.getSize(new THREE.Vector3()).y;
+    }
+    geometry.setAttribute('uv', new THREE.BufferAttribute(uvAttribute, 2));
+
+
+        var material = new THREE.MeshPhongMaterial({  map: texture});
+        var stlModel = new THREE.Mesh(geometry, material);
+        scene.add(stlModel);
+
+        stlModels.push(stlModel);
+        stlName.push(tmp[i].name);
+        stlPosition.push(tmp[i].position);
+        stlObjType.push(tmp[i].obj_type);
+        if (tmp[i].center) {
+         stlCenter.push(tmp[i].center);
+         stlModel.rotation.set(
+          tmp[i].rotation._x,
+          tmp[i].rotation._y,
+          tmp[i].rotation._z
+         );
+         var newPos = rotatePoint(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z, tmp[i].center.x, tmp[i].center.y, tmp[i].center.z, tmp[i].rotation._x * 180 / Math.PI, tmp[i].rotation._y * 180 / Math.PI, tmp[i].rotation._z * 180 / Math.PI)
+
+         // 在这个闭包内，i和tmp[i]是被正确捕获的
+         stlModel.position.set(newPos.x, newPos.y, newPos.z);
+        }
+        else {
+
+         stlCenter.push(null);
+         stlModel.rotation.set(
+          tmp[i].rotation._x,
+          tmp[i].rotation._y,
+          tmp[i].rotation._z
+         );
+         // 在这个闭包内，i和tmp[i]是被正确捕获的
+         stlModel.position.set(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z);
+        }
+
+        stlModel.scale.set(tmp[i].scale.x, tmp[i].scale.y, tmp[i].scale.z);
+
+       });
+      }
+      else if (tmp[i].name.indexOf('light') > -1) {
+       const pointLight = new THREE.PointLight(tmp[i].color, 1, 50); // 紅色光源
+       pointLight.position.set(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z); // 設定光源位置
+       scene.add(pointLight);
+       stlModels.push(pointLight);
+       stlName.push(tmp[i].name);
+       stlPosition.push(tmp[i].position);
+       stlObjType.push(tmp[i].obj_type);
+
+       if (tmp[i].center) {
+
+        stlCenter.push(tmp[i].center);
+       }
+       else {
+
+        stlCenter.push(null);
+       }
+
+      }
+      else if (tmp[i].name.indexOf('sphere') > -1) {
+       const sphereSize = 0.1;
+       const bulbGeometry = new THREE.SphereGeometry(sphereSize, 16, 8);
+       const bulbMaterial = new THREE.MeshBasicMaterial({ color: tmp[i].color }); // 與光源顏色相同
+       const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
+       bulb.position.set(tmp[i].position.x, tmp[i].position.y, tmp[i].position.z);  // 設置與光源相同的位置
+       scene.add(bulb);
+       stlModels.push(bulb);
+       stlName.push(tmp[i].name);
+       stlPosition.push(tmp[i].position);
+       stlObjType.push(tmp[i].obj_type);
+       if (tmp[i].center) {
+
+        stlCenter.push(tmp[i].center);
+       }
+       else {
+
+        stlCenter.push(null);
+       }
+
+      }
+      else if (tmp[i].name.indexOf('label') > -1) {
+       // 添加一個 3D 物體
+       const geometry = new THREE.BoxGeometry();
+       const material = new THREE.MeshBasicMaterial({ color: 0x003300 });
+       const cube = new THREE.Mesh(geometry, material);
+       scene.add(cube);
+       const earthDiv = document.createElement("div");
+       earthDiv.className = "label";
+       earthDiv.textContent = "Earth";
+       earthDiv.style.marginTop = "-1em";
+       const earthLabel = new CSS2DObject(earthDiv);
+       earthLabel.position.set(0, 1, 0);
+       cube.add(earthLabel);
+      }
+
+     })(i);
+    }
+   });
+
+   // Handle STL upload
+   document.getElementById('stlUploader').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (!file) return; // 如果没有文件被选中，则退出函数
+
+    // 获取文件扩展名
+    const extension = file.name.split('.').pop().toLowerCase();
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+     let loader;
+
+     // 根据文件扩展名选择加载器
+     if (extension === 'stl') {
+      loader = new STLLoader();
+     } else if (extension === 'obj') {
+      loader = new OBJLoader();
+     } else {
+      // 如果不是支持的文件类型，则退出
+      console.error('Unsupported file type.');
+      return;
+     }
+     const texture = createTextTexture('Your Text Here');
+    // 设置纹理重复和包裹
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(10, 10);  // 调整重复次数
+
+     // 解析文件内容并创建模型
+     const geometry = loader.parse(e.target.result);
+    geometry.computeBoundingBox();
+    geometry.computeVertexNormals();
+
+     generateUVs(geometry);
+
+
+     let material = new THREE.MeshPhongMaterial({ color: 0x555555, specular: 0x111111, shininess: 200 ,map: texture});
+     let mesh;
+
+     if (extension === 'stl') {
+      mesh = new THREE.Mesh(geometry, material);
+     } else if (extension === 'obj') {
+      // OBJLoader返回一个Group对象，而不是Geometry
+      // 因此，我们对返回的group应用材质
+      material = new THREE.MeshPhongMaterial({ color: 0x555555, specular: 0x111111, shininess: 200 });
+      geometry.traverse(function (child) {
+       if (child instanceof THREE.Mesh) {
+        child.material = material;
+       }
+      });
+      mesh = geometry;
+     }
+
+     // 添加到场景和数组中
+     scene.add(mesh);
+     stlModels.push(mesh); // 假设你有一个数组来存储加载的模型
+     stlName.push(file.name); // 存储文件名
+     document.getElementById('stlUploader').value = ''; // 重置文件输入
+    };
+
+    // 根据文件类型以正确的格式读取文件
+    if (extension === 'stl') {
+     reader.readAsArrayBuffer(file);
+    } else if (extension === 'obj') {
+     reader.readAsText(file);
+    }
+   });
+
+   // Input listeners for transformations
+   document.getElementById('stlIndex').addEventListener('input', queryModelTransform);
+   document.getElementById('stlObjType').addEventListener('input', updateModelTransform);
+   document.getElementById('positionX').addEventListener('input', updateModelTransform);
+   document.getElementById('positionY').addEventListener('input', updateModelTransform);
+   document.getElementById('positionZ').addEventListener('input', updateModelTransform);
+   document.getElementById('CenterX').addEventListener('input', updateModelTransform);
+   document.getElementById('CenterY').addEventListener('input', updateModelTransform);
+   document.getElementById('CenterZ').addEventListener('input', updateModelTransform);
+   document.getElementById('AllpositionX').addEventListener('input', updateModelTransform);
+   document.getElementById('AllpositionY').addEventListener('input', updateModelTransform);
+   document.getElementById('AllpositionZ').addEventListener('input', updateModelTransform);
+   document.getElementById('scaleX').addEventListener('input', updateModelTransform);
+   document.getElementById('scaleY').addEventListener('input', updateModelTransform);
+   document.getElementById('scaleZ').addEventListener('input', updateModelTransform);
+   document.getElementById('rotationX').addEventListener('input', updateModelTransform);
+   document.getElementById('rotationY').addEventListener('input', updateModelTransform);
+   document.getElementById('rotationZ').addEventListener('input', updateModelTransform);
+   document.getElementById('color').addEventListener('input', updateModelTransform);
+
+
+   document.getElementById('A1').addEventListener('input', rotateBridge);
+   document.getElementById('A2').addEventListener('input', rotateBridge);
+   document.getElementById('SA3').addEventListener('input', rotateBridge);
+   document.getElementById('A4').addEventListener('input', rotateBridge);
+   document.getElementById('SA4').addEventListener('input', rotateBridge);
+   document.getElementById('B1').addEventListener('input', rotateBridge);
+   document.getElementById('B2').addEventListener('input', rotateBridge);
+   document.getElementById('SB3').addEventListener('input', rotateBridge);
+   document.getElementById('B4').addEventListener('input', rotateBridge);
+   document.getElementById('SB4').addEventListener('input', rotateBridge);
+   document.getElementById('C1').addEventListener('input', rotateBridge);
+   document.getElementById('C2').addEventListener('input', rotateBridge);
+   document.getElementById('SC3').addEventListener('input', rotateBridge);
+   document.getElementById('C4').addEventListener('input', rotateBridge);
+   document.getElementById('SC4').addEventListener('input', rotateBridge);
+
+   animate();
+  }
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  function onMouseMove(event) {
+   // 计算鼠标在屏幕上的位置
+   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+   // 通过 Raycaster 确定鼠标在三维空间中的位置
+   raycaster.setFromCamera(mouse, camera);
+   
+    // 计算射线与平面的交点
+    const intersects = raycaster.intersectObject(plane);
+
+    if (intersects.length > 0) {
+        const intersect = intersects[0];
+        console.log("交点位置：", intersect.point);
+        // 如果需要，可以在交点位置放置一个标记
+        axesHelper.position.copy(intersect.point);
+    }
+  }
+
+  window.addEventListener('mousemove', onMouseMove, false);
+
+  function rotateBridge() {
+
+var tmp = JSON.parse(document.getElementById('json').value);
+const A1 = parseFloat(document.getElementById('A1').value);
+const A2 = parseFloat(document.getElementById('A2').value);
+const SA3 = parseFloat(document.getElementById('SA3').value);
+const A4 = parseFloat(document.getElementById('A4').value);
+const SA4 = parseFloat(document.getElementById('SA4').value);
+
+const B1 = parseFloat(document.getElementById('B1').value);
+const B2 = parseFloat(document.getElementById('B2').value);
+const SB3 = parseFloat(document.getElementById('SB3').value);
+const B4 = parseFloat(document.getElementById('B4').value);
+const SB4 = parseFloat(document.getElementById('SB4').value);
+
+const C1 = parseFloat(document.getElementById('C1').value);
+const C2 = parseFloat(document.getElementById('C2').value);
+const SC3 = parseFloat(document.getElementById('SC3').value);
+const C4 = parseFloat(document.getElementById('C4').value);
+const SC4 = parseFloat(document.getElementById('SC4').value);
+
+
+var idxA1 = tmp.findIndex(x => x.obj_type == 'A1');
+var idxA2 = tmp.findIndex(x => x.obj_type == 'A2');
+var idxA3 = tmp.findIndex(x => x.obj_type == 'A3');
+var idxA4 = tmp.findIndex(x => x.obj_type == 'A4');
+
+var idxB1 = tmp.findIndex(x => x.obj_type == 'B1');
+var idxB2 = tmp.findIndex(x => x.obj_type == 'B2');
+var idxB3 = tmp.findIndex(x => x.obj_type == 'B3');
+var idxB4 = tmp.findIndex(x => x.obj_type == 'B4');
+
+var idxC1 = tmp.findIndex(x => x.obj_type == 'C1');
+var idxC2 = tmp.findIndex(x => x.obj_type == 'C2');
+var idxC3 = tmp.findIndex(x => x.obj_type == 'C3');
+var idxC4 = tmp.findIndex(x => x.obj_type == 'C4');
+
+var centerA1 =  tmp[idxA1].center;
+var centerA2 =  tmp[idxA2].center;
+var centerA3 = tmp[idxA3].center;
+var centerA4 = tmp[idxA4].center;
+var rotateA1 = tmp[idxA1].rotation;
+var rotateA2 = tmp[idxA2].rotation;
+var rotateA3 = tmp[idxA3].rotation;
+var rotateA4 = tmp[idxA4].rotation;
+var posA1 = tmp[idxA1].position;
+var posA2 = tmp[idxA2].position;
+var posA3 = tmp[idxA3].position;
+var posA4 = tmp[idxA4].position;
+
+
+var newPosA2 = rotatePoint(posA2.x, posA2.y, posA2.z, centerA2.x, centerA2.y, centerA2.z, 0, A2, 0);
+stlModels[idxA2].rotation.set(0, A2 / 180 * Math.PI, 0);
+stlModels[idxA2].position.set(newPosA2.x, newPosA2.y, newPosA2.z);
+
+var newPosA3 = rotatePoint(posA3.x, posA3.y, posA3.z + SA3, centerA2.x, centerA2.y, centerA2.z, 0, A2, 0);
+stlModels[idxA3].rotation.set(0, A2 / 180 * Math.PI, 0);
+stlModels[idxA3].position.set(newPosA3.x, newPosA3.y, newPosA3.z);
+
+var newPosA4 = rotatePoint(posA4.x, posA4.y, posA4.z + SA3, centerA2.x, centerA2.y, centerA2.z, 0, A2, 0);
+stlModels[idxA4].rotation.set(0, (A2 + A4) / 180 * Math.PI, 0);
+ 
+stlModels[idxA4].position.set(newPosA4.x, newPosA4.y, newPosA4.z);
+
+var newCenterA4 = rotatePoint(centerA4.x, centerA4.y, centerA4.z + SA3, centerA2.x, centerA2.y, centerA2.z, 0, A2, 0);
+
+newPosA4 = rotatePoint(newPosA4.x, newPosA4.y, newPosA4.z, newCenterA4.x, newCenterA4.y, newCenterA4.z, rotateA4._x * 180 / Math.PI,  A4, rotateA4._z * 180 / Math.PI);
+
+stlModels[idxA4].position.set(newPosA4.x, newPosA4.y, newPosA4.z);
+stlModels[idxA4].scale.set(0.35, 0.35, SA4);
+ }
+
+  function rotateBridge1() {
+
+   var tmp = JSON.parse(document.getElementById('json').value);
+   const A1 = parseFloat(document.getElementById('A1').value);
+   const A2 = parseFloat(document.getElementById('A2').value);
+   const A3 = parseFloat(document.getElementById('A3').value);
+
+   const B1 = parseFloat(document.getElementById('B1').value);
+   const B2 = parseFloat(document.getElementById('B2').value);
+   const B3 = parseFloat(document.getElementById('B3').value);
+
+   var idxA1 = tmp.findIndex(x => x.obj_type == 'A1');
+   var idxA2 = tmp.findIndex(x => x.obj_type == 'A2');
+   var idxA3 = tmp.findIndex(x => x.obj_type == 'A3');
+
+   var idxB1 = tmp.findIndex(x => x.obj_type == 'B1');
+   var idxB2 = tmp.findIndex(x => x.obj_type == 'B2');
+   var idxB3 = tmp.findIndex(x => x.obj_type == 'B3');
+
+
+
+   var centerA1 =  tmp[idxA1].center;
+   var centerA2 =  tmp[idxA2].center;
+   var centerA3 = tmp[idxA3].center;
+   var rotateA1 = tmp[idxA1].rotation;
+   var rotateA2 = tmp[idxA2].rotation;
+   var rotateA3 = tmp[idxA3].rotation;
+   var posA1 = tmp[idxA1].position;
+   var posA2 = tmp[idxA2].position;
+   var posA3 = tmp[idxA3].position;
+
+   // A1角度 pos依據center旋轉 設rotate後要重算positioin
+   stlModels[idxA1].rotation.set(rotateA1._x, A1 / 180 * Math.PI, rotateA1._z);
+   var newPosA1 = rotatePoint(posA1.x, posA1.y, posA1.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI);
+   stlModels[idxA1].position.set(newPosA1.x, newPosA1.y, newPosA1.z);
+   
+
+   var newPosA2 =  rotatePoint(posA2.x, posA2.y, posA2.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI);
+   var newCenterA2 =  rotatePoint(centerA2.x, centerA2.y, centerA2.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI);
+   
+   var newPosA3 =  rotatePoint(posA3.x, posA3.y, posA3.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI);
+   var newCenterA3 =  rotatePoint(centerA3.x, centerA3.y, centerA3.z, centerA1.x, centerA1.y, centerA1.z, rotateA1._x * 180 / Math.PI, A1, rotateA1._z * 180 / Math.PI);
+   
+
+   stlModels[idxA2].position.set(newPosA2.x, newPosA2.y, newPosA2.z);
+   stlModels[idxA2].rotation.set(rotateA2._x, (A1 + A2) / 180 * Math.PI, rotateA2._z);
+   newPosA2 =  rotatePoint(newPosA2.x, newPosA2.y, newPosA2.z, newCenterA2.x, newCenterA2.y, newCenterA2.z, rotateA1._x * 180 / Math.PI, A2, rotateA1._z * 180 / Math.PI);
+  
+   stlModels[idxA2].position.set(newPosA2.x, newPosA2.y, newPosA2.z);
+
+   
+   stlModels[idxA3].position.set(newPosA3.x, newPosA3.y, newPosA3.z);
+   stlModels[idxA3].rotation.set(rotateA3._x, (A1 + A2) / 180 * Math.PI, rotateA3._z);
+   newPosA3 =  rotatePoint(newPosA3.x, newPosA3.y, newPosA3.z, newCenterA2.x, newCenterA2.y, newCenterA2.z, rotateA2._x * 180 / Math.PI, A2, rotateA2._z * 180 / Math.PI);
+   newCenterA3 =  rotatePoint(newCenterA3.x, newCenterA3.y, newCenterA3.z, newCenterA2.x, newCenterA2.y, newCenterA2.z, rotateA2._x * 180 / Math.PI, A2, rotateA2._z * 180 / Math.PI);
+   
+   newPosA3 =  rotatePoint(newPosA3.x, newPosA3.y, newPosA3.z, newCenterA3.x, newCenterA3.y, newCenterA3.z, rotateA3._x * 180 / Math.PI, A3, rotateA3._z * 180 / Math.PI);
+  
+   stlModels[idxA3].position.set(newPosA3.x, newPosA3.y, newPosA3.z);
+   stlModels[idxA3].rotation.set(rotateA3._x, (A1 + A2 + A3) / 180 * Math.PI, rotateA3._z);
+
+
+
+   
+
+   var centerB1 =  tmp[idxB1].center;
+   var centerB2 =  tmp[idxB2].center;
+   var centerB3 = tmp[idxB3].center;
+   var rotateB1 = tmp[idxB1].rotation;
+   var rotateB2 = tmp[idxB2].rotation;
+   var rotateB3 = tmp[idxB3].rotation;
+   var posB1 = tmp[idxB1].position;
+   var posB2 = tmp[idxB2].position;
+   var posB3 = tmp[idxB3].position;
+
+   // B1角度 pos依據center旋轉 設rotate後要重算positioin
+   stlModels[idxB1].rotation.set(rotateB1._x, B1 / 180 * Math.PI, rotateB1._z);
+   var newPosB1 = rotatePoint(posB1.x, posB1.y, posB1.z, centerB1.x, centerB1.y, centerB1.z, rotateB1._x * 180 / Math.PI, B1, rotateB1._z * 180 / Math.PI);
+   stlModels[idxB1].position.set(newPosB1.x, newPosB1.y, newPosB1.z);
+   
+
+   var newPosB2 =  rotatePoint(posB2.x, posB2.y, posB2.z, centerB1.x, centerB1.y, centerB1.z, rotateB1._x * 180 / Math.PI, B1, rotateB1._z * 180 / Math.PI);
+   var newCenterB2 =  rotatePoint(centerB2.x, centerB2.y, centerB2.z, centerB1.x, centerB1.y, centerB1.z, rotateB1._x * 180 / Math.PI, B1, rotateB1._z * 180 / Math.PI);
+   
+   var newPosB3 =  rotatePoint(posB3.x, posB3.y, posB3.z, centerB1.x, centerB1.y, centerB1.z, rotateB1._x * 180 / Math.PI, B1, rotateB1._z * 180 / Math.PI);
+   var newCenterB3 =  rotatePoint(centerB3.x, centerB3.y, centerB3.z, centerB1.x, centerB1.y, centerB1.z, rotateB1._x * 180 / Math.PI, B1, rotateB1._z * 180 / Math.PI);
+   
+
+   stlModels[idxB2].position.set(newPosB2.x, newPosB2.y, newPosB2.z);
+   stlModels[idxB2].rotation.set(rotateB2._x, (B1 + B2) / 180 * Math.PI, rotateB2._z);
+   newPosB2 =  rotatePoint(newPosB2.x, newPosB2.y, newPosB2.z, newCenterB2.x, newCenterB2.y, newCenterB2.z, rotateB1._x * 180 / Math.PI, B2, rotateB1._z * 180 / Math.PI);
+  
+   stlModels[idxB2].position.set(newPosB2.x, newPosB2.y, newPosB2.z);
+
+   
+   stlModels[idxB3].position.set(newPosB3.x, newPosB3.y, newPosB3.z);
+   stlModels[idxB3].rotation.set(rotateB3._x, (B1 + B2) / 180 * Math.PI, rotateB3._z);
+   newPosB3 =  rotatePoint(newPosB3.x, newPosB3.y, newPosB3.z, newCenterB2.x, newCenterB2.y, newCenterB2.z, rotateB2._x * 180 / Math.PI, B2, rotateB2._z * 180 / Math.PI);
+   newCenterB3 =  rotatePoint(newCenterB3.x, newCenterB3.y, newCenterB3.z, newCenterB2.x, newCenterB2.y, newCenterB2.z, rotateB2._x * 180 / Math.PI, B2, rotateB2._z * 180 / Math.PI);
+   
+   newPosB3 =  rotatePoint(newPosB3.x, newPosB3.y, newPosB3.z, newCenterB3.x, newCenterB3.y, newCenterB3.z, rotateB3._x * 180 / Math.PI, B3, rotateB3._z * 180 / Math.PI);
+  
+   stlModels[idxB3].position.set(newPosB3.x, newPosB3.y, newPosB3.z);
+   stlModels[idxB3].rotation.set(rotateB3._x, (B1 + B2 + B3) / 180 * Math.PI, rotateB3._z);
+
+
+
+    }
+
+
+
+  function queryModelTransform() {
+   const sIndex = parseInt(document.getElementById('stlIndex').value);
+   document.getElementById('stlName').value = stlName[sIndex];
+   document.getElementById('stlObjType').value = stlObjType[sIndex];
+   document.getElementById('positionX').value = stlPosition[sIndex].x;
+   document.getElementById('positionY').value = stlPosition[sIndex].y;
+   document.getElementById('positionZ').value = stlPosition[sIndex].z;
+   document.getElementById('scaleX').value = stlModels[sIndex].scale.x;
+   document.getElementById('scaleY').value = stlModels[sIndex].scale.y;
+   document.getElementById('scaleZ').value = stlModels[sIndex].scale.z;
+   document.getElementById('rotationX').value = stlModels[sIndex].rotation._x * 180 / Math.PI;
+   document.getElementById('rotationY').value = stlModels[sIndex].rotation._y * 180 / Math.PI;
+   document.getElementById('rotationZ').value = stlModels[sIndex].rotation._z * 180 / Math.PI;
+   if (stlModels[sIndex].type == "PointLight")
+    document.getElementById('color').value = '#' + stlModels[sIndex].color.getHexString();
+   else
+    document.getElementById('color').value = '#' + stlModels[sIndex].material.color.getHexString();
+   if (stlCenter[sIndex]) {
+
+    document.getElementById('CenterX').value = stlCenter[sIndex].x;
+    document.getElementById('CenterY').value = stlCenter[sIndex].y;
+    document.getElementById('CenterZ').value = stlCenter[sIndex].z;
+   }
+   else {
+    document.getElementById('CenterX').value = "";
+    document.getElementById('CenterY').value = "";
+    document.getElementById('CenterZ').value = "";
+
+   }
+
+   var tmp = [];
+   for (var i = 0; i < stlModels.length; i++) {
+
+    tmp.push({
+     index: i,
+     name: stlName[i],
+     obj_type: stlObjType[i],
+     position: stlPosition[i],
+     scale: stlModels[i].scale,
+     rotation: stlModels[i].rotation,
+     color: (stlModels[i].type == "PointLight") ? '#' + stlModels[i].color.getHexString() : '#' + stlModels[i].material.color.getHexString(),
+     center: stlCenter[i]
+    })
+   }
+   document.getElementById('json').value = JSON.stringify(tmp);
+  }
+
+  function updateModelTransform() {
+
+   const sIndex = parseInt(document.getElementById('stlIndex').value);
+   if (sIndex >= 0) {
+    const posX = parseFloat(document.getElementById('positionX').value);
+    const posY = parseFloat(document.getElementById('positionY').value);
+    const posZ = parseFloat(document.getElementById('positionZ').value);
+    stlPosition[sIndex] = { x: posX, y: posY, z: posZ };
+
+    const scaleX = parseFloat(document.getElementById('scaleX').value);
+    const scaleY = parseFloat(document.getElementById('scaleY').value);
+    const scaleZ = parseFloat(document.getElementById('scaleZ').value);
+    stlModels[sIndex].scale.set(scaleX, scaleY, scaleZ);
+
+    const rotX = parseFloat(document.getElementById('rotationX').value) * Math.PI / 180;
+    const rotY = parseFloat(document.getElementById('rotationY').value) * Math.PI / 180;
+    const rotZ = parseFloat(document.getElementById('rotationZ').value) * Math.PI / 180;
+
+
+    if (document.getElementById('CenterX').value != '' && document.getElementById('CenterY').value != '' && document.getElementById('CenterZ').value != '') {
+
+     const centerX = parseFloat(document.getElementById('CenterX').value);
+     const centerY = parseFloat(document.getElementById('CenterY').value);
+     const centerZ = parseFloat(document.getElementById('CenterZ').value);
+     stlCenter[sIndex] = { x: centerX, y: centerY, z: centerZ };
+
+     stlModels[sIndex].rotation.set(rotX, rotY, rotZ);
+     const rotX1 = parseFloat(document.getElementById('rotationX').value);
+     const rotY1 = parseFloat(document.getElementById('rotationY').value);
+     const rotZ1 = parseFloat(document.getElementById('rotationZ').value);
+
+     var newPos = rotatePoint(posX, posY, posZ, centerX, centerY, centerZ, rotX1, rotY1, rotZ1)
+
+     // 在这个闭包内，i和tmp[i]是被正确捕获的
+     stlModels[sIndex].position.set(newPos.x, newPos.y, newPos.z);
+    }
+    else {
+
+     stlModels[sIndex].rotation.set(rotX, rotY, rotZ);
+     stlModels[sIndex].position.set(posX, posY, posZ);
+    }
+
+    stlObjType[sIndex] = document.getElementById('stlObjType').value
+
+    if (stlModels[sIndex].type == "PointLight")
+     stlModels[sIndex].color.set(document.getElementById('color').value); // 将颜色改为红色
+    else
+     stlModels[sIndex].material.color.set(document.getElementById('color').value); // 将颜色改为红色
+   }
+   for (var i = 0; i < stlModels.length; i++) {
+
+    var AllposX = parseFloat(document.getElementById('AllpositionX').value);
+    var AllposY = parseFloat(document.getElementById('AllpositionY').value);
+    var AllposZ = parseFloat(document.getElementById('AllpositionZ').value);
+    AllposX += stlModels[i].position.x;
+    AllposY += stlModels[i].position.y;
+    AllposZ += stlModels[i].position.z;
+    stlModels[i].position.set(AllposX, AllposY, AllposZ);
+   }
+
+   var tmp = [];
+   for (var i = 0; i < stlModels.length; i++) {
+
+    tmp.push({
+     index: i,
+     name: stlName[i],
+     obj_type: stlObjType[i],
+     position: stlPosition[i],
+     scale: stlModels[i].scale,
+     rotation: stlModels[i].rotation,
+     color: (stlModels[i].type == "PointLight") ? '#' + stlModels[i].color.getHexString() : '#' + stlModels[i].material.color.getHexString(),
+     center: stlCenter[i]
+    })
+   }
+   document.getElementById('json').value = JSON.stringify(tmp);
+  }
+
+  function animate() {
+   requestAnimationFrame(animate);
+   controls.update(); // 只有当 enableDamping 或 autoRotate 被设置时才需要
+   renderer.render(scene, camera);
+   labelRenderer.render(scene, camera);
+  }
+
+  init();
+
+ </script> <!-- Your JavaScript code will go here -->
+</body>
+
+</html>
