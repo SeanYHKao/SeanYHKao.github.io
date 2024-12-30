@@ -1,0 +1,83 @@
+﻿  public static void Main(string[] args)
+    {
+        // 初始化定時器，每 5 分鐘呼叫一次 eland_UploadData 方法
+        eland_timer = new Timer(eland_UploadData, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+
+        // 防止主程式退出
+        Console.WriteLine("按任意鍵結束...");
+        Console.ReadKey();
+    }
+
+    // 上傳資料的方法
+    private static void eland_UploadData(object eland_state)
+    {
+      // 準備 JSON 資料，包含所需的結構
+           // JSON 字串與 curl 格式一致
+        string eland_jsonString = @"
+        {
+            ""ID"": ""Parking"",
+            ""PW"": ""Yilan"",
+            ""UpdateTime"": ""2024-11-02T12:48:31+08:00"",
+            ""UpdateInterval"": ""60"",
+            ""AuthorityCode"": ""ILA"",
+            ""ParkingAvailabilities"": [
+                {
+                    ""CarParkID"": ""20067"",
+                    ""CarParkName"": {
+                        ""Zh_tw"": ""大武停車場""
+                    },
+                    ""TotalSpaces"": ""23"",
+                    ""AvailableSpaces"": ""21"",
+                    ""Availabilities"": [
+                        {
+                            ""SpaceType"": ""1"",
+                            ""NumberOfSpaces"": ""23"",
+                            ""AvailableSpaces"": ""21""
+                        }
+                    ],
+                    ""AreaAvailabilities"": [],
+                    ""ServiceStatus"": ""1"",
+                    ""FullStatus"": ""0"",
+                    ""ChargeStatus"": ""1"",
+                    ""DataCollectTime"": ""2022-03-03T14:49:13+08:00""
+                }
+            ]
+        }";
+
+
+        // 使用 WebClient 發送請求
+        using (var eland_client = new WebClient())
+        {
+            try
+            {
+                 // 設置請求的標頭，宣告為 JSON 格式
+                eland_client.Headers[HttpRequestHeader.ContentType] = "application/json";
+  eland_client.Encoding = Encoding.UTF8; // 確保數據以 UTF-8 編碼發送
+                // 發送 POST 請求到指定的 API URL
+                var eland_response = eland_client.UploadString("https://tp.e-land.gov.tw/DataAPI/api/Parking", "POST", eland_jsonString);
+
+
+                // 回應成功，輸出回應內容
+                Console.WriteLine("上傳成功，回應內容：" + eland_response);
+            }
+            catch (WebException eland_ex)
+            {
+                // 捕獲並處理例外情況，取得錯誤的回應
+                if (eland_ex.Response != null)
+                {
+                    using (var eland_responseStream = eland_ex.Response.GetResponseStream())
+                    {
+                        using (var eland_reader = new System.IO.StreamReader(eland_responseStream, Encoding.UTF8))
+                        {
+                            string eland_errorResponse = eland_reader.ReadToEnd();
+                            Console.WriteLine("上傳失敗，錯誤回應內容：" + eland_errorResponse);
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("上傳失敗，錯誤訊息：" + eland_ex.Message);
+                }
+            }
+        }
+    }

@@ -151,6 +151,68 @@
         passengerTunnel.add(bottomTunnel2);
 
 
+        const boorTunnel1 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3, 1), grayMaterial);
+        boorTunnel1.position.y = 1;
+        boorTunnel1.position.x = 7.5;
+        boorTunnel1.position.z = -1.3;
+        boorTunnel1.castShadow = true;
+        boorTunnel1.receiveShadow = true;
+        passengerTunnel.add(boorTunnel1);
+
+
+
+        const boorTunnel2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3, 1), grayMaterial);
+        boorTunnel2.position.y = 1;
+        boorTunnel2.position.x = 7.5;
+        boorTunnel2.position.z = 1.3;
+        boorTunnel2.castShadow = true;
+        boorTunnel2.receiveShadow = true;
+        passengerTunnel.add(boorTunnel2);
+
+
+
+        const boorTunnel3 = new THREE.Mesh(new THREE.BoxGeometry(2, 0.2, 3), grayMaterial);
+        boorTunnel3.position.y = -0.6;
+        boorTunnel3.position.x = 8;
+        boorTunnel3.position.z = 0;
+        boorTunnel3.castShadow = true;
+        boorTunnel3.receiveShadow = true;
+        passengerTunnel.add(boorTunnel3);
+
+
+
+
+        const boorTunnel4 = new THREE.Mesh(new THREE.BoxGeometry(2, 0.2, 3), grayMaterial);
+        boorTunnel4.position.y = 2.4;
+        boorTunnel4.position.x = 8;
+        boorTunnel4.position.z = 0;
+        boorTunnel4.castShadow = true;
+        boorTunnel4.receiveShadow = true;
+        passengerTunnel.add(boorTunnel4);
+
+        
+
+        const boorTunnel5 = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 0.2), grayMaterial);
+        boorTunnel5.position.y = 1;
+        boorTunnel5.position.x = 8;
+        boorTunnel5.position.z = 1.5;
+        boorTunnel5.castShadow = true;
+        boorTunnel5.receiveShadow = true;
+        passengerTunnel.add(boorTunnel5);
+
+
+
+
+        const boorTunnel6 = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 0.2), grayMaterial);
+        boorTunnel6.position.y = 1;
+        boorTunnel6.position.x = 8;
+        boorTunnel6.position.z = -1.5;
+        boorTunnel6.castShadow = true;
+        boorTunnel6.receiveShadow = true;
+        passengerTunnel.add(boorTunnel6);
+
+
+
         passengerTunnel.position.set(12.5, 3, 0);
         scene.add(passengerTunnel);
 
