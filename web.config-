@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <system.webServer>
+        <staticContent>
+            <mimeMap fileExtension=".apk" mimeType="application/octet-stream" />
+            <mimeMap fileExtension=".obj" mimeType="application/octet-stream" />
+            <mimeMap fileExtension=".mp4" mimeType="application/octet-stream" />
+        </staticContent>
+        <defaultDocument>
+            <files>
+                <add value="robot.html" />
+            </files>
+        </defaultDocument>
+    </system.webServer>
+</configuration>
