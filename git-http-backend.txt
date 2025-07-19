@@ -1,0 +1,147 @@
+「在 Windows Server + IIS 10 上，用 git-http-backend 搭 Git 伺服器」的完整流程、常見地雷、以及查詢/備份設定的方法，一次整理成筆記。
+你可以直接複製貼到 OneNote 或 README.md 做長期備忘。
+
+0 準備工作
+要件	建議版本	備註
+Git for Windows	2.40+	頂多預設安裝即可
+IIS 10（含 CGI 元件）	Windows 10/11 Pro 或 Server 2016+	伺服器管理員「Web 伺服器 → CGI」要打勾
+IIS 模組	Basic Authentication	勾選即可。若要用 Windows AD 也可以開 Windows Auth，但文中用 Basic
+PowerShell ≥ 5		方便用 WebAdministration Cmdlet
+防火牆/Proxy	開 80 (或 443)	若用 443 需額外 SSL 憑證
+
+1 IIS 站台與應用程式集區
+powershell
+複製
+編輯
+Import-Module WebAdministration
+
+# 1.1 AppPool：不用 .NET，純 CGI
+New-WebAppPool -Name "GitAppPool"
+Set-ItemProperty IIS:\AppPools\GitAppPool -Name "managedRuntimeVersion" -Value ""
+
+# 設定環境變數
+Add-WebConfigurationProperty `
+  -PSPath  IIS:\AppPools\GitAppPool `
+  -Filter  "environmentVariables" `
+  -Name    "." `
+  -Value   @{ name="GIT_PROJECT_ROOT"; value="C:\inetpub\sites\git" }
+
+Add-WebConfigurationProperty `
+  -PSPath  IIS:\AppPools\GitAppPool `
+  -Filter  "environmentVariables" `
+  -Name    "." `
+  -Value   @{ name="GIT_HTTP_EXPORT_ALL"; value="1" }
+
+# 1.2 站台
+New-Item -ItemType Directory -Path C:\inetpub\sites\git
+New-Website -Name "GitSite" -Port 80 -PhysicalPath "C:\inetpub\sites\git" -ApplicationPool "GitAppPool"
+2 Handler（核心）
+在 GitSite 根層 web.config 加入（或用 Cmdlet 建立）：
+
+xml
+複製
+編輯
+<configuration>
+  <system.webServer>
+    <handlers>
+      <add name="GitSmartHTTP" path="*" verb="*" modules="CgiModule"
+           scriptProcessor="C:\Program Files\Git\mingw64\libexec\git-core\git-http-backend.exe"
+           resourceType="Either" requireAccess="Script" preCondition="" />
+    </handlers>
+
+    <security>
+      <authentication>
+        <basicAuthentication enabled="true" />
+        <anonymousAuthentication enabled="false" />
+      </authentication>
+    </security>
+  </system.webServer>
+</configuration>
+常見錯誤
+
+500.19 – cannot be used at this path：代表 handlers 或 basicAuthentication 區段被鎖住；在 applicationHost.config 裡把 overrideModeDefault="Deny" 改 Allow，或用 <location path="GitSite" overrideMode="Allow"> 包起來。
+
+404 但 IIS 日誌顯示 sc-substatus=0：路徑對，但 handler 沒被啟用，多半是 preCondition 沒清成空字串。
+
+3 NTFS 權限
+把 Repo 根目錄（C:\inetpub\sites\git）授權給 AppPool Identity：
+
+cmd
+複製
+編輯
+icacls C:\inetpub\sites\git /grant "IIS APPPOOL\GitAppPool:(OI)(CI)M"
+若看到「unable to create temporary object directory」→ 代表裸倉庫內沒有 Write 權限；重跑一次 icacls 或確認繼承。
+
+4 建立裸倉庫（每一個新專案只做一次）
+cmd
+複製
+編輯
+cd C:\inetpub\sites\git
+git init --bare MyProject.git
+⚠️ 做完不要再 git init --bare 第二次。同一專案日後只需 push。
+
+5 開發端（VS、VS Code）
+bash
+複製
+編輯
+# 在專案根目錄
+git init
+git add .
+git commit -m "first commit"
+
+# 設定遠端
+git remote add origin http://<user>:<password>@<server-ip>/MyProject.git
+git push -u origin main      # or master
+可能的 VS Code 提示
+訊息	解法
+Make sure you configure your "user.name" and "user.email"	git config --global user.name "..."
+git config --global user.email "..."
+Can't push refs… Pull first	對空倉庫可直接 push --set-upstream; 若已有遠端提交先 git pull --rebase
+src refspec main does not match any	你本地分支叫 master；git push -u origin master 或改名 git branch -M main
+
+6 常見錯誤對照表
+HTTP 狀態	典型訊息	可能原因 / 排除
+404	expected flush after ref listing	倉庫不存在 / 路徑打錯；或 handler 沒生效
+500
+(dubious ownership)	detected dubious ownership	以系統管理員建立的裸倉庫 → 讓 AppPool 寫入；或在伺服器端 git config --global --add safe.directory <path>
+500
+(unpacker error)	unable to create temporary object directory	NTFS 權限不足
+401	authentication	basicAuthentication 關閉、帳號密碼錯
+
+7 如何查目前設定
+powershell
+複製
+編輯
+# Handler
+Get-WebConfigurationProperty -PSPath IIS:\Sites\GitSite `
+  -Filter "system.webServer/handlers/add[@name='GitSmartHTTP']" -Name "."
+
+# 驗證方式
+Get-WebConfigurationProperty -PSPath IIS:\Sites\GitSite `
+  -Filter "system.webServer/security/authentication/*Authentication" -Name enabled |
+  Format-Table Name,Value
+
+# 環境變數
+(Get-Item IIS:\AppPools\GitAppPool).environmentVariables
+IIS Log (%SystemDrive%\inetpub\logs\LogFiles\W3SVC*)
+Failed‑Request Tracing（若已開）→ %SystemDrive%\inetpub\logs\FailedReqLogFiles
+
+8 快速自動化腳本（選用）
+powershell
+複製
+編輯
+param([string]$RepoName)
+
+$root = "C:\inetpub\sites\git"
+$full = Join-Path $root "$RepoName.git"
+
+git init --bare $full
+icacls  $full /grant "IIS APPPOOL\GitAppPool:(OI)(CI)M"
+Write-Host "Repo created: http://<server-ip>/$RepoName.git"
+小抄
+動作	指令
+建裸倉庫	git init --bare Foo.git
+測試是否通	curl -u user:pwd "http://host/Foo.git/info/refs?service=git-upload-pack"
+本地新增遠端	git remote add origin http://host/Foo.git
+首次 push	git push -u origin main
+後續同步	git pull --rebase → git push
